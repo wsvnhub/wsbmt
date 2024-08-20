@@ -1,0 +1,31 @@
+version: '2.8'
+
+services:
+  nextjs:
+    image: node:18-alpine
+    container_name: nextjs-app
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    ports:
+      - '3000:3000'
+    environment:
+      - MONGODB_URI=mongodb://root:example@mongo:27017/ways?authSource=admin
+    command: sh -c "npm install && npm run dev"
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:5.0
+    container_name: mongodb
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+volumes:
+  mongodb_data:
