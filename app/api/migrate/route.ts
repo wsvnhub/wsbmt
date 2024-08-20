@@ -62,7 +62,7 @@ export async function GET(request: Request) {
     bankName: "MB (Quân đội)",
     bankCode: "688112688",
     bankUserName: "NGUYEN THI AI NHAN",
-    qrCode: "https://internal-api-drive-stream.larksuite.com/space/api/box/stream/download/preview/ZvhubCxwwo3xe6xARHCu9XKks4e?mount_point=explorer&preview_type=16&version=7402110887018135558",
+    qrCode: "https://w.ladicdn.com/5dc39976770cd34186edd2d3/qr-wsb-20240820045649-u73w2.png",
   });
   await db.collection("promotions").insertMany([
     {
