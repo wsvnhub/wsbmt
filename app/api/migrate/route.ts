@@ -185,7 +185,7 @@ const lastDate = new Date(futureYear, futureMonth + 1, 0).getDate();
   } else {
     i++;
   }
- }
+ 
    
     console.log(date.toDateString());
     const insertData = courts.map((court) => {
