@@ -151,11 +151,14 @@ export async function GET(request: Request) {
       createdAt: new Date().getTime(),
     },
   ]);
-  const lastDate = new Date(
-    new Date().getFullYear(),
-    new Date().getMonth() + 4,
-    0
-  ).getDate();
+ const futureDate = new Date();
+futureDate.setMonth(futureDate.getMonth() + 4);
+const lastDate = new Date(
+  futureDate.getFullYear(),
+  futureDate.getMonth() + 1, // +1 để nhảy sang tháng tiếp theo
+  0
+).getDate();
+
 
   let i = new Date().getDate();
 
@@ -163,8 +166,8 @@ export async function GET(request: Request) {
   console.log(i, lastDate);
 
   while (i <= lastDate) {
-    const date = new Date();
-    date.setDate(i);
+    const date = new Date(futureDate.getFullYear(), futureDate.getMonth(), i); // Đặt đúng tháng 4 tháng sau
+
     console.log(date.toDateString());
     const insertData = courts.map((court) => {
       const timeslots = generateTimeArray(court.timeClusterId);
