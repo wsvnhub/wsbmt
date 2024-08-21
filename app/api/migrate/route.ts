@@ -38,6 +38,13 @@ export async function GET(request: Request) {
       pricePerHour: "139000",
       createdAt: new Date().getTime(),
     },
+  {
+      id: "CN NQA",
+      name: "CN Nguyễn Quý Anh",
+      address: "86 Nguyễn Quý Anh, Tân Phú",
+      pricePerHour: "119000",
+      createdAt: new Date().getTime(),
+    },
   ]);
 
   await db.collection("schedules").insertMany([
@@ -150,7 +157,51 @@ export async function GET(request: Request) {
       timeClusterId: "cluster4",
       createdAt: new Date().getTime(),
     },
+  {
+      facilitiyId: "CN NQA",
+      id: "NQA-1",
+      name: "Sân 1",
+      timeClusterId: "cluster1",
+      createdAt: new Date().getTime(),
+    },
+    {
+      facilitiyId: "CN NQA",
+      id: "NQA-2",
+      name: "Sân 2",
+      timeClusterId: "cluster1",
+      createdAt: new Date().getTime(),
+    },
+    {
+      facilitiyId: "CN NQA",
+      id: "NQA-3",
+      name: "Sân 3",
+      timeClusterId: "cluster2",
+      createdAt: new Date().getTime(),
+    },
+    {
+      facilitiyId: "CN NQA",
+      id: "NQA-4",
+      name: "Sân 4",
+      timeClusterId: "cluster2",
+      createdAt: new Date().getTime(),
+    },
+    {
+      facilitiyId: "CN NQA",
+      id: "NQA-5",
+      name: "Sân 5",
+      timeClusterId: "cluster3",
+      createdAt: new Date().getTime(),
+    },
+    {
+      facilitiyId: "CN NQA",
+      id: "NQA-6",
+      name: "Sân 6",
+      timeClusterId: "cluster3",
+      createdAt: new Date().getTime(),
+    },
   ]);
+
+  
  const lastDate = new Date(
     new Date().getFullYear(),
     new Date().getMonth() + 4,
