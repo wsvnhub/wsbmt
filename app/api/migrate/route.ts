@@ -161,7 +161,7 @@ if (futureMonth > 11) {
   futureYear += 1;
 }
 
-const lastDate = new Date(futureYear, futureMonth + 1, 0).getDate();
+let lastDate = new Date(futureYear, futureMonth + 1, 0).getDate(); // `let` để có thể tái gán giá trị sau này
 
 
 
@@ -171,7 +171,7 @@ const lastDate = new Date(futureYear, futureMonth + 1, 0).getDate();
   const courts = await db.collection("courts").find().toArray();
   console.log(i, lastDate);
 
- while (futureYear < currentDate.getFullYear() || (futureYear === currentDate.getFullYear() && futureMonth <= currentDate.getMonth() + 4)) {
+ while (futureYear < currentDate.getFullYear() + 1 || (futureYear === currentDate.getFullYear() + 1 && futureMonth <= currentDate.getMonth())) {
   const date = new Date(futureYear, futureMonth, i);
   
   if (i > lastDate) {
@@ -185,7 +185,7 @@ const lastDate = new Date(futureYear, futureMonth + 1, 0).getDate();
   } else {
     i++;
   }
- 
+
    
     console.log(date.toDateString());
     const insertData = courts.map((court) => {
