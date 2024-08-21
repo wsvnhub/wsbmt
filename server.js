@@ -31,31 +31,26 @@ const initDB = async () => {
 
 const { mongoPool } = await initDB();
 
+
 const job = CronJob.from({
   cronTime: "0 0 0 1 * *",
   // cronTime: "0 * * * * *",
   onTick: async function () {
     console.log("You will see this message every second");
 
- const lastDate = new Date(
-  new Date().getFullYear(),
-  new Date().getMonth() + 4,
-  0
-).getDate();
+    const lastDate = new Date(
+      new Date().getFullYear(),
+      new Date().getMonth() + 1,
+      0
+    ).getDate();
 
-
-
- let i = new Date().getDate();
+    let i = new Date().getDate();
 
     const courts = await mongoPool.collection("courts").find().toArray();
     console.log(i, lastDate);
-    
-   while (i <= lastDate) {
-    const date = new Date();
-    date.setDate(i);
-
-
-
+    while (i <= lastDate) {
+      const date = new Date();
+      date.setDate(i);
       const insertData = courts.map((court) => {
         const timeslots = generateTimeArray(court.timeClusterId);
         return {
