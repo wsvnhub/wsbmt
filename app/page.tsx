@@ -289,21 +289,7 @@ export default function Home() {
         </p>
       )}
       {contextHolder}
-  import React, { useState } from 'react';
-
-const Header = ({ isSchedule, headerPadding, setSelectedDate, selectedDate, handleChangeFacilitiesInfo }) => {
-  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-
-  const openLightbox = () => {
-    setIsLightboxOpen(true);
-  };
-
-  const closeLightbox = () => {
-    setIsLightboxOpen(false);
-  };
-
-
-<header
+ <header
         className={${headerPadding} lg:sticky bg-primary top-0 flex flex-col lg:flex-row items-center lg:gap-4 gap-2 justify-between z-30}
       >
         <h1 className="text-xl font-semibold my-2 text-center lg:text-left lg:mb-0">
@@ -317,12 +303,9 @@ const Header = ({ isSchedule, headerPadding, setSelectedDate, selectedDate, hand
         {isSchedule && (
           <>
             <div className="flex justify-center items-center gap-4">
-              <button
-              onClick={openLightbox}
-              className="text-white underline italic"
-            >
-              Bảng giá
-            </button>
+              <a href="#" className="text-white underline italic">
+                Bảng giá
+              </a>
 
               <input
                 onChange={(e) => setSelectedDate(new Date(e.target.value))}
@@ -403,26 +386,7 @@ const Header = ({ isSchedule, headerPadding, setSelectedDate, selectedDate, hand
             </div>
           </>
         )}
-{isLightboxOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
-          <div className="relative">
-            <img src="https://w.ladicdn.com/5dc39976770cd34186edd2d3/badminton-gioi-thieu-chung-popup-web-dat-san-20240821083954-ceix4.jpg" alt="Bảng giá" className="max-w-full h-auto" />
-            <button
-              onClick={closeLightbox}
-              className="absolute top-0 right-0 mt-2 mr-2 bg-white rounded-full p-2"
-            >
-              X
-            </button>
-          </div>
-        </div>
-      )}
-
       </header>
-
- );
-};
-
-export default Header;
 
       {isSchedule && (
         <main className="bg-[#edfff6] p-2 lg:p-6 relative">
