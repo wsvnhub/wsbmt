@@ -37,7 +37,7 @@ const job = CronJob.from({
   onTick: async function () {
     console.log("You will see this message every second");
 
-   const currentDate = new Date();
+  const currentDate = new Date();
 let futureMonth = currentDate.getMonth() + 4;
 let futureYear = currentDate.getFullYear();
 
@@ -46,11 +46,12 @@ if (futureMonth > 11) {
   futureYear += 1;
 }
 
-let lastDate = new Date(futureYear, futureMonth + 1, 0).getDate(); // `let` để có thể tái gán giá trị sau này
+let lastDate = new Date(futureYear, futureMonth + 1, 0).getDate();
 
 
 
-    let i = new Date().getDate();
+
+    let i = currentDate.getDate();  // Bắt đầu từ ngày hiện tại
 
     const courts = await mongoPool.collection("courts").find().toArray();
     console.log(i, lastDate);
