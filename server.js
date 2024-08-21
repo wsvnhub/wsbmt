@@ -37,13 +37,16 @@ const job = CronJob.from({
   onTick: async function () {
     console.log("You will see this message every second");
 
-const futureDate = new Date();
-futureDate.setMonth(futureDate.getMonth() + 4);
-const lastDate = new Date(
-  futureDate.getFullYear(),
-  futureDate.getMonth() + 1,  // +1 để nhảy sang tháng tiếp theo
-  0
-).getDate();
+const currentDate = new Date();
+let futureMonth = currentDate.getMonth() + 4;
+let futureYear = currentDate.getFullYear();
+
+if (futureMonth > 11) {
+  futureMonth -= 12;
+  futureYear += 1;
+}
+
+const lastDate = new Date(futureYear, futureMonth + 1, 0).getDate();
 
 
     
@@ -52,7 +55,21 @@ const lastDate = new Date(
     const courts = await mongoPool.collection("courts").find().toArray();
     console.log(i, lastDate);
     while (i <= lastDate) {
-     const date = new Date(futureDate.getFullYear(), futureDate.getMonth(), i); // sửa ở đây
+     while (futureYear < currentDate.getFullYear() || (futureYear === currentDate.getFullYear() && futureMonth <= currentDate.getMonth() + 4)) {
+  const date = new Date(futureYear, futureMonth, i);
+  
+  if (i > lastDate) {
+    i = 1;
+    futureMonth++;
+    if (futureMonth > 11) {
+      futureMonth = 0;
+      futureYear++;
+    }
+    lastDate = new Date(futureYear, futureMonth + 1, 0).getDate();
+  } else {
+    i++;
+  }
+
       
       const insertData = courts.map((court) => {
         const timeslots = generateTimeArray(court.timeClusterId);
