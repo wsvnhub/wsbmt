@@ -161,7 +161,7 @@ if (futureMonth > 11) {
   futureYear += 1;
 }
 
-Let lastDate = new Date(futureYear, futureMonth + 1, 0).getDate();
+let lastDate = new Date(futureYear, futureMonth + 1, 0).getDate();
 
 
 
