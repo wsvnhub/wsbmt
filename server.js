@@ -54,7 +54,7 @@ const lastDate = new Date(futureYear, futureMonth + 1, 0).getDate();
 
     const courts = await mongoPool.collection("courts").find().toArray();
     console.log(i, lastDate);
-    while (i <= lastDate) {
+    
      while (futureYear < currentDate.getFullYear() || (futureYear === currentDate.getFullYear() && futureMonth <= currentDate.getMonth() + 4)) {
   const date = new Date(futureYear, futureMonth, i);
   
@@ -69,6 +69,7 @@ const lastDate = new Date(futureYear, futureMonth + 1, 0).getDate();
   } else {
     i++;
   }
+     }
 
       
       const insertData = courts.map((court) => {
