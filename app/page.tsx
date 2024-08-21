@@ -345,6 +345,7 @@ export default function Home() {
                   DQH = Sân Dương Quảng Hàm, Gò Vấp
                 </p>
               </Checkbox>
+              <p></p>
                 <Checkbox
                 defaultChecked
                 name="CN NQA"
@@ -359,7 +360,7 @@ export default function Home() {
                   NQA = Sân Nguyễn Quý Anh, Tân Phú
                 </p>
               </Checkbox>
-              <p></p>
+              
             </div>
             <div className="w-full lg:w-auto flex flex-row-reverse lg:flex-col gap-2 lg:gap-4 items-center">
               <a
