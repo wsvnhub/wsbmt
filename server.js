@@ -37,25 +37,19 @@ const job = CronJob.from({
   onTick: async function () {
     console.log("You will see this message every second");
 
-const lastDate = new Date(
-  new Date().getFullYear(),
-  new Date().getMonth() + 4,
-  0
-).getDate();
+    const lastDate = new Date(
+      new Date().getFullYear(),
+      new Date().getMonth() + 1,
+      0
+    ).getDate();
 
-
-
-    
     let i = new Date().getDate();
 
     const courts = await mongoPool.collection("courts").find().toArray();
     console.log(i, lastDate);
-    
     while (i <= lastDate) {
-  const date = new Date(targetYear, targetMonth, i);
-
-
-      
+      const date = new Date();
+      date.setDate(i);
       const insertData = courts.map((court) => {
         const timeslots = generateTimeArray(court.timeClusterId);
         return {
