@@ -297,7 +297,7 @@ export default function Home() {
     <>
       <p>Nhấn giữ shift để cuộn ngang</p>
      <header
-        className={${headerPadding} lg:sticky bg-primary top-0 flex flex-col lg:flex-row items-center lg:gap-4 gap-2 justify-between z-30}
+        className={`${headerPadding} lg:sticky bg-primary top-0 flex flex-col lg:flex-row items-center lg:gap-4 gap-2 justify-between z-30`}
       >
         <h1 className="text-xl font-semibold my-2 text-center lg:text-left lg:mb-0">
           {isSchedule && (
@@ -353,7 +353,7 @@ export default function Home() {
                 </p>
               </Checkbox>
               <p></p>
-                <Checkbox
+              <Checkbox
                 defaultChecked
                 name="CN NQA"
                 onChange={(e) =>
