@@ -345,6 +345,21 @@ export default function Home() {
                   DQH = Sân Dương Quảng Hàm, Gò Vấp
                 </p>
               </Checkbox>
+                <Checkbox
+                defaultChecked
+                name="CN NQA"
+                onChange={(e) =>
+                  handleChangeFacilitiesInfo(
+                    e.target.name || "",
+                    e.target.checked
+                  )
+                }
+              >
+                <p className="text-white text-md">
+                  NQA = Sân Nguyễn Quý Anh, Tân Phú
+                </p>
+              </Checkbox>
+              <p></p>
             </div>
             <div className="w-full lg:w-auto flex flex-row-reverse lg:flex-col gap-2 lg:gap-4 items-center">
               <a
