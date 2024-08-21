@@ -296,8 +296,22 @@ export default function Home() {
   return (
     <>
       <p>Nhấn giữ shift để cuộn ngang</p>
-      <header
-        className={`${headerPadding} lg:sticky bg-primary top-0 flex flex-col lg:flex-row items-center lg:gap-4 gap-2 justify-between z-30`}
+      import React, { useState } from 'react';
+
+const Header = ({ isSchedule, headerPadding, setSelectedDate, selectedDate, handleChangeFacilitiesInfo }) => {
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+
+  const openLightbox = () => {
+    setIsLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setIsLightboxOpen(false);
+  };
+
+
+<header
+        className={${headerPadding} lg:sticky bg-primary top-0 flex flex-col lg:flex-row items-center lg:gap-4 gap-2 justify-between z-30}
       >
         <h1 className="text-xl font-semibold my-2 text-center lg:text-left lg:mb-0">
           {isSchedule && (
@@ -310,13 +324,18 @@ export default function Home() {
         {isSchedule && (
           <>
             <div className="flex justify-center items-center gap-4">
-              <a href="#" className="text-white underline italic">
-                Bảng giá
-              </a>
+              <button
+              onClick={openLightbox}
+              className="text-white underline italic"
+            >
+              Bảng giá
+            </button>
+
               <input
                 onChange={(e) => setSelectedDate(new Date(e.target.value))}
                 className="bg-white text-primary font-semibold pl-6 pr-2 py-2 rounded-md"
                 type="date"
+                placeholder="dd-mm-yyyy"
                 value={selectedDate.toISOString().substring(0, 10)}
               />
             </div>
@@ -365,7 +384,7 @@ export default function Home() {
                   NQA = Sân Nguyễn Quý Anh, Tân Phú
                 </p>
               </Checkbox>
-            
+              
             </div>
             <div className="w-full lg:w-auto flex flex-row-reverse lg:flex-col gap-2 lg:gap-4 items-center">
               <a
@@ -391,7 +410,26 @@ export default function Home() {
             </div>
           </>
         )}
+{isLightboxOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
+          <div className="relative">
+            <img src="https://w.ladicdn.com/5dc39976770cd34186edd2d3/badminton-gioi-thieu-chung-popup-web-dat-san-20240821083954-ceix4.jpg" alt="Bảng giá" className="max-w-full h-auto" />
+            <button
+              onClick={closeLightbox}
+              className="absolute top-0 right-0 mt-2 mr-2 bg-white rounded-full p-2"
+            >
+              X
+            </button>
+          </div>
+        </div>
+      )}
+
       </header>
+
+ );
+};
+
+export default Header;
 
       {isSchedule && (
         <main className="bg-[#edfff6] p-2 lg:p-6 relative">
