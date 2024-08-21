@@ -152,39 +152,23 @@ export async function GET(request: Request) {
     },
   ]);
 
-const currentDate = new Date();
-let futureMonth = currentDate.getMonth() + 4;
-let futureYear = currentDate.getFullYear();
-
-if (futureMonth > 11) {
-  futureMonth -= 12;
-  futureYear += 1;
-}
-
-let lastDate = new Date(futureYear, futureMonth + 1, 0).getDate(); // `let` để có thể tái gán giá trị sau này
+const lastDate = new Date(
+  new Date().getFullYear(),
+  new Date().getMonth() + 4,
+  0
+).getDate();
 
 
 
- let i = currentDate.getDate();  // Giữ nguyên để bắt đầu từ ngày hiện tại
+let i = new Date().getDate();  // Bắt đầu từ ngày hiện tại
 
 
   const courts = await db.collection("courts").find().toArray();
   console.log(i, lastDate);
 
- while (futureYear < currentDate.getFullYear() + 1 || (futureYear === currentDate.getFullYear() + 1 && futureMonth <= currentDate.getMonth())) {
-  const date = new Date(futureYear, futureMonth, i);
-  
-  if (i > lastDate) {
-    i = 1;
-    futureMonth++;
-    if (futureMonth > 11) {
-      futureMonth = 0;
-      futureYear++;
-    }
-    lastDate = new Date(futureYear, futureMonth + 1, 0).getDate();
-  } else {
-    i++;
-  }
+ while (i <= lastDate) {
+  const date = new Date(targetDate); // Sử dụng đối tượng Date của tháng 4 tháng sau
+  date.setDate(i);
 
    
     console.log(date.toDateString());
