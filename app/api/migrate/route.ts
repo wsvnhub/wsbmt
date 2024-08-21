@@ -153,9 +153,11 @@ export async function GET(request: Request) {
   ]);
 
 
+const futureDate = new Date();
+futureDate.setMonth(futureDate.getMonth() + 4);
 const lastDate = new Date(
-  new Date().getFullYear(),
-  new Date().getMonth() + 4,
+  futureDate.getFullYear(),
+  futureDate.getMonth() + 1,  // +1 để nhảy sang tháng tiếp theo
   0
 ).getDate();
 
@@ -165,8 +167,7 @@ const lastDate = new Date(
   console.log(i, lastDate);
 
   while (i <= lastDate) {
-    const date = new Date();
-date.setDate(i);
+    const date = new Date(futureDate.getFullYear(), futureDate.getMonth(), i); // sửa ở đây
 
     console.log(date.toDateString());
     const insertData = courts.map((court) => {
