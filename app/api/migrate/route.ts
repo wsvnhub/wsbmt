@@ -183,7 +183,7 @@ while (futureYear < currentDate.getFullYear() || (futureYear === currentDate.get
   } else {
     i++;
   }
-
+}
 
     console.log(date.toDateString());
     const insertData = courts.map((court) => {
