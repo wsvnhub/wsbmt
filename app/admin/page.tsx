@@ -429,6 +429,21 @@ export default function Page() {
                 DQH = Sân Dương Quảng Hàm, Gò Vấp
               </p>
             </Checkbox>
+              <p></p>
+            <Checkbox
+                defaultChecked
+                name="CN NQA"
+                onChange={(e) =>
+                  handleChangeFacilitiesInfo(
+                    e.target.name || "",
+                    e.target.checked
+                  )
+                }
+              >
+                <p className="text-white text-base">
+                  NQA = Sân Nguyễn Quý Anh, Tân Phú
+                </p>
+              </Checkbox>
           </div>
           <div className="flex flex-col lg:flex-row gap-2 items-center">
             <div className="flex items-center flex-wrap gap-2">
