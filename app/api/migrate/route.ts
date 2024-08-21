@@ -153,13 +153,11 @@ export async function GET(request: Request) {
   ]);
 
 
-const currentDate = new Date();
-const futureMonth = currentDate.getMonth() + 4;
-const futureYear = currentDate.getFullYear() + Math.floor(futureMonth / 12);
-const correctedMonth = futureMonth % 12;
-const lastDate = new Date(futureYear, correctedMonth + 1, 0).getDate();
-
-
+const lastDate = new Date(
+  new Date().getFullYear(),
+  new Date().getMonth() + 4,
+  0
+).getDate();
 
   let i = new Date().getDate();
 
@@ -167,7 +165,8 @@ const lastDate = new Date(futureYear, correctedMonth + 1, 0).getDate();
   console.log(i, lastDate);
 
   while (i <= lastDate) {
-    const date = new Date(futureYear, correctedMonth, i);
+    const date = new Date();
+date.setDate(i);
 
     console.log(date.toDateString());
     const insertData = courts.map((court) => {
