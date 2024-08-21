@@ -152,23 +152,20 @@ export async function GET(request: Request) {
     },
   ]);
 
-
 const lastDate = new Date(
-  new Date().getFullYear(),
-  new Date().getMonth() + 4,
-  0
-).getDate();
+    new Date().getFullYear(),
+    new Date().getMonth() + 1,
+    0
+  ).getDate();
 
-let i = new Date().getDate();  // Bắt đầu từ ngày hiện tại
+  let i = new Date().getDate();
 
   const courts = await db.collection("courts").find().toArray();
   console.log(i, lastDate);
 
-while (i <= lastDate) {
-  const date = new Date(targetDate); // Sử dụng đối tượng Date của tháng 4 tháng sau
-  date.setDate(i);
-
-
+  while (i <= lastDate) {
+    const date = new Date();
+    date.setDate(i);
     console.log(date.toDateString());
     const insertData = courts.map((court) => {
       const timeslots = generateTimeArray(court.timeClusterId);
