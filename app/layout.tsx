@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import ConfigAntd from "@/components/ConfigAntd";
-import AuthenticationLayout from "@/components/AuthenticationLayout";
 
 const montserrat = Montserrat({ subsets: ["latin"] });
 
@@ -20,7 +19,7 @@ export default function RootLayout({
     <html className="bg-primary text-white" lang="en">
       <body className={montserrat.className}>
         <ConfigAntd>
-          <AuthenticationLayout>{children}</AuthenticationLayout>
+          {children}
         </ConfigAntd>
       </body>
     </html>
