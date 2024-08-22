@@ -333,7 +333,7 @@ export default function Home() {
                   )
                 }
               >
-                <p className="text-white text-md">
+                <p className="text-white font-semibold text-md">
                   NVL = Sân Nguyễn Văn Lượng, Gò Vấp
                 </p>
               </Checkbox>
@@ -348,7 +348,7 @@ export default function Home() {
                 }
                 name="CN DQH"
               >
-                <p className="text-white text-md">
+                <p className="text-white font-semibold text-md">
                   DQH = Sân Dương Quảng Hàm, Gò Vấp
                 </p>
               </Checkbox>
@@ -363,7 +363,7 @@ export default function Home() {
                   )
                 }
               >
-                <p className="text-white text-md">
+                <p className="text-white font-semibold text-md">
                   NQA = Sân Nguyễn Quý Anh, Tân Phú
                 </p>
               </Checkbox>
