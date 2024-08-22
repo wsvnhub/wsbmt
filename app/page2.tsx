@@ -295,7 +295,7 @@ export default function Home() {
   }
   return (
     <>
-      <p>Nhấn giữ shift để cuộn ngang</p>
+      <p>  Để xem giờ tối: Nhấn giữ Shift và Scroll để cuộn ngang </p>
      <header
         className={`${headerPadding} lg:sticky bg-primary top-0 flex flex-col lg:flex-row items-center lg:gap-4 gap-2 justify-between z-30`}
       >
@@ -376,7 +376,7 @@ export default function Home() {
               >
                 Khách đặt lịch cố định: <br /> Gọi 0389145575
               </a>
-              <div className="w-7/12 lg:w-full flex items-center gap-2 lg:gap-6 text-[8px]">
+              <div className="w-7/12 lg:w-full flex items-center gap-2 lg:gap-6 text-[10px]">
                 <div className="flex items-center justify-center gap-2">
                   <div className="bg-white w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md"></div>
                   <span>Trống</span>
