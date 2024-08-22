@@ -292,18 +292,18 @@ export default function Home() {
 <header
         className={`${headerPadding} lg:sticky bg-primary top-0 flex flex-col lg:flex-row items-center lg:gap-4 gap-2 justify-between z-30`}
       >
-        <h1 className="text-xl font-semibold my-2 text-center lg:text-left lg:mb-0">
+        <h2 className="text-xl font-semibold my-2 text-center lg:text-left lg:mb-0">
           {isSchedule && (
             <>
               Đặt sân theo giờ <br />
             </>
           )}
           Ways Station Badminton
-        </h1>
+        </h2>
         {isSchedule && (
           <>
             <div className="flex justify-center items-center gap-4">
-              <a href="#" className="text-white underline italic">
+              <a href="https://diachi.ways.vn/san" className="text-white underline italic">
                 Bảng giá
               </a>
 
