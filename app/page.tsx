@@ -285,7 +285,7 @@ export default function Home() {
     <>
       {isSchedule && (
         <p className="hidden lg:block sticky top-0 left-0 z-40">
-          Nhấn giữ shift để cuộn ngang
+            Để xem giờ tối: Nhấn giữ Shift và Scroll để cuộn ngang 
         </p>
       )}
       {contextHolder}
@@ -326,7 +326,7 @@ export default function Home() {
                   )
                 }
               >
-                <p className="text-white font-semibold text-md">
+                <p className="text-white font-medium text-md">
                   NVL = Sân Nguyễn Văn Lượng, Gò Vấp
                 </p>
               </Checkbox>
@@ -341,7 +341,7 @@ export default function Home() {
                 }
                 name="CN DQH"
               >
-                <p className="text-white font-semibold text-md">
+                <p className="text-white font-medium text-md">
                   DQH = Sân Dương Quảng Hàm, Gò Vấp
                 </p>
               </Checkbox>
@@ -356,7 +356,7 @@ export default function Home() {
                   )
                 }
               >
-                <p className="text-white font-semibold text-md">
+                <p className="text-white font-medium text-md">
                   NQA = Sân Nguyễn Quý Anh, Tân Phú
                 </p>
               </Checkbox>
@@ -369,7 +369,7 @@ export default function Home() {
               >
                 Khách đặt lịch cố định: <br /> Gọi 0389145575
               </a>
-              <div className="w-7/12 lg:w-full flex items-center gap-2 lg:gap-6 text-[8px]">
+              <div className="w-7/12 lg:w-full flex items-center gap-2 lg:gap-6 text-[10px]">
                 <div className="flex items-center justify-center gap-2">
                   <div className="bg-white w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md"></div>
                   <span>Trống</span>
