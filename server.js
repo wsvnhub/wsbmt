@@ -215,7 +215,7 @@ app.prepare().then(() => {
               });
             }
           });
-        }, 60000);
+        }, 600000);
 
         const insertData = {
           id,

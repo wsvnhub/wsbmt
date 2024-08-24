@@ -21,11 +21,7 @@
     { "time": "19:55-20:55", "isNextDay": false },
     { "time": "21:00-22:00", "isNextDay": false },
     { "time": "22:05-23:05", "isNextDay": false },
-    { "time": "23:10-0:10", "isNextDay": false },
-    { "time": "0:15-1:15", "isNextDay": true },
-    { "time": "1:20-2:20", "isNextDay": true },
-    { "time": "2:25-3:25", "isNextDay": true },
-    { "time": "3:30-4:30", "isNextDay": true }
+    { "time": "23:10-24:10", "isNextDay": false }
   ],
   "cluster2": [
     { "time": "0:25-1:25", "isNextDay": false },
@@ -49,11 +45,7 @@
     { "time": "20:05-21:05", "isNextDay": false },
     { "time": "21:10-22:10", "isNextDay": false },
     { "time": "22:15-23:15", "isNextDay": false },
-    { "time": "23:20-00:20", "isNextDay": false },
-    { "time": "0:25-1:25", "isNextDay": true },
-    { "time": "1:30-2:30", "isNextDay": true },
-    { "time": "2:35-3:35", "isNextDay": true },
-    { "time": "3:40-4:40", "isNextDay": true }
+    { "time": "23:20-00:20", "isNextDay": false }
   ],
   "cluster3": [
     { "time": "0:35-1:35", "isNextDay": false },
@@ -77,11 +69,8 @@
     { "time": "20:15-21:15", "isNextDay": false },
     { "time": "21:20-22:20", "isNextDay": false },
     { "time": "22:25-23:25", "isNextDay": false },
-    { "time": "23:30-00:30", "isNextDay": false },
-    { "time": "0:35-1:35", "isNextDay": true },
-    { "time": "1:40-2:40", "isNextDay": true },
-    { "time": "2:45-3:45", "isNextDay": true },
-    { "time": "3:50-4:50", "isNextDay": true }
+    { "time": "23:30-00:30", "isNextDay": false }
+ 
   ],
   "cluster4": [
     { "time": "0:45-1:45", "isNextDay": false },
@@ -105,10 +94,6 @@
     { "time": "20:25-21:25", "isNextDay": false },
     { "time": "21:30-22:30", "isNextDay": false },
     { "time": "22:35-23:35", "isNextDay": false },
-    { "time": "23:40-0:40", "isNextDay": false },
-    { "time": "0:45-1:45", "isNextDay": true },
-    { "time": "1:50-2:50", "isNextDay": true },
-    { "time": "2:55-3:55", "isNextDay": true },
-    { "time": "4:00-5:00", "isNextDay": true }
+    { "time": "23:40-0:40", "isNextDay": false }
   ]
 }

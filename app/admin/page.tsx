@@ -290,7 +290,7 @@ export default function Page() {
     socket.on("schedules:updated", (arg) => {
       return setFacilities((preState: any) => {
         const data = Object.keys(preState).reduce((memo: any, value) => {
-          const stateItems = preState[value];
+          const stateItems = preState[value] || [];
           const data = clusters.reduce((memo: any, cluster) => {
             const items = stateItems[cluster.id];
             const newState = items.map((item: any) => {
@@ -429,21 +429,21 @@ export default function Page() {
                 DQH = Sân Dương Quảng Hàm, Gò Vấp
               </p>
             </Checkbox>
-              <p></p>
+            <p></p>
             <Checkbox
-                defaultChecked
-                name="CN NQA"
-                onChange={(e) =>
-                  handleChangeFacilitiesInfo(
-                    e.target.name || "",
-                    e.target.checked
-                  )
-                }
-              >
-                <p className="text-white text-base">
-                  NQA = Sân Nguyễn Quý Anh, Tân Phú
-                </p>
-              </Checkbox>
+              defaultChecked
+              name="CN NQA"
+              onChange={(e) =>
+                handleChangeFacilitiesInfo(
+                  e.target.name || "",
+                  e.target.checked
+                )
+              }
+            >
+              <p className="text-white text-base">
+                NQA = Sân Nguyễn Quý Anh, Tân Phú
+              </p>
+            </Checkbox>
           </div>
           <div className="flex flex-col lg:flex-row gap-2 items-center">
             <div className="flex items-center flex-wrap gap-2">
@@ -474,9 +474,8 @@ export default function Page() {
               return (
                 <div
                   key={index}
-                  className={`${
-                    bgColor[index < bgColor.length ? index : 0]
-                  } px-2 pb-6 pt-4`}
+                  className={`${bgColor[index < bgColor.length ? index : 0]
+                    } px-2 pb-6 pt-4`}
                 >
                   <p className="text-primary text-md font-semibold mb-2">
                     {dayjs(date).format("dd")} {dayjs(date).format("DD/MM")}

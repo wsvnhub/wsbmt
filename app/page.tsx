@@ -4,7 +4,7 @@ import ScheduleTable from "@/components/ScheduleTable";
 import ConfirmPayments from "@/components/payments";
 import WaitPayments from "@/components/payments/Wait";
 import ResultPayments from "@/components/payments/Result";
-import { Checkbox, DatePicker, notification } from "antd";
+import { Checkbox, notification } from "antd";
 import useSocket from "@/socket/useSocket";
 import Loader from "@/components/Loader";
 import { groupBy, keyBy } from "lodash";
@@ -59,6 +59,7 @@ export default function Home() {
   }>({});
   const [selectedFacInfo, setSelectedFacInfo] = useState<FacilitiesInfo[]>([]);
 
+
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selected, setSelected] = useState<any>({
     totalHours: 0,
@@ -73,7 +74,7 @@ export default function Home() {
     applyDiscount: false,
     transactionCode: "",
   });
-  const [selectedTimeSlots, setSelectedTimeSlots] = useState<any[]>([]);
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState<any>({});
 
   const isSchedule = page.state === "schedule";
   const isConfirm = page.state === "confirm";
@@ -106,7 +107,22 @@ export default function Home() {
         },
         [selectedDate.toDateString()]
       ).then((data) => {
-        setFacilities(groupBy(data, "timeClusterId"));
+        const grouped = groupBy(data, "timeClusterId")
+        let i = 0
+
+        const timeSlots = selectedTimeSlots[selectedDate.toDateString()] || []
+
+
+        while (i < timeSlots.length) {
+          const item = timeSlots[i];
+          const { index: { cluster, rowIndex, columnIndex } } = item
+          if (grouped[cluster][rowIndex][columnIndex].status === "empty") {
+            grouped[cluster][rowIndex][columnIndex] = item
+          }
+          i++
+        }
+
+        setFacilities(grouped);
         setIsLoading(false);
       });
     }
@@ -116,7 +132,7 @@ export default function Home() {
     socket.on("schedules:updated", (arg) => {
       return setFacilities((preState: any) => {
         const data = clusters.reduce((memo: any, cluster) => {
-          const items = preState[cluster.id];
+          const items = preState[cluster.id] || [];
           const newState = items.map((item: any) => {
             if (item) {
               arg.forEach((cell: any) => {
@@ -143,6 +159,7 @@ export default function Home() {
     });
   }, [socket]);
 
+
   /**
    * @handleEvent
    * @CellClick
@@ -161,7 +178,7 @@ export default function Home() {
     tableIndex: number,
     columnIndex: number,
     rowIndex: number,
-    _date: Date,
+    date: Date,
     cluster: string
   ) => {
     const row = facilities[cluster][rowIndex];
@@ -175,8 +192,9 @@ export default function Home() {
       cell.facility = row.facility;
       cell.court = row.court;
 
-      setSelectedTimeSlots([
-        ...selectedTimeSlots,
+      setSelectedTimeSlots({
+        ...selectedTimeSlots, [date.toDateString()]: [...selectedTimeSlots[date.toDateString()] || [],
+
         {
           ...cell,
           index: {
@@ -184,17 +202,19 @@ export default function Home() {
             rowIndex,
             columnIndex,
             createdAt: row.createdAt,
+            cluster
           },
         },
-      ]);
+        ]
+      });
     } else {
       cloneSelected.details = cloneSelected.details.filter(
         (item: any) => item !== detail
       );
-      const filtered = selectedTimeSlots.filter(
-        (item) => item.id !== row.courtId && item.facility !== row.facility
+      const filtered = selectedTimeSlots[selectedDate.toDateString()].filter(
+        (item: any) => item.id !== row.courtId && item.facility !== row.facility
       );
-      setSelectedTimeSlots(filtered);
+      setSelectedTimeSlots({ ...selectedTimeSlots, [selectedDate.toDateString()]: filtered });
     }
 
     setFacilities((preState: any) => {
@@ -210,20 +230,20 @@ export default function Home() {
     });
   };
   const handleChangeFacilitiesInfo = (name: string, checked: boolean) => {
-    const filtered = Object.values(facilitiesInfo).filter((item) =>
-      checked ? item.id === name : item.id !== name
-    );
     if (checked) {
+      const filtered = Object.values(facilitiesInfo).filter((item) =>
+        checked ? item.id === name : item.id !== name
+      );
       return setSelectedFacInfo([...selectedFacInfo, filtered[0]]);
     }
-    return setSelectedFacInfo(filtered);
+    return setSelectedFacInfo(preState => preState.filter(item => item.id !== name));
   };
   const handleChangePage = async (newState: any) => {
     if (isSchedule) {
       setSelected((pre: any) => ({
         ...pre,
         date: selectedDate.toLocaleDateString(),
-        timeSlots: selectedTimeSlots,
+        timeSlots: Object.values(selectedTimeSlots),
         totalPrice: selected.totalHours * Number(pricePerHour),
       }));
     }
@@ -234,7 +254,7 @@ export default function Home() {
           ? newState.details
           : newState.details.join(";");
 
-      const timeSlotData = selectedTimeSlots.map((timeSlots) => {
+      const timeSlotData = selectedTimeSlots.map((timeSlots: any) => {
         timeSlots.bookedBy = { name: newState.userName, phone: newState.phone };
         timeSlots.status = "wait";
         timeSlots.isFixed = newState.isFixed;
@@ -285,33 +305,41 @@ export default function Home() {
     <>
       {isSchedule && (
         <p className="hidden lg:block sticky top-0 left-0 z-40">
-            Để xem giờ tối: Nhấn giữ Shift và Scroll để cuộn ngang 
+          Nhấn giữ shift để cuộn ngang
         </p>
       )}
       {contextHolder}
-<header
+      <header
         className={`${headerPadding} lg:sticky bg-primary top-0 flex flex-col lg:flex-row items-center lg:gap-4 gap-2 justify-between z-30`}
       >
-        <h2 className="text-lg lg:text-xl font-semibold my-2 text-center lg:text-left lg:mb-0">
+        <h1 className="text-xl font-semibold my-2 text-center lg:text-left lg:mb-0">
           {isSchedule && (
             <>
               Đặt sân theo giờ <br />
             </>
           )}
           Ways Station Badminton
-        </h2>
+        </h1>
         {isSchedule && (
           <>
             <div className="flex justify-center items-center gap-4">
-              <a href="https://diachi.ways.vn/san" className="text-white underline italic">
+              <a href="#" className="text-white underline italic">
                 Bảng giá
               </a>
 
               <input
-                onChange={(e) => setSelectedDate(new Date(e.target.value))}
+                onChange={(e) => {
+                  const value = e.target.value
+                  let date = new Date()
+                  if (value !== "") {
+                    date = new Date(value)
+                  }
+                  setSelectedDate(date)
+                }}
                 className="bg-white text-primary font-semibold pl-6 pr-2 py-2 rounded-md"
                 type="date"
                 placeholder="dd-mm-yyyy"
+                onKeyDown={(e) => e.preventDefault()}
                 value={selectedDate.toISOString().substring(0, 10)}
               />
             </div>
@@ -326,7 +354,7 @@ export default function Home() {
                   )
                 }
               >
-                <p className="text-white font-medium text-md">
+                <p className="text-white text-md">
                   NVL = Sân Nguyễn Văn Lượng, Gò Vấp
                 </p>
               </Checkbox>
@@ -341,46 +369,44 @@ export default function Home() {
                 }
                 name="CN DQH"
               >
-                <p className="text-white font-medium text-md">
+                <p className="text-white text-md">
                   DQH = Sân Dương Quảng Hàm, Gò Vấp
                 </p>
               </Checkbox>
-              <p></p>
               <Checkbox
                 defaultChecked
-                name="CN NQA"
                 onChange={(e) =>
                   handleChangeFacilitiesInfo(
                     e.target.name || "",
                     e.target.checked
                   )
                 }
+                name="CN NQA"
               >
-                <p className="text-white font-medium text-md">
+                <p className="text-white text-md">
                   NQA = Sân Nguyễn Quý Anh, Tân Phú
                 </p>
               </Checkbox>
-              
             </div>
             <div className="w-full lg:w-auto flex flex-row-reverse lg:flex-col gap-2 lg:gap-4 items-center">
               <a
                 href="tel:0389145575"
-                className="w-5/12 text-right lg:w-full p-2 lg:py-2 lg:px-4 rounded-lg font-semibold italic text-[10px] lg:text-[15px] bg-gradient-to-b from-blue-500 to-cyan-500"
+                className="w-5/12 text-right lg:hidden lg:w-full p-2 lg:py-2 lg:px-4 rounded-lg font-semibold italic text-[10px] lg:text-[15px] bg-gradient-to-b from-blue-500 to-cyan-500"
               >
                 Khách đặt lịch cố định: <br /> Gọi 0389145575
               </a>
               <div className="w-7/12 lg:w-full flex items-center gap-2 lg:gap-6 text-[8px]">
                 <div className="flex items-center justify-center gap-2">
                   <div className="bg-white w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md"></div>
-                  <span className="text-[10px]">Trống</span>
+                  <span>Trống</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
                   <div className="bg-red-400 w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md"></div>
-                  <span className="text-[10px]">Đã đặt</span>
+                  <span>Đã đặt</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
                   <div className="bg-yellow-500 w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md"></div>
-                  <span className="text-[10px]">Đang chọn</span>
+                  <span>Đang chọn</span>
                 </div>
               </div>
             </div>
@@ -437,7 +463,7 @@ export default function Home() {
           paymentInfo={paymentInfo}
           btnText={btnText}
           currentPage={page.state}
-          timslots={selectedTimeSlots}
+          timslots={Object.values(selectedTimeSlots)}
           handleChangePage={handleChangePage}
         />
       )}
