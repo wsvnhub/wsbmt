@@ -66,7 +66,7 @@ export async function POST(request: Request) {
     }
 
     const { status, transactions }: MBBankResponse = await fetch(
-      `${process.env.BANK_API_BASE_URL}/transactions/list?limit=20&amount_in=${amount}`,
+      `${process.env.BANK_API_BASE_URL}/transactions/list?limit=100&amount_in=${amount}`,
       {
         headers: {
           Authorization: "Bearer " + process.env.BANK_API_KEY,

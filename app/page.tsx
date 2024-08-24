@@ -10,6 +10,7 @@ import Loader from "@/components/Loader";
 import { groupBy, keyBy } from "lodash";
 import { VND } from "@/utils";
 import clusters from "@/data/clusters.json";
+import _ from "lodash";
 
 interface PageState {
   state: "schedule" | "confirm" | "info" | "result";
@@ -111,8 +112,6 @@ export default function Home() {
         let i = 0
 
         const timeSlots = selectedTimeSlots[selectedDate.toDateString()] || []
-
-
         while (i < timeSlots.length) {
           const item = timeSlots[i];
           const { index: { cluster, rowIndex, columnIndex } } = item
@@ -211,7 +210,8 @@ export default function Home() {
       cloneSelected.details = cloneSelected.details.filter(
         (item: any) => item !== detail
       );
-      const filtered = selectedTimeSlots[selectedDate.toDateString()].filter(
+
+      const filtered = (selectedTimeSlots[selectedDate.toDateString()]).filter(
         (item: any) => item.id !== row.courtId && item.facility !== row.facility
       );
       setSelectedTimeSlots({ ...selectedTimeSlots, [selectedDate.toDateString()]: filtered });
@@ -243,7 +243,7 @@ export default function Home() {
       setSelected((pre: any) => ({
         ...pre,
         date: selectedDate.toLocaleDateString(),
-        timeSlots: Object.values(selectedTimeSlots),
+        timeSlots: _.flatMap(Object.values(selectedTimeSlots)),
         totalPrice: selected.totalHours * Number(pricePerHour),
       }));
     }
@@ -254,7 +254,7 @@ export default function Home() {
           ? newState.details
           : newState.details.join(";");
 
-      const timeSlotData = selectedTimeSlots.map((timeSlots: any) => {
+      const timeSlotData = _.flatMap(Object.values(selectedTimeSlots)).map((timeSlots: any) => {
         timeSlots.bookedBy = { name: newState.userName, phone: newState.phone };
         timeSlots.status = "wait";
         timeSlots.isFixed = newState.isFixed;
@@ -262,7 +262,6 @@ export default function Home() {
       });
       try {
         const res = await createSchedules(newState, timeSlotData);
-
         if (!res.success) {
           return api.open({
             message: "Giờ đặt không hợp lệ",
@@ -463,7 +462,7 @@ export default function Home() {
           paymentInfo={paymentInfo}
           btnText={btnText}
           currentPage={page.state}
-          timslots={Object.values(selectedTimeSlots)}
+          timslots={_.flatMap(Object.values(selectedTimeSlots))}
           handleChangePage={handleChangePage}
         />
       )}
