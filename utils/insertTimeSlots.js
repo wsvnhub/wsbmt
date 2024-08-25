@@ -1,4 +1,4 @@
-import { generateTimeArray } from "@/utils/genTimeSlotsByJson";
+import { generateTimeArray } from "./genTimeSlotsByJson.js";
 import { ObjectId } from "mongodb";
 
 
