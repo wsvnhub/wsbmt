@@ -69,7 +69,7 @@ export async function POST(request: Request) {
       `${process.env.BANK_API_BASE_URL}/transactions/list?limit=100&amount_in=${amount}`,
       {
         headers: {
-          Authorization: "Bearer FHJ6FOHAR9S0DDGMRTZGQRWAPBAGSXOICWBKLU2N1EQXGWEBH2E85YPKXCY7SQAD",
+          Authorization: "Bearer " + process.env.BANK_API_KEY,
         },
       }
     ).then((response) => response.json());
