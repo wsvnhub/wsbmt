@@ -109,20 +109,22 @@ export default function Home() {
         [selectedDate.toDateString()]
       ).then((data) => {
         const grouped = groupBy(data, "timeClusterId")
-        let i = 0
-
-        const timeSlots = selectedTimeSlots[selectedDate.toDateString()] || []
-        while (i < timeSlots.length) {
-          const item = timeSlots[i];
-          const { index: { cluster, rowIndex, columnIndex } } = item
-          if (grouped[cluster][rowIndex][columnIndex].status === "empty") {
-            grouped[cluster][rowIndex][columnIndex] = item
+        if (grouped) {
+          let i = 0
+          const timeSlots = selectedTimeSlots[selectedDate.toDateString()] || []
+          while (i < timeSlots.length) {
+            const item = timeSlots[i];
+            const { index: { cluster, rowIndex, columnIndex } } = item
+            if (grouped[cluster][rowIndex][columnIndex].status === "empty") {
+              grouped[cluster][rowIndex][columnIndex] = item
+            }
+            i++
           }
-          i++
+
+          setFacilities(grouped);
+          setIsLoading(false);
         }
 
-        setFacilities(grouped);
-        setIsLoading(false);
       });
     }
   }, [selectedFacInfo, getCourts, selectedDate]);
