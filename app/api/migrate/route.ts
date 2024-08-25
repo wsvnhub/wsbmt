@@ -1,5 +1,5 @@
 import clientPromise from "@/lib/mongo";
-import { generateTimeArray } from "@/utils/genTimeSlotsByJson";
+import { insertTimeslots } from "@/utils/insertTimeSlots";
 import { ObjectId } from "mongodb";
 
 const collections = [
@@ -38,7 +38,7 @@ export async function GET(request: Request) {
       pricePerHour: "139000",
       createdAt: new Date().getTime(),
     },
-  {
+    {
       id: "CN NQA",
       name: "CN Nguyễn Quý Anh",
       address: "86 Nguyễn Quý Anh, Tân Phú",
@@ -157,7 +157,7 @@ export async function GET(request: Request) {
       timeClusterId: "cluster4",
       createdAt: new Date().getTime(),
     },
-  {
+    {
       facilitiyId: "CN NQA",
       id: "NQA-1",
       name: "Sân 1",
@@ -201,37 +201,8 @@ export async function GET(request: Request) {
     },
   ]);
 
-  
- const lastDate = new Date(
-    new Date().getFullYear(),
-    new Date().getMonth() + 4,
-    0
-  ).getDate();
+  await insertTimeslots({ db })
 
-  let i = new Date().getDate();
-
-  const courts = await db.collection("courts").find().toArray();
-  console.log(i, lastDate);
-
-  while (i <= lastDate) {
-    const date = new Date();
-    date.setDate(i);
-    console.log(date.toDateString());
-    const insertData = courts.map((court) => {
-      const timeslots = generateTimeArray(court.timeClusterId);
-      return {
-        id: new ObjectId().toString(),
-        facility: court.facilitiyId,
-        courtId: court.id,
-        court: court.name,
-        timeClusterId: court.timeClusterId,
-        ...timeslots,
-        createdAt: date.toDateString(),
-      };
-    });
-    await db.collection("timeslots").insertMany(insertData);
-    i++;
-  }
   await client.close();
   return Response.json({
     data: "success",
