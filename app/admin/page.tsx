@@ -176,7 +176,7 @@ export default function Page() {
     _dateString
   ) => {
     if (!date) {
-      setSpecificsDate([]);
+      return setSpecificsDate([]);
     }
     return setSpecificsDate(date.map((day) => day.toDate().toDateString()));
   };
@@ -190,13 +190,13 @@ export default function Page() {
   };
 
   const handleChangeFacilitiesInfo = (name: string, checked: boolean) => {
-    const filtered = Object.values(facilitiesInfo).filter((item) =>
-      checked ? item.id === name : item.id !== name
-    );
     if (checked) {
+      const filtered = Object.values(facilitiesInfo).filter((item) =>
+        checked ? item.id === name : item.id !== name
+      );
       return setSelectedFacInfo([...selectedFacInfo, filtered[0]]);
     }
-    return setSelectedFacInfo(filtered);
+    return setSelectedFacInfo(preState => preState.filter(item => item.id !== name));
   };
   const handleCellClick = (
     cell: any,
@@ -207,7 +207,6 @@ export default function Page() {
     cluster: string
   ) => {
     const row = facilities[currentDate.toDateString()][cluster][rowIndex];
-    console.log(row);
     const detail: string = `${row.court} - ${cell.from} đến ${cell.to}`;
     let cloneSelected: any = { ...selected };
     if (cell.status === "pending") {
@@ -341,8 +340,6 @@ export default function Page() {
               format={"DD/MM/YYYY"}
               className="text-primary"
               placeholder={["Ngày bắt đầu", "Ngày kết thúc"]}
-              minDate={dayjs()}
-              maxDate={dayjs(dayjs().endOf("month"), dateFormat)}
               onChange={(dates: any) => {
                 if (!dates) {
                   return;
