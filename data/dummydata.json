@@ -1,0 +1,53 @@
+{
+  "facility": {
+    "id": "123123123",
+    "name": "NVL",
+    "address": "70 Nguyễn Văn Lượng, P. 10, Gò Vấp",
+    "courts": [
+      {
+        "id": "san-1",
+        "name": "San 1",
+        "pricePerHour": "200000",
+        "date": "30-07-2024",
+        "timeslots": [
+          {
+            "facility": "NVL",
+            "court": "San 1",
+            "from": "14:15",
+            "to": "15:15",
+            "hour": 1,
+            "status": "done",
+            "bookedBy": {
+              "name": "tét nam",
+              "phone": "09000000"
+            },
+            "isFixed": false,
+            "availability": true
+          }
+        ]
+      },
+      {
+        "id": "san-2",
+        "name": "San 2",
+        "pricePerHour": "200000",
+        "date": "29-07-2024",
+        "timeslots": [
+          {
+            "facility": "NVL",
+            "court": "San 2",
+            "from": "13:15",
+            "to": "14:15",
+            "hour": 1,
+            "status": "done",
+            "bookedBy": {
+              "name": "tét nam",
+              "phone": "09000000"
+            },
+            "isFixed": false,
+            "availability": true
+          }
+        ]
+      }
+    ]
+  }
+}

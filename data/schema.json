@@ -1,0 +1,47 @@
+{
+  "facility": {
+    "id": "",
+    "name": "NVL",
+    "address": "70 Nguyễn Văn Lượng, P. 10, Gò Vấp",
+    "courts": [
+      {
+        "id": "",
+        "name": "San 1",
+        "pricePerHour": "200000",
+        "date": "",
+        "timeslots": [
+          {
+            "from": "14:15",
+            "to": "16:15",
+            "hour": 1,
+            "status": "done",
+            "bookedBy": {
+              "name": "",
+              "phone": ""
+            },
+            "isFixed": true,
+            "availability": true
+          }
+        ]
+      }
+    ]
+  },
+  "schedules": {
+    "totalHours": 0,
+    "totalPrice": 0,
+    "detail": "Sân 1 - 2:35 đến 4:30",
+    "facility": "",
+    "phone": "",
+    "userName": "",
+    "email": "",
+    "isFixed": false,
+    "applyDiscount": true,
+    "createdAt": ""
+  },
+  "paymentInfo": {
+    "bankName": "ACB (Á Châu Bank)",
+    "bankCode": "0123456789",
+    "bankUserName": "NGUYEN VAN AN",
+    "qrCode": ""
+  }
+}
