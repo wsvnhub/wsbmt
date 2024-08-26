@@ -1,5 +1,5 @@
 import clientPromise from "@/lib/mongo";
-import { generateTimeArray } from "@/utils/genTimeSlotsByJson";
+import { insertTimeslots } from "@/utils/insertTimeSlots";
 import { ObjectId } from "mongodb";
 
 const collections = [
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
   await db.collection("facilities").insertMany([
     {
       id: "CN NVL",
-      name: "Nguyễn Văn Lượng",
+      name: "CN Nguyễn Văn Lượng",
       address: "70 Nguyễn Văn Lượng, P. 10, Gò Vấp",
       pricePerHour: "139000",
       createdAt: new Date().getTime(),
@@ -36,6 +36,13 @@ export async function GET(request: Request) {
       name: "CN Dương Quảng Hàm",
       address: "262 Dương Quảng Hàm, Gò Vấp",
       pricePerHour: "139000",
+      createdAt: new Date().getTime(),
+    },
+    {
+      id: "CN NQA",
+      name: "CN Nguyễn Quý Anh",
+      address: "86 Nguyễn Quý Anh, Tân Phú",
+      pricePerHour: "119000",
       createdAt: new Date().getTime(),
     },
   ]);
@@ -62,7 +69,7 @@ export async function GET(request: Request) {
     bankName: "MB (Quân đội)",
     bankCode: "688112688",
     bankUserName: "NGUYEN THI AI NHAN",
-    qrCode: "",
+    qrCode: "https://w.ladicdn.com/5dc39976770cd34186edd2d3/qr-wsb-20240820045649-u73w2.png",
   });
   await db.collection("promotions").insertMany([
     {
@@ -150,39 +157,55 @@ export async function GET(request: Request) {
       timeClusterId: "cluster4",
       createdAt: new Date().getTime(),
     },
+    {
+      facilitiyId: "CN NQA",
+      id: "NQA-1",
+      name: "Sân 1",
+      timeClusterId: "cluster1",
+      createdAt: new Date().getTime(),
+    },
+    {
+      facilitiyId: "CN NQA",
+      id: "NQA-2",
+      name: "Sân 2",
+      timeClusterId: "cluster1",
+      createdAt: new Date().getTime(),
+    },
+    {
+      facilitiyId: "CN NQA",
+      id: "NQA-3",
+      name: "Sân 3",
+      timeClusterId: "cluster2",
+      createdAt: new Date().getTime(),
+    },
+    {
+      facilitiyId: "CN NQA",
+      id: "NQA-4",
+      name: "Sân 4",
+      timeClusterId: "cluster2",
+      createdAt: new Date().getTime(),
+    },
+    {
+      facilitiyId: "CN NQA",
+      id: "NQA-5",
+      name: "Sân 5",
+      timeClusterId: "cluster3",
+      createdAt: new Date().getTime(),
+    },
+    {
+      facilitiyId: "CN NQA",
+      id: "NQA-6",
+      name: "Sân 6",
+      timeClusterId: "cluster3",
+      createdAt: new Date().getTime(),
+    },
   ]);
-  const lastDate = new Date(
-    new Date().getFullYear(),
-    new Date().getMonth() + 1,
-    0
-  ).getDate();
 
-  let i = new Date().getDate();
+  await insertTimeslots({ db })
 
-  const courts = await db.collection("courts").find().toArray();
-  console.log(i, lastDate);
-
-  while (i <= lastDate) {
-    const date = new Date();
-    date.setDate(i);
-    console.log(date.toDateString());
-    const insertData = courts.map((court) => {
-      const timeslots = generateTimeArray(court.timeClusterId);
-      return {
-        id: new ObjectId().toString(),
-        facility: court.facilitiyId,
-        courtId: court.id,
-        court: court.name,
-        timeClusterId: court.timeClusterId,
-        ...timeslots,
-        createdAt: date.toDateString(),
-      };
-    });
-    await db.collection("timeslots").insertMany(insertData);
-    i++;
-  }
   await client.close();
   return Response.json({
     data: "success",
   });
 }
+

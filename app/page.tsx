@@ -4,12 +4,13 @@ import ScheduleTable from "@/components/ScheduleTable";
 import ConfirmPayments from "@/components/payments";
 import WaitPayments from "@/components/payments/Wait";
 import ResultPayments from "@/components/payments/Result";
-import { Checkbox, DatePicker, notification } from "antd";
+import { Checkbox, notification } from "antd";
 import useSocket from "@/socket/useSocket";
 import Loader from "@/components/Loader";
 import { groupBy, keyBy } from "lodash";
-import { VND } from "@/utils";
+import { formatDate, VND } from "@/utils";
 import clusters from "@/data/clusters.json";
+import _ from "lodash";
 
 interface PageState {
   state: "schedule" | "confirm" | "info" | "result";
@@ -59,6 +60,7 @@ export default function Home() {
   }>({});
   const [selectedFacInfo, setSelectedFacInfo] = useState<FacilitiesInfo[]>([]);
 
+
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selected, setSelected] = useState<any>({
     totalHours: 0,
@@ -68,12 +70,12 @@ export default function Home() {
     phone: "",
     userName: "",
     email: "",
-    date: selectedDate.toLocaleDateString(),
+    dates: [],
     isFixed: false,
     applyDiscount: false,
     transactionCode: "",
   });
-  const [selectedTimeSlots, setSelectedTimeSlots] = useState<any[]>([]);
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState<any>({});
 
   const isSchedule = page.state === "schedule";
   const isConfirm = page.state === "confirm";
@@ -89,11 +91,10 @@ export default function Home() {
    */
   React.useEffect(() => {
     getInfo().then((data) => {
-      console.log(data)
       setPaymentInfo(data.paymentInfo[0]);
       setfacilitiesInfo(keyBy(data.facilities, "id"));
       setSelectedFacInfo(data.facilities);
-      setPricePerHour(data.facilities[0].pricePerHour ? data.facilities[0].pricePerHour : 10);
+      setPricePerHour(data.facilities[0].pricePerHour);
     });
   }, [getInfo]);
 
@@ -107,17 +108,32 @@ export default function Home() {
         },
         [selectedDate.toDateString()]
       ).then((data) => {
-        setFacilities(groupBy(data, "timeClusterId"));
-        setIsLoading(false);
+        const grouped = groupBy(data, "timeClusterId")
+        if (grouped) {
+          let i = 0
+          const timeSlots = selectedTimeSlots[selectedDate.toLocaleDateString()] || []
+          while (i < timeSlots.length) {
+            const item = timeSlots[i];
+            const { index: { cluster, rowIndex, columnIndex } } = item
+            const status = grouped[cluster][rowIndex][columnIndex].status
+            const facility = grouped[cluster][rowIndex].facility
+            if (status === "empty" && item.facility === facility) {
+              grouped[cluster][rowIndex][columnIndex] = item
+            }
+            i++
+          }
+          setFacilities(grouped);
+          setIsLoading(false);
+        }
+
       });
     }
   }, [selectedFacInfo, getCourts, selectedDate]);
-
   React.useEffect(() => {
     socket.on("schedules:updated", (arg) => {
       return setFacilities((preState: any) => {
         const data = clusters.reduce((memo: any, cluster) => {
-          const items = preState[cluster.id];
+          const items = preState[cluster.id] || [];
           const newState = items.map((item: any) => {
             if (item) {
               arg.forEach((cell: any) => {
@@ -144,6 +160,7 @@ export default function Home() {
     });
   }, [socket]);
 
+
   /**
    * @handleEvent
    * @CellClick
@@ -162,7 +179,7 @@ export default function Home() {
     tableIndex: number,
     columnIndex: number,
     rowIndex: number,
-    _date: Date,
+    date: Date,
     cluster: string
   ) => {
     const row = facilities[cluster][rowIndex];
@@ -176,8 +193,9 @@ export default function Home() {
       cell.facility = row.facility;
       cell.court = row.court;
 
-      setSelectedTimeSlots([
-        ...selectedTimeSlots,
+      setSelectedTimeSlots({
+        ...selectedTimeSlots, [date.toLocaleDateString()]: [...selectedTimeSlots[date.toLocaleDateString()] || [],
+
         {
           ...cell,
           index: {
@@ -185,17 +203,20 @@ export default function Home() {
             rowIndex,
             columnIndex,
             createdAt: row.createdAt,
+            cluster
           },
         },
-      ]);
+        ]
+      });
     } else {
       cloneSelected.details = cloneSelected.details.filter(
         (item: any) => item !== detail
       );
-      const filtered = selectedTimeSlots.filter(
-        (item) => item.id !== row.courtId && item.facility !== row.facility
+
+      const filtered = (selectedTimeSlots[selectedDate.toDateString()]).filter(
+        (item: any) => item.id !== row.courtId && item.facility !== row.facility
       );
-      setSelectedTimeSlots(filtered);
+      setSelectedTimeSlots({ ...selectedTimeSlots, [selectedDate.toLocaleDateString()]: filtered });
     }
 
     setFacilities((preState: any) => {
@@ -211,20 +232,20 @@ export default function Home() {
     });
   };
   const handleChangeFacilitiesInfo = (name: string, checked: boolean) => {
-    const filtered = Object.values(facilitiesInfo).filter((item) =>
-      checked ? item.id === name : item.id !== name
-    );
     if (checked) {
+      const filtered = Object.values(facilitiesInfo).filter((item) =>
+        checked ? item.id === name : item.id !== name
+      );
       return setSelectedFacInfo([...selectedFacInfo, filtered[0]]);
     }
-    return setSelectedFacInfo(filtered);
+    return setSelectedFacInfo(preState => preState.filter(item => item.id !== name));
   };
   const handleChangePage = async (newState: any) => {
     if (isSchedule) {
       setSelected((pre: any) => ({
         ...pre,
-        date: selectedDate.toLocaleDateString(),
-        timeSlots: selectedTimeSlots,
+        dates: Object.keys(selectedTimeSlots),
+        timeSlots: _.flatMap(Object.values(selectedTimeSlots)),
         totalPrice: selected.totalHours * Number(pricePerHour),
       }));
     }
@@ -235,7 +256,7 @@ export default function Home() {
           ? newState.details
           : newState.details.join(";");
 
-      const timeSlotData = selectedTimeSlots.map((timeSlots) => {
+      const timeSlotData = _.flatMap(Object.values(selectedTimeSlots)).map((timeSlots: any) => {
         timeSlots.bookedBy = { name: newState.userName, phone: newState.phone };
         timeSlots.status = "wait";
         timeSlots.isFixed = newState.isFixed;
@@ -243,7 +264,6 @@ export default function Home() {
       });
       try {
         const res = await createSchedules(newState, timeSlotData);
-
         if (!res.success) {
           return api.open({
             message: "Giờ đặt không hợp lệ",
@@ -309,10 +329,18 @@ export default function Home() {
               </a>
 
               <input
-                onChange={(e) => setSelectedDate(new Date(e.target.value))}
+                onChange={(e) => {
+                  const value = e.target.value
+                  let date = new Date()
+                  if (value !== "") {
+                    date = new Date(value)
+                  }
+                  setSelectedDate(date)
+                }}
                 className="bg-white text-primary font-semibold pl-6 pr-2 py-2 rounded-md"
                 type="date"
                 placeholder="dd-mm-yyyy"
+                onKeyDown={(e) => e.preventDefault()}
                 value={selectedDate.toISOString().substring(0, 10)}
               />
             </div>
@@ -344,6 +372,20 @@ export default function Home() {
               >
                 <p className="text-white text-md">
                   DQH = Sân Dương Quảng Hàm, Gò Vấp
+                </p>
+              </Checkbox>
+              <Checkbox
+                defaultChecked
+                onChange={(e) =>
+                  handleChangeFacilitiesInfo(
+                    e.target.name || "",
+                    e.target.checked
+                  )
+                }
+                name="CN NQA"
+              >
+                <p className="text-white text-md">
+                  NQA = Sân Nguyễn Quý Anh, Tân Phú
                 </p>
               </Checkbox>
             </div>
@@ -422,7 +464,7 @@ export default function Home() {
           paymentInfo={paymentInfo}
           btnText={btnText}
           currentPage={page.state}
-          timslots={selectedTimeSlots}
+          timslots={_.flatMap(Object.values(selectedTimeSlots))}
           handleChangePage={handleChangePage}
         />
       )}

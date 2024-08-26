@@ -7,13 +7,13 @@ import { Server } from "socket.io";
 import { generateTimeArray } from "./utils/genTimeSlotsByJson.js";
 import axios from "axios";
 
+config();
 const url =
   "https://open.larksuite.com/open-apis/auth/v3/tenant_access_token/internal";
 
 const headers = {
   "Content-Type": "application/json; charset=utf-8",
 };
-
 const data = {
   app_id: process.env.APP_ID,
   app_secret: process.env.APP_SECRET,
@@ -83,7 +83,6 @@ async function update_record(record_id) {
   }
 }
 
-config();
 var record_id = "";
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";

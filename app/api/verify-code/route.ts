@@ -13,8 +13,6 @@ export async function POST(request: Request) {
     const client = await clientPromise;
     const db = client.db(process.env.DB);
     const data = await db.collection("promotions").findOne({ code });
-    const allData = await db.collection("promotions").find({}).toArray();
-    console.log("Promote -------", allData);
     return Response.json(
       {
         data,

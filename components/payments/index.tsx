@@ -49,7 +49,11 @@ export default function ConfirmPayments({
   facilitiesInfo,
   handleChangePage,
 }: ConfirmPaymentsProps) {
+<<<<<<< HEAD
   const { details, totalHours, date, facility } = data;
+=======
+  const { details, totalHours, dates, facility } = data;
+>>>>>>> 14fc732977eb47f6caa5cab1a56892c69f818279
   const pricePerHour = Number(data.totalPrice) / Number(data.totalHours);
 
   const [discountCode, setDiscountCode] = React.useState("");
@@ -146,7 +150,11 @@ export default function ConfirmPayments({
             <Text title="Chi nhánh" content={facText} />
             <Text title="Địa chỉ" content={facAddress} />
             <Text title="Sân - giờ" content={facDetail} />
+<<<<<<< HEAD
             <Text title="Ngày" content={date} />
+=======
+            <Text title="Ngày" content={dates.join(", ")} />
+>>>>>>> 14fc732977eb47f6caa5cab1a56892c69f818279
             <Text
               title="Giá 1 giờ"
               content={VND.format(pricePerHour)}

@@ -6,8 +6,8 @@ import ConfigAntd from "@/components/ConfigAntd";
 const montserrat = Montserrat({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "DTD Team",
-  description: "Created by DTD Solutions",
+  title: "Ways Station Badminton",
+  description: "Ways Station Badminton",
 };
 
 export default function RootLayout({
@@ -18,7 +18,9 @@ export default function RootLayout({
   return (
     <html className="bg-primary text-white" lang="en">
       <body className={montserrat.className}>
-        <ConfigAntd>{children}</ConfigAntd>
+        <ConfigAntd>
+          {children}
+        </ConfigAntd>
       </body>
     </html>
   );

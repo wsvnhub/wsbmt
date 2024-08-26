@@ -1,4 +1,5 @@
 import clientPromise from "@/lib/mongo";
+import { formatDate } from "@/utils";
 
 interface MBBankTransaction {
   id: string;
@@ -64,9 +65,8 @@ export async function POST(request: Request) {
     if (!process.env.BANK_API_BASE_URL) {
       throw new Error("Bank API chưa được cài đặt");
     }
-
     const { status, transactions }: MBBankResponse = await fetch(
-      `${process.env.BANK_API_BASE_URL}/transactions/list?limit=20&amount_in=${amount}`,
+      `${process.env.BANK_API_BASE_URL}/transactions/list?limit=100&amount_in=${amount}&transaction_date_min=${formatDate()}`,
       {
         headers: {
           Authorization: "Bearer " + process.env.BANK_API_KEY,
@@ -80,13 +80,13 @@ export async function POST(request: Request) {
 
     const message = {
       text: "Đơn hàng của bạn chưa được thanh toán",
-      error: false,
+      error: true,
     };
 
     let index = 0;
     while (index < transactions.length) {
       const { transaction_content, amount_in } = transactions[index];
-      if (transaction_content.trim() === code && Number(amount_in) === amount) {
+      if (transaction_content.trim() === code && Number(amount_in) === Number(amount)) {
         message.error = false;
         message.text = "Thanh toán thành công";
       }

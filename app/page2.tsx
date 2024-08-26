@@ -295,28 +295,30 @@ export default function Home() {
   }
   return (
     <>
-      <p>Nhấn giữ shift để cuộn ngang</p>
-      <header
+      <p>  Để xem giờ tối: Nhấn giữ Shift và Scroll để cuộn ngang </p>
+     <header
         className={`${headerPadding} lg:sticky bg-primary top-0 flex flex-col lg:flex-row items-center lg:gap-4 gap-2 justify-between z-30`}
       >
-        <h1 className="text-xl font-semibold my-2 text-center lg:text-left lg:mb-0">
+        <h2 className="text-lg lg:text-xl font-semibold my-2 text-center lg:text-left lg:mb-0">
           {isSchedule && (
             <>
               Đặt sân theo giờ <br />
             </>
           )}
           Ways Station Badminton
-        </h1>
+        </h2>
         {isSchedule && (
           <>
             <div className="flex justify-center items-center gap-4">
-              <a href="#" className="text-white underline italic">
+              <a href="https://diachi.ways.vn/san" className="text-white underline italic">
                 Bảng giá
               </a>
+
               <input
                 onChange={(e) => setSelectedDate(new Date(e.target.value))}
                 className="bg-white text-primary font-semibold pl-6 pr-2 py-2 rounded-md"
                 type="date"
+                placeholder="dd-mm-yyyy"
                 value={selectedDate.toISOString().substring(0, 10)}
               />
             </div>
@@ -331,7 +333,7 @@ export default function Home() {
                   )
                 }
               >
-                <p className="text-white text-md">
+                <p className="text-white font-medium text-md">
                   NVL = Sân Nguyễn Văn Lượng, Gò Vấp
                 </p>
               </Checkbox>
@@ -346,30 +348,46 @@ export default function Home() {
                 }
                 name="CN DQH"
               >
-                <p className="text-white text-md">
+                <p className="text-white font-medium text-md">
                   DQH = Sân Dương Quảng Hàm, Gò Vấp
                 </p>
               </Checkbox>
+              <p></p>
+              <Checkbox
+                defaultChecked
+                name="CN NQA"
+                onChange={(e) =>
+                  handleChangeFacilitiesInfo(
+                    e.target.name || "",
+                    e.target.checked
+                  )
+                }
+              >
+                <p className="text-white font-medium text-md">
+                  NQA = Sân Nguyễn Quý Anh, Tân Phú
+                </p>
+              </Checkbox>
+              
             </div>
             <div className="w-full lg:w-auto flex flex-row-reverse lg:flex-col gap-2 lg:gap-4 items-center">
               <a
                 href="tel:0389145575"
-                className="w-5/12 text-right lg:hidden lg:w-full p-2 lg:py-2 lg:px-4 rounded-lg font-semibold italic text-[10px] lg:text-[15px] bg-gradient-to-b from-blue-500 to-cyan-500"
+                className="w-5/12 text-right lg:w-full p-2 lg:py-2 lg:px-4 rounded-lg font-semibold italic text-[10px] lg:text-[15px] bg-gradient-to-b from-blue-500 to-cyan-500"
               >
                 Khách đặt lịch cố định: <br /> Gọi 0389145575
               </a>
-              <div className="w-7/12 lg:w-full flex items-center gap-2 lg:gap-6 text-[8px]">
+             <div className="w-7/12 lg:w-full flex items-center gap-2 lg:gap-6 text-[8px]">
                 <div className="flex items-center justify-center gap-2">
                   <div className="bg-white w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md"></div>
-                  <span>Trống</span>
+                  <span className="text-[10px]">Trống</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
                   <div className="bg-red-400 w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md"></div>
-                  <span>Đã đặt</span>
+                  <span className="text-[10px]">Đã đặt</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
                   <div className="bg-yellow-500 w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md"></div>
-                  <span>Đang chọn</span>
+                  <span className="text-[10px]">Đang chọn</span>
                 </div>
               </div>
             </div>

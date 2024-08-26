@@ -1,4 +1,4 @@
-import timeSlots from "../data/timeSlots.json" assert { type: "json" };
+import timeSlots from "../data/timeSlots.json" with { type: "json" };
 export function generateTimeArray(cluster) {
   return timeSlots[cluster].map((timeslot) => {
     const { time } = timeslot;

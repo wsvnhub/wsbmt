@@ -36,7 +36,7 @@ const job = new CronJob(
 
     const lastDate = new Date(
       new Date().getFullYear(),
-      new Date().getMonth() + 1,
+      new Date().getMonth() + 4,
       0
     ).getDate();
     let i = new Date().getDate();

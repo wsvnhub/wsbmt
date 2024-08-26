@@ -140,7 +140,7 @@ export default function Page() {
         ...timeSlots,
         status: "wait",
         isFixed,
-        bookedBy: { name, phone ,email},
+        bookedBy: { name, phone },
       };
     });
     const submitedData = {
@@ -176,7 +176,7 @@ export default function Page() {
     _dateString
   ) => {
     if (!date) {
-      setSpecificsDate([]);
+      return setSpecificsDate([]);
     }
     return setSpecificsDate(date.map((day) => day.toDate().toDateString()));
   };
@@ -190,13 +190,13 @@ export default function Page() {
   };
 
   const handleChangeFacilitiesInfo = (name: string, checked: boolean) => {
-    const filtered = Object.values(facilitiesInfo).filter((item) =>
-      checked ? item.id === name : item.id !== name
-    );
     if (checked) {
+      const filtered = Object.values(facilitiesInfo).filter((item) =>
+        checked ? item.id === name : item.id !== name
+      );
       return setSelectedFacInfo([...selectedFacInfo, filtered[0]]);
     }
-    return setSelectedFacInfo(filtered);
+    return setSelectedFacInfo(preState => preState.filter(item => item.id !== name));
   };
   const handleCellClick = (
     cell: any,
@@ -207,7 +207,6 @@ export default function Page() {
     cluster: string
   ) => {
     const row = facilities[currentDate.toDateString()][cluster][rowIndex];
-    console.log(row);
     const detail: string = `${row.court} - ${cell.from} đến ${cell.to}`;
     let cloneSelected: any = { ...selected };
     if (cell.status === "pending") {
@@ -290,7 +289,7 @@ export default function Page() {
     socket.on("schedules:updated", (arg) => {
       return setFacilities((preState: any) => {
         const data = Object.keys(preState).reduce((memo: any, value) => {
-          const stateItems = preState[value];
+          const stateItems = preState[value] || [];
           const data = clusters.reduce((memo: any, cluster) => {
             const items = stateItems[cluster.id];
             const newState = items.map((item: any) => {
@@ -325,7 +324,6 @@ export default function Page() {
   if (isLoading) {
     return <Loader />;
   }
-
   return (
     <>
       {contextHolder}
@@ -341,8 +339,6 @@ export default function Page() {
               format={"DD/MM/YYYY"}
               className="text-primary"
               placeholder={["Ngày bắt đầu", "Ngày kết thúc"]}
-              minDate={dayjs()}
-              maxDate={dayjs(dayjs().endOf("month"), dateFormat)}
               onChange={(dates: any) => {
                 if (!dates) {
                   return;
@@ -429,6 +425,21 @@ export default function Page() {
                 DQH = Sân Dương Quảng Hàm, Gò Vấp
               </p>
             </Checkbox>
+            <p></p>
+            <Checkbox
+              defaultChecked
+              name="CN NQA"
+              onChange={(e) =>
+                handleChangeFacilitiesInfo(
+                  e.target.name || "",
+                  e.target.checked
+                )
+              }
+            >
+              <p className="text-white text-base">
+                NQA = Sân Nguyễn Quý Anh, Tân Phú
+              </p>
+            </Checkbox>
           </div>
           <div className="flex flex-col lg:flex-row gap-2 items-center">
             <div className="flex items-center flex-wrap gap-2">
@@ -459,9 +470,8 @@ export default function Page() {
               return (
                 <div
                   key={index}
-                  className={`${
-                    bgColor[index < bgColor.length ? index : 0]
-                  } px-2 pb-6 pt-4`}
+                  className={`${bgColor[index < bgColor.length ? index : 0]
+                    } px-2 pb-6 pt-4`}
                 >
                   <p className="text-primary text-md font-semibold mb-2">
                     {dayjs(date).format("dd")} {dayjs(date).format("DD/MM")}
