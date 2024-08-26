@@ -324,7 +324,6 @@ export default function Page() {
   if (isLoading) {
     return <Loader />;
   }
-
   return (
     <>
       {contextHolder}

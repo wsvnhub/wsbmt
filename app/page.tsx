@@ -8,7 +8,7 @@ import { Checkbox, notification } from "antd";
 import useSocket from "@/socket/useSocket";
 import Loader from "@/components/Loader";
 import { groupBy, keyBy } from "lodash";
-import { VND } from "@/utils";
+import { formatDate, VND } from "@/utils";
 import clusters from "@/data/clusters.json";
 import _ from "lodash";
 
@@ -70,7 +70,7 @@ export default function Home() {
     phone: "",
     userName: "",
     email: "",
-    date: selectedDate.toLocaleDateString(),
+    dates: [],
     isFixed: false,
     applyDiscount: false,
     transactionCode: "",
@@ -111,16 +111,17 @@ export default function Home() {
         const grouped = groupBy(data, "timeClusterId")
         if (grouped) {
           let i = 0
-          const timeSlots = selectedTimeSlots[selectedDate.toDateString()] || []
+          const timeSlots = selectedTimeSlots[selectedDate.toLocaleDateString()] || []
           while (i < timeSlots.length) {
             const item = timeSlots[i];
             const { index: { cluster, rowIndex, columnIndex } } = item
-            if (grouped[cluster][rowIndex][columnIndex].status === "empty") {
+            const status = grouped[cluster][rowIndex][columnIndex].status
+            const facility = grouped[cluster][rowIndex].facility
+            if (status === "empty" && item.facility === facility) {
               grouped[cluster][rowIndex][columnIndex] = item
             }
             i++
           }
-
           setFacilities(grouped);
           setIsLoading(false);
         }
@@ -128,7 +129,6 @@ export default function Home() {
       });
     }
   }, [selectedFacInfo, getCourts, selectedDate]);
-
   React.useEffect(() => {
     socket.on("schedules:updated", (arg) => {
       return setFacilities((preState: any) => {
@@ -194,7 +194,7 @@ export default function Home() {
       cell.court = row.court;
 
       setSelectedTimeSlots({
-        ...selectedTimeSlots, [date.toDateString()]: [...selectedTimeSlots[date.toDateString()] || [],
+        ...selectedTimeSlots, [date.toLocaleDateString()]: [...selectedTimeSlots[date.toLocaleDateString()] || [],
 
         {
           ...cell,
@@ -216,7 +216,7 @@ export default function Home() {
       const filtered = (selectedTimeSlots[selectedDate.toDateString()]).filter(
         (item: any) => item.id !== row.courtId && item.facility !== row.facility
       );
-      setSelectedTimeSlots({ ...selectedTimeSlots, [selectedDate.toDateString()]: filtered });
+      setSelectedTimeSlots({ ...selectedTimeSlots, [selectedDate.toLocaleDateString()]: filtered });
     }
 
     setFacilities((preState: any) => {
@@ -244,7 +244,7 @@ export default function Home() {
     if (isSchedule) {
       setSelected((pre: any) => ({
         ...pre,
-        date: selectedDate.toLocaleDateString(),
+        dates: Object.keys(selectedTimeSlots),
         timeSlots: _.flatMap(Object.values(selectedTimeSlots)),
         totalPrice: selected.totalHours * Number(pricePerHour),
       }));
