@@ -31,7 +31,6 @@ async function create_record(new_record) {
 
     // Lấy dữ liệu từ phản hồi
     const responseData = response.data;
-    console.log(responseData.tenant_access_token);
 
     const url_create_record = `https://open.larksuite.com/open-apis/bitable/v1/apps/${app_token}/tables/${table_id}/records`;
     const authorizationToken = `Bearer ${responseData.tenant_access_token}`;
@@ -248,7 +247,6 @@ app.prepare().then(() => {
     //   const data = await mongoPool.collection("courts").find(filter).toArray();
     //   return callback({ data, schedules });
     // });
-
     socket.on("schedules:create", async (arg, callback) => {
       const { timeSlotsData, schedulesData } = arg;
 
@@ -263,17 +261,17 @@ app.prepare().then(() => {
           throw new Error("Schedule is already exists");
         }
         // const allTimeSlots = await timeSlots.find({}).toArray();
+
         const countIsFixed = schedulesData.timeSlots.filter(
           (slot) => slot.isFixed
         ).length;
+
         const currentTimeMillis = Date.now();
 
         const uniqueIds = [
           ...new Set(timeSlotsData.map((item) => item.id)),
         ].join(", ");
-        const [day, month, year] = schedulesData.date.split("/").map(Number);
-        const date = new Date(year, month - 1, day); // Tháng bắt đầu từ 0
-        const milliseconds = date.getTime();
+
         const new_record = {
           fields: {
             time_order: currentTimeMillis,
@@ -284,7 +282,7 @@ app.prepare().then(() => {
             email: schedulesData.email,
             san: schedulesData.details,
             address: JSON.stringify(schedulesData.facility),
-            date: milliseconds,
+            date: JSON.stringify(schedulesData.dates),
             time: schedulesData.totalHours,
             quantity: schedulesData.timeSlots.length,
             total_money: schedulesData.totalPrice,
@@ -293,6 +291,7 @@ app.prepare().then(() => {
             dat_co_dinh: countIsFixed,
           },
         };
+        console.log("new record--------------", new_record);
         create_record(new_record)
           .then((res) => {
             record_id = res.data.record.record_id;
