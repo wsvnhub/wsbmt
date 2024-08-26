@@ -33,10 +33,14 @@ export default function useSocket() {
     };
   }, []);
   const getInfo = React.useCallback(async () => {
-
+    const appInfo = localStorage.getItem("app:info");
+    if (appInfo) {
+      return JSON.parse(appInfo);
+    }
     const res = await socket.emitWithAck("app:info", {
       size: 10,
     });
+    localStorage.setItem("app:info", JSON.stringify(res));
     return res;
   }, []);
 
@@ -65,7 +69,7 @@ export default function useSocket() {
     },
     []
   );
-  const deleteSchedules = React.useCallback((data: any) => { }, []);
+  const deleteSchedules = React.useCallback((data: any) => {}, []);
   const updateSchedules = React.useCallback(async (transactionCode: string) => {
     const res = await socket.emitWithAck("schedules:create", {
       code: transactionCode,

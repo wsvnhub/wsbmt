@@ -4,9 +4,85 @@ import { config } from "dotenv";
 import { MongoClient, ObjectId } from "mongodb";
 import next from "next";
 import { Server } from "socket.io";
-import { insertTimeslots } from "./utils/insertTimeSlots.js";
+import { generateTimeArray } from "./utils/genTimeSlotsByJson.js";
+import axios from "axios";
 
 config();
+const url =
+  "https://open.larksuite.com/open-apis/auth/v3/tenant_access_token/internal";
+
+const headers = {
+  "Content-Type": "application/json; charset=utf-8",
+};
+const data = {
+  app_id: process.env.APP_ID,
+  app_secret: process.env.APP_SECRET,
+};
+const app_token = process.env.APP_TOKEN;
+const table_id = process.env.TABLE_ID;
+async function create_record(new_record) {
+  try {
+    const response = await axios.post(url, data, { headers });
+
+    // Kiểm tra nếu yêu cầu thành công
+    if (response.status !== 200) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+
+    // Lấy dữ liệu từ phản hồi
+    const responseData = response.data;
+
+    const url_create_record = `https://open.larksuite.com/open-apis/bitable/v1/apps/${app_token}/tables/${table_id}/records`;
+    const authorizationToken = `Bearer ${responseData.tenant_access_token}`;
+    const nextApiHeaders = {
+      Authorization: authorizationToken,
+      "Content-Type": "application/json",
+    };
+
+    const nextResponse = await axios.post(url_create_record, new_record, {
+      headers: nextApiHeaders,
+    });
+    // Trả về dữ liệu phản hồi từ yêu cầu thứ hai
+    return nextResponse.data;
+  } catch (error) {
+    console.error("Error:", error.message);
+  }
+}
+async function update_record(record_id) {
+  try {
+    const response = await axios.post(url, data, { headers });
+
+    // Kiểm tra nếu yêu cầu thành công
+    if (response.status !== 200) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+
+    // Lấy dữ liệu từ phản hồi
+    const responseData = response.data;
+    const url_create_record = `https://open.larksuite.com/open-apis/bitable/v1/apps/${app_token}/tables/${table_id}/records/${record_id}`;
+    const authorizationToken = `Bearer ${responseData.tenant_access_token}`;
+    const nextApiHeaders = {
+      Authorization: authorizationToken,
+      "Content-Type": "application/json",
+    };
+    var new_record = {
+      fields: {
+        trang_thai: "booked",
+      },
+    };
+
+    const nextResponse = await axios.put(url_create_record, new_record, {
+      headers: nextApiHeaders,
+    });
+
+    // Trả về dữ liệu phản hồi từ yêu cầu thứ hai
+    return nextResponse.data;
+  } catch (error) {
+    console.error("Error:", error.message);
+  }
+}
+
+var record_id = "";
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
 const port = 3000 || process.env.PORT;
@@ -31,13 +107,40 @@ const initDB = async () => {
 
 const { mongoPool } = await initDB();
 
-
 const job = CronJob.from({
-  cronTime: "0 0 1 1 *",
+  cronTime: "0 0 0 1 * *",
   // cronTime: "0 * * * * *",
   onTick: async function () {
     console.log("You will see this message every second");
-    await insertTimeslots({ db: mongoPool })
+
+    const lastDate = new Date(
+      new Date().getFullYear(),
+      new Date().getMonth() + 1,
+      0
+    ).getDate();
+
+    let i = new Date().getDate();
+
+    const courts = await mongoPool.collection("courts").find().toArray();
+    console.log(i, lastDate);
+    while (i <= lastDate) {
+      const date = new Date();
+      date.setDate(i);
+      const insertData = courts.map((court) => {
+        const timeslots = generateTimeArray(court.timeClusterId);
+        return {
+          id: new ObjectId().toString(),
+          facilitiyId: court.facilitiyId,
+          courtId: court.id,
+          court: court.name,
+          timeClusterId: court.timeClusterId,
+          timeslots,
+          createdAt: date.toDateString(),
+        };
+      });
+      await mongoPool.collection("timeslots").insertMany(insertData);
+      i++;
+    }
   },
   start: false,
   timeZone: "Asia/Ho_Chi_Minh",
@@ -144,9 +247,9 @@ app.prepare().then(() => {
     //   const data = await mongoPool.collection("courts").find(filter).toArray();
     //   return callback({ data, schedules });
     // });
-
     socket.on("schedules:create", async (arg, callback) => {
       const { timeSlotsData, schedulesData } = arg;
+
       const schedules = mongoPool.collection("schedules");
       const timeSlots = mongoPool.collection("timeslots");
       const id = new ObjectId().toString();
@@ -157,6 +260,43 @@ app.prepare().then(() => {
         if (isExist) {
           throw new Error("Schedule is already exists");
         }
+        // const allTimeSlots = await timeSlots.find({}).toArray();
+
+        const countIsFixed = schedulesData.timeSlots.filter(
+          (slot) => slot.isFixed
+        ).length;
+
+        const currentTimeMillis = Date.now();
+
+        const uniqueIds = [
+          ...new Set(timeSlotsData.map((item) => item.id)),
+        ].join(", ");
+
+        const new_record = {
+          fields: {
+            time_order: currentTimeMillis,
+            chi_nhanh: uniqueIds,
+            ND_CK: schedulesData.transactionCode,
+            name: schedulesData.userName,
+            phone: schedulesData.phone,
+            email: schedulesData.email,
+            san: schedulesData.details,
+            address: JSON.stringify(schedulesData.facility),
+            date: JSON.stringify(schedulesData.dates),
+            time: schedulesData.totalHours,
+            quantity: schedulesData.timeSlots.length,
+            total_money: schedulesData.totalPrice,
+            voucher_code: schedulesData.applyDiscount ? "True" : "False",
+            trang_thai: "wait",
+            dat_co_dinh: countIsFixed,
+          },
+        };
+        console.log("new record--------------", new_record);
+        create_record(new_record)
+          .then((res) => {
+            record_id = res.data.record.record_id;
+          })
+          .catch((err) => console.log(err));
         console.log("schedules:created");
         const updateQuery = timeSlotsData.map((timeSlot) => {
           const { facility, id, index } = timeSlot;
@@ -187,7 +327,7 @@ app.prepare().then(() => {
               });
             }
           });
-        }, 600000);
+        }, 60000);
 
         const insertData = {
           id,
@@ -217,11 +357,12 @@ app.prepare().then(() => {
       try {
         const res = await schedules.findOne({
           transactionCode: code,
-          status: "booked",
+          status: "wait",
         });
         if (!res) {
           throw new Error("Đơn hàng của bạn chưa được thanh toán");
         }
+        update_record(record_id);
         const updatedData = res.timslots.map((timeSlot) => {
           timeSlot.status = "booked";
           return timeSlot;
