@@ -4,7 +4,7 @@ import { config } from "dotenv";
 import { MongoClient, ObjectId } from "mongodb";
 import next from "next";
 import { Server } from "socket.io";
-import { generateTimeArray } from "./utils/genTimeSlotsByJson.js";
+import { insertTimeslots } from "./utils/insertTimeSlots.js";
 import axios from "axios";
 
 config();
@@ -108,39 +108,13 @@ const initDB = async () => {
 const { mongoPool } = await initDB();
 
 const job = CronJob.from({
-  cronTime: "0 0 0 1 * *",
+  cronTime: "0 0 1 1 *",
   // cronTime: "0 * * * * *",
   onTick: async function () {
-    console.log("You will see this message every second");
 
-    const lastDate = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth() + 1,
-      0
-    ).getDate();
+    await insertTimeslots({ db: mongoPool })
+    console.log("created 1 year time slots");
 
-    let i = new Date().getDate();
-
-    const courts = await mongoPool.collection("courts").find().toArray();
-    console.log(i, lastDate);
-    while (i <= lastDate) {
-      const date = new Date();
-      date.setDate(i);
-      const insertData = courts.map((court) => {
-        const timeslots = generateTimeArray(court.timeClusterId);
-        return {
-          id: new ObjectId().toString(),
-          facilitiyId: court.facilitiyId,
-          courtId: court.id,
-          court: court.name,
-          timeClusterId: court.timeClusterId,
-          timeslots,
-          createdAt: date.toDateString(),
-        };
-      });
-      await mongoPool.collection("timeslots").insertMany(insertData);
-      i++;
-    }
   },
   start: false,
   timeZone: "Asia/Ho_Chi_Minh",
@@ -327,7 +301,7 @@ app.prepare().then(() => {
               });
             }
           });
-        }, 60000);
+        }, 600000);
 
         const insertData = {
           id,

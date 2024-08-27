@@ -115,11 +115,19 @@ export default function Home() {
           while (i < timeSlots.length) {
             const item = timeSlots[i];
             const { index: { cluster, rowIndex, columnIndex } } = item
-            const status = grouped[cluster][rowIndex][columnIndex].status
-            const facility = grouped[cluster][rowIndex].facility
-            if (status === "empty" && item.facility === facility) {
-              grouped[cluster][rowIndex][columnIndex] = item
+            if (grouped[cluster]) {
+              grouped[cluster].forEach((row,index) => {
+                const status = row[columnIndex].status
+                const facility = row.facility
+                const court = row.court
+                if (status === "empty" && item.facility === facility && court === item.court) {
+                  grouped[cluster][index][columnIndex] = item
+                }
+              })
+
+
             }
+
             i++
           }
           setFacilities(grouped);
@@ -213,7 +221,7 @@ export default function Home() {
         (item: any) => item !== detail
       );
 
-      const filtered = (selectedTimeSlots[selectedDate.toDateString()]).filter(
+      const filtered = (selectedTimeSlots[selectedDate.toLocaleDateString()]).filter(
         (item: any) => item.id !== row.courtId && item.facility !== row.facility
       );
       setSelectedTimeSlots({ ...selectedTimeSlots, [selectedDate.toLocaleDateString()]: filtered });
