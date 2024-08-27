@@ -306,7 +306,7 @@ export default function Home() {
     <>
       {isSchedule && (
         <p className="hidden lg:block sticky top-0 left-0 z-40">
-          Trên máy tính, giữ Shift và Scroll chuột để cuộn ngang
+          Để xem giờ tối: Nhấn giữ Shift và Scroll để cuộn ngang
         </p>
       )}
       {contextHolder}
