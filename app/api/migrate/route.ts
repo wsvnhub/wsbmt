@@ -1,5 +1,5 @@
 import clientPromise from "@/lib/mongo";
-import { insertTimeslots } from "@/utils/insertTimeSlots";
+import { insertTimeslots } from "@/utils/insertTimeSlots.js";
 import { ObjectId } from "mongodb";
 
 const collections = [
