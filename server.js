@@ -28,7 +28,6 @@ async function create_record(new_record) {
     if (response.status !== 200) {
       throw new Error(`Request failed with status ${response.status}`);
     }
-
     // Lấy dữ liệu từ phản hồi
     const responseData = response.data;
 
@@ -38,7 +37,7 @@ async function create_record(new_record) {
       Authorization: authorizationToken,
       "Content-Type": "application/json",
     };
-
+    console.log("url_create_record", url_create_record)
     const nextResponse = await axios.post(url_create_record, new_record, {
       headers: nextApiHeaders,
     });

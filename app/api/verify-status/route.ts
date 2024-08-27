@@ -86,9 +86,10 @@ export async function POST(request: Request) {
     let index = 0;
     while (index < transactions.length) {
       const { transaction_content, amount_in } = transactions[index];
-      if (transaction_content.trim() === code && Number(amount_in) === Number(amount)) {
+      if (transaction_content.trim().includes(code) && Number(amount_in) === Number(amount)) {
         message.error = false;
         message.text = "Thanh toán thành công";
+        break;
       }
       index++;
     }
