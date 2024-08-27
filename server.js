@@ -37,10 +37,11 @@ async function create_record(new_record) {
       Authorization: authorizationToken,
       "Content-Type": "application/json",
     };
-    console.log("url_create_record", url_create_record)
+    console.log("url_create_record", url_create_record);
     const nextResponse = await axios.post(url_create_record, new_record, {
       headers: nextApiHeaders,
     });
+    console.log("nextResponse.data---------", nextResponse.data);
     // Trả về dữ liệu phản hồi từ yêu cầu thứ hai
     return nextResponse.data;
   } catch (error) {
@@ -110,10 +111,8 @@ const job = CronJob.from({
   cronTime: "0 0 1 1 *",
   // cronTime: "0 * * * * *",
   onTick: async function () {
-
-    await insertTimeslots({ db: mongoPool })
+    await insertTimeslots({ db: mongoPool });
     console.log("created 1 year time slots");
-
   },
   start: false,
   timeZone: "Asia/Ho_Chi_Minh",
@@ -222,6 +221,7 @@ app.prepare().then(() => {
     // });
     socket.on("schedules:create", async (arg, callback) => {
       const { timeSlotsData, schedulesData } = arg;
+      console.log("schedulesData", schedulesData);
 
       const schedules = mongoPool.collection("schedules");
       const timeSlots = mongoPool.collection("timeslots");
@@ -234,11 +234,6 @@ app.prepare().then(() => {
           throw new Error("Schedule is already exists");
         }
         // const allTimeSlots = await timeSlots.find({}).toArray();
-
-        const countIsFixed = schedulesData.timeSlots.filter(
-          (slot) => slot.isFixed
-        ).length;
-
         const currentTimeMillis = Date.now();
 
         const uniqueIds = [
@@ -261,7 +256,7 @@ app.prepare().then(() => {
             total_money: schedulesData.totalPrice,
             voucher_code: schedulesData.applyDiscount ? "True" : "False",
             trang_thai: "wait",
-            dat_co_dinh: countIsFixed,
+            dat_co_dinh: schedulesData.isFixed ? "True" : "False",
           },
         };
         console.log("new record--------------", new_record);
