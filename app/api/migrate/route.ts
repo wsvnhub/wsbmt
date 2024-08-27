@@ -74,8 +74,8 @@ export async function GET(request: Request) {
   await db.collection("promotions").insertMany([
     {
       id: new ObjectId().toString(),
-      code: "open-day",
-      value: 20,
+      code: "y",
+      value: 98,
       unit: "percent",
     },
   ]);
