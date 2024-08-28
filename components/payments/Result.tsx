@@ -33,7 +33,7 @@ export default function ResultPayments({
   facilitiesInfo,
   handleChangePage,
 }: ResultPaymentsProps) {
-  const { details, date, facility, applyDiscount, phone, userName, email } =
+  const { details, dates, facility, applyDiscount, phone, userName, email } =
     data;
 
   const detailArr = details
@@ -101,7 +101,7 @@ export default function ResultPayments({
           <Text title="Chi nhánh" content={facText} />
           <Text title="Địa chỉ" content={facAddress} />
           <Text title="Sân - giờ" content={facDetail} />
-          <Text title="Ngày" content={date} />
+          <Text title="Ngày" content={dates.join(', ')} />
           <Text
             title="Giá 1 giờ"
             content={totalPrice}
