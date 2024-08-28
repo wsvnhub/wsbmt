@@ -81,7 +81,7 @@ async function update_record(record_id) {
   }
 }
 
-var record_id = "";
+// var record_id = "";
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
 const port = 3000 || process.env.PORT;
@@ -237,7 +237,7 @@ app.prepare().then(() => {
           },
         };
         const res = await create_record(new_record)
-        record_id = res.data.record.record_id;
+        const record_id = res.data.record.record_id;
         console.log("schedules:created");
         const updateQuery = timeSlotsData.map((timeSlot) => {
           const { facility, id, index } = timeSlot;
@@ -273,6 +273,7 @@ app.prepare().then(() => {
         const insertData = {
           id,
           ...schedulesData,
+          larkRecordId: record_id,
           status: "wait",
           createdAt: new Date(),
         };
@@ -294,28 +295,31 @@ app.prepare().then(() => {
     socket.on("schedules:update", async (arg, callback) => {
       const { code } = arg;
       const schedules = mongoPool.collection("schedules");
-      const timeSlots = db.collection("timeslots");
+      // const timeSlots = db.collection("timeslots");
       try {
         const res = await schedules.findOne({
           transactionCode: code,
-          status: "wait",
+          status: "booked",
         });
         if (!res) {
           throw new Error("Đơn hàng của bạn chưa được thanh toán");
         }
+        const record_id = res.larkRecordId
         await update_record(record_id);
-        const updatedData = res.timslots.map((timeSlot) => {
-          timeSlot.status = "booked";
-          return timeSlot;
-        });
-        await updateTimeSlot({
-          collection: timeSlots,
-          timeSlotsData: updatedData,
-        });
-        console.log("schedules:updated");
-        socket.broadcast.emit("schedules:updated", updatedData);
+        console.log("updated record success")
+        // const updatedData = res.timslots.map((timeSlot) => {
+        //   timeSlot.status = "booked";
+        //   return timeSlot;
+        // });
+        // await updateTimeSlot({
+        //   collection: timeSlots,
+        //   timeSlotsData: updatedData,
+        // });
+        // console.log("schedules:updated");
+        // socket.broadcast.emit("schedules:updated", updatedData);
+        return callback({ success: true, data: record_id })
       } catch (error) {
-        callback({
+        return callback({
           error,
         });
       }

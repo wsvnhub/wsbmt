@@ -36,8 +36,9 @@ export default function ResultPayments({
   const { details, date, facility, applyDiscount, phone, userName, email } =
     data;
 
-  const facDetail = details
+  const detailArr = details
     .split(";")
+  const facDetail = detailArr
     .map((key: string, index: number) => <p key={index}>- {key}</p>);
 
   const facAddress = Object.keys(facility).map((key) => (
@@ -106,7 +107,7 @@ export default function ResultPayments({
             content={totalPrice}
             showDiscount={applyDiscount}
           />
-          <Text title="Số giờ" content="02" />
+          <Text title="Số giờ" content={detailArr.length} />
           <Text
             title="Tổng"
             content={VND.format(totalPrice)}

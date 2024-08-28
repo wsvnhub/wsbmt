@@ -59,8 +59,7 @@ export default function WaitPayments({
       if (response.status === 202) {
         setIsLoading(false);
         return setAlertMessage(
-          `Đơn hàng của bạn chưa được thanh toán. 
-          Vui lòng chờ giây lát rồi kiểm tra lại`
+          `Đơn hàng của bạn chưa được thanh toán.`
         );
       }
       handleChangePage({ data: res.data });
