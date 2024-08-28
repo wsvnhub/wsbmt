@@ -37,7 +37,6 @@ async function create_record(new_record) {
       Authorization: authorizationToken,
       "Content-Type": "application/json",
     };
-    console.log("url_create_record", url_create_record);
     const nextResponse = await axios.post(url_create_record, new_record, {
       headers: nextApiHeaders,
     });
@@ -193,35 +192,14 @@ app.prepare().then(() => {
       const data = await mongoPool
         .collection("timeslots")
         .find(filter)
-        // .sort({ court: 1 })
         .toArray();
       return callback({ data });
     });
 
-    // socket.on("schedules:list", async (arg, callback) => {
-    //   const { facilitiyIds, range, dates } = arg;
 
-    //   const filter = { facilitiyId: { $in: facilitiyIds } };
-    //   const schedulesFilter = { status: { $in: ["booked", "wait"] } };
-    //   if (dates.length > 0) {
-    //     schedulesFilter.date = { $in: dates };
-    //   }
-    //   if (range.startDate !== "" && range.endDate !== "") {
-    //     schedulesFilter.createdAt = {
-    //       $gte: new Date(range.startDate),
-    //       $lte: new Date(range.endDate),
-    //     };
-    //   }
-    //   const schedules = await mongoPool
-    //     .collection("schedules")
-    //     .find(schedulesFilter)
-    //     .toArray();
-    //   const data = await mongoPool.collection("courts").find(filter).toArray();
-    //   return callback({ data, schedules });
-    // });
+
     socket.on("schedules:create", async (arg, callback) => {
       const { timeSlotsData, schedulesData } = arg;
-      console.log("schedulesData", schedulesData);
 
       const schedules = mongoPool.collection("schedules");
       const timeSlots = mongoPool.collection("timeslots");
@@ -233,7 +211,6 @@ app.prepare().then(() => {
         if (isExist) {
           throw new Error("Schedule is already exists");
         }
-        // const allTimeSlots = await timeSlots.find({}).toArray();
         const currentTimeMillis = Date.now();
 
         const uniqueIds = [
@@ -249,22 +226,18 @@ app.prepare().then(() => {
             phone: schedulesData.phone,
             email: schedulesData.email,
             san: schedulesData.details,
-            address: JSON.stringify(schedulesData.facility),
-            date: JSON.stringify(schedulesData.dates),
+            address: Object.values(schedulesData.facility).join(", "),
+            date: schedulesData.dates.join(", "),
             time: schedulesData.totalHours,
             quantity: schedulesData.timeSlots.length,
             total_money: schedulesData.totalPrice,
             voucher_code: schedulesData.applyDiscount ? "True" : "False",
-            trang_thai: "wait",
+            trang_thai: "Chờ thanh toán",
             dat_co_dinh: schedulesData.isFixed ? "True" : "False",
           },
         };
-        console.log("new record--------------", new_record);
-        create_record(new_record)
-          .then((res) => {
-            record_id = res.data.record.record_id;
-          })
-          .catch((err) => console.log(err));
+        const res = await create_record(new_record)
+        record_id = res.data.record.record_id;
         console.log("schedules:created");
         const updateQuery = timeSlotsData.map((timeSlot) => {
           const { facility, id, index } = timeSlot;
@@ -330,7 +303,7 @@ app.prepare().then(() => {
         if (!res) {
           throw new Error("Đơn hàng của bạn chưa được thanh toán");
         }
-        update_record(record_id);
+        await update_record(record_id);
         const updatedData = res.timslots.map((timeSlot) => {
           timeSlot.status = "booked";
           return timeSlot;
