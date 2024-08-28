@@ -18,6 +18,7 @@ import Loader from "@/components/Loader";
 import { useRouter } from "next/navigation";
 import { VND } from "@/utils";
 import clusters from "@/data/clusters.json";
+import _ from "lodash";
 
 const splitArr = ({ data }: any) => {
   return groupBy(data, "timeClusterId");
@@ -73,7 +74,6 @@ export default function Page() {
   const [pricePerHour, setPricePerHour] = React.useState(0);
 
   const [facilities, setFacilities] = React.useState<any>({});
-  const [selectedDate, setSelectedDate] = React.useState(new Date());
   const [selected, setSelected] = React.useState<any>({
     totalHours: 0,
     totalPrice: 0,
@@ -82,12 +82,12 @@ export default function Page() {
     phone: "",
     userName: "",
     email: "",
-    date: selectedDate.toLocaleDateString(),
+    dates: [],
     isFixed: false,
     applyDiscount: false,
     transactionCode: "",
   });
-  const [selectedTimeSlots, setSelectedTimeSlots] = React.useState<any[]>([]);
+  const [selectedTimeSlots, setSelectedTimeSlots] = React.useState<any>({});
 
   const [selectedFacInfo, setSelectedFacInfo] = React.useState<
     FacilitiesInfo[]
@@ -127,6 +127,7 @@ export default function Page() {
     setProcessing(true);
     const { name, phone, email } = values;
     if (!name || !phone || !email) {
+      setProcessing(false);
       return api.open({
         message: "Thiếu thông tin",
         description: "Vui lòng điền đầy đủ thông tin",
@@ -135,7 +136,7 @@ export default function Page() {
     }
     const { isApplyDiscount } = discountInfo;
     const totalPrice = selected.totalHours * pricePerHour;
-    const timeSlotData = selectedTimeSlots.map((timeSlots) => {
+    const timeSlotData = _.flatMap(Object.values(selectedTimeSlots)).map((timeSlots: any) => {
       return {
         ...timeSlots,
         status: "wait",
@@ -152,6 +153,7 @@ export default function Page() {
       applyDiscount: isApplyDiscount,
       totalPrice,
       isFixed,
+      dates: Object.keys(selectedTimeSlots),
       transactionCode: `WSB${new Date().getTime()}`,
       details: selected.details.join(";"),
     };
@@ -159,7 +161,7 @@ export default function Page() {
 
     try {
       const { data } = await createSchedules(submitedData, timeSlotData);
-      setSelectedTimeSlots([]);
+      setSelectedTimeSlots({});
       setSelected({});
       if (data?.insertedId) {
         router.push(`/admin/${data.insertedId}`);
@@ -216,26 +218,30 @@ export default function Page() {
       cell.facility = row.facility;
       cell.court = row.court;
 
-      setSelectedTimeSlots([
-        ...selectedTimeSlots,
+      setSelectedTimeSlots({
+        ...selectedTimeSlots, [currentDate.toLocaleDateString()]: [...selectedTimeSlots[currentDate.toLocaleDateString()] || [],
+
         {
           ...cell,
           index: {
             tableIndex,
             rowIndex,
             columnIndex,
-            createdAt: currentDate.toDateString(),
+            createdAt: row.createdAt,
+            cluster
           },
         },
-      ]);
+        ]
+      });
     } else {
       cloneSelected.details = cloneSelected.details.filter(
         (item: any) => item !== detail
       );
-      const filtered = selectedTimeSlots.filter(
-        (item) => item.id !== row.courtId && item.facility !== row.facility
+
+      const filtered = (selectedTimeSlots[currentDate.toLocaleDateString()]).filter(
+        (item: any) => item.id !== row.courtId && item.facility !== row.facility
       );
-      setSelectedTimeSlots(filtered);
+      setSelectedTimeSlots({ ...selectedTimeSlots, [currentDate.toLocaleDateString()]: filtered });
     }
 
     setFacilities((preState: any) => {
@@ -252,7 +258,6 @@ export default function Page() {
     });
   };
   const defaultValue = [dayjs()];
-  const dateFormat = "YYYY-MM-DD";
 
   React.useEffect(() => {
     getInfo().then((data) => {
@@ -274,9 +279,28 @@ export default function Page() {
       ).then((data) => {
         const groupByDate = groupBy(data, "createdAt");
         const mapped = Object.keys(groupByDate).reduce((memo: any, date) => {
+          const timeSlots = selectedTimeSlots[new Date(date).toLocaleDateString()] || []
+          console.log("timeSlots", timeSlots)
           memo[date] = splitArr({
             data: groupByDate[date],
           });
+          const grouped = memo[date]
+          let i = 0
+          while (i < timeSlots.length) {
+            const item = timeSlots[i];
+            const { index: { cluster, columnIndex } } = item
+            if (grouped[cluster]) {
+              grouped[cluster].forEach((row: any, index: number) => {
+                const status = row[columnIndex].status
+                const facility = row.facility
+                const court = row.court
+                if (status === "empty" && item.facility === facility && court === item.court) {
+                  memo[date][cluster][index][columnIndex] = item
+                }
+              })
+            }
+            i++
+          }
           return memo;
         }, {});
         setFacilities(mapped);

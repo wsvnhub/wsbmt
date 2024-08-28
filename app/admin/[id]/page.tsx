@@ -1,4 +1,5 @@
 "use client";
+import ResultPayments from "@/components/payments/Result";
 import WaitPayments from "@/components/payments/Wait";
 import useSocket from "@/socket/useSocket";
 import React from "react";
@@ -32,6 +33,15 @@ export default function Page(props: any) {
           Ways Station Badminton
         </a>
       </header>
+      {/* <ResultPayments data={data}
+        totalPrice={data.totalPrice}
+        paymentInfo={paymentInfo}
+        btnText={{ info: "" }}
+        currentPage={""}
+        facilitiesInfo={undefined}
+        handleChangePage={function (state: any): void {
+          throw new Error("Function not implemented.");
+        }} /> */}
       <WaitPayments
         data={data}
         totalPrice={data.totalPrice}
