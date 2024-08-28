@@ -11,9 +11,9 @@ services:
     ports:
       - '3000:3000'
     environment:
-      - NODE_ENV=production 
+      # - NODE_ENV=production 
       - MONGODB_URI=mongodb://root:example@mongo:27017/ways?authSource=admin
-    command: sh -c "npm install --production=false && npm run build && npm start"
+    command: sh -c "npm install --production=false && npm run dev"
     depends_on:
       - mongo
 

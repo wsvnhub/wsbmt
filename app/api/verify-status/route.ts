@@ -21,41 +21,6 @@ interface MBBankResponse {
   messages: any;
   transactions: Array<MBBankTransaction>;
 }
-const dummyData = {
-  status: 200,
-  error: null,
-  messages: { success: true },
-  transactions: [
-    {
-      id: "1291436",
-      bank_brand_name: "MBBank",
-      account_number: "688112688",
-      transaction_date: "2024-08-09 16:00:40",
-      amount_out: "0.00",
-      amount_in: "2000.00",
-      accumulated: "0.00",
-      transaction_content: "LY QUANG DIEU CHUYEN TIEN- Ma GD ACSP/ Ud269904",
-      reference_number: "FT24222008103706",
-      code: null,
-      sub_account: null,
-      bank_account_id: "2375",
-    },
-    {
-      id: "1291437",
-      bank_brand_name: "MBBank",
-      account_number: "688112688",
-      transaction_date: "2024-08-12 16:00:40",
-      amount_out: "0.00",
-      amount_in: "200000.00",
-      accumulated: "0.00",
-      transaction_content: "WSB123456789",
-      reference_number: "FT24222008103706",
-      code: null,
-      sub_account: null,
-      bank_account_id: "2375",
-    },
-  ],
-};
 
 export async function POST(request: Request) {
   try {

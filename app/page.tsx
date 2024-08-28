@@ -43,7 +43,7 @@ export interface FacilitiesInfo {
 const minWidth = 60;
 
 export default function Home() {
-  const { getInfo, getCourts, socket, createSchedules, sendUpdateSchedules } =
+  const { getInfo, getCourts, socket, createSchedules, sendUpdateSchedules, updateSchedules } =
     useSocket();
   const [page, setPage] = useState<PageState>({ state: "schedule" });
 
@@ -116,7 +116,7 @@ export default function Home() {
             const item = timeSlots[i];
             const { index: { cluster, rowIndex, columnIndex } } = item
             if (grouped[cluster]) {
-              grouped[cluster].forEach((row,index) => {
+              grouped[cluster].forEach((row, index) => {
                 const status = row[columnIndex].status
                 const facility = row.facility
                 const court = row.court
@@ -271,6 +271,10 @@ export default function Home() {
         return timeSlots;
       });
       try {
+        api.open({
+          type: "info",
+          message: "Đang tạo đơn!",
+        });
         const res = await createSchedules(newState, timeSlotData);
         if (!res.success) {
           return api.open({
@@ -292,12 +296,12 @@ export default function Home() {
     }
 
     if (isShowInfo) {
-      console.log("newState", newState);
+      await updateSchedules(selected.transactionCode)
       await sendUpdateSchedules(newState.data);
     }
     if (isShowResult) {
+
       setSelected({});
-      setSelectedDate(new Date());
     }
 
     return setPage({ state: nextPages[page.state] as PageState["state"] });

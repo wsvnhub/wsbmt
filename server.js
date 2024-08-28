@@ -37,10 +37,10 @@ async function create_record(new_record) {
       Authorization: authorizationToken,
       "Content-Type": "application/json",
     };
-    console.log("url_create_record", url_create_record)
     const nextResponse = await axios.post(url_create_record, new_record, {
       headers: nextApiHeaders,
     });
+    console.log("nextResponse.data---------", nextResponse.data);
     // Trả về dữ liệu phản hồi từ yêu cầu thứ hai
     return nextResponse.data;
   } catch (error) {
@@ -81,7 +81,7 @@ async function update_record(record_id) {
   }
 }
 
-var record_id = "";
+// var record_id = "";
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
 const port = 3000 || process.env.PORT;
@@ -110,10 +110,8 @@ const job = CronJob.from({
   cronTime: "0 0 1 1 *",
   // cronTime: "0 * * * * *",
   onTick: async function () {
-
-    await insertTimeslots({ db: mongoPool })
+    await insertTimeslots({ db: mongoPool });
     console.log("created 1 year time slots");
-
   },
   start: false,
   timeZone: "Asia/Ho_Chi_Minh",
@@ -194,32 +192,12 @@ app.prepare().then(() => {
       const data = await mongoPool
         .collection("timeslots")
         .find(filter)
-        // .sort({ court: 1 })
         .toArray();
       return callback({ data });
     });
 
-    // socket.on("schedules:list", async (arg, callback) => {
-    //   const { facilitiyIds, range, dates } = arg;
 
-    //   const filter = { facilitiyId: { $in: facilitiyIds } };
-    //   const schedulesFilter = { status: { $in: ["booked", "wait"] } };
-    //   if (dates.length > 0) {
-    //     schedulesFilter.date = { $in: dates };
-    //   }
-    //   if (range.startDate !== "" && range.endDate !== "") {
-    //     schedulesFilter.createdAt = {
-    //       $gte: new Date(range.startDate),
-    //       $lte: new Date(range.endDate),
-    //     };
-    //   }
-    //   const schedules = await mongoPool
-    //     .collection("schedules")
-    //     .find(schedulesFilter)
-    //     .toArray();
-    //   const data = await mongoPool.collection("courts").find(filter).toArray();
-    //   return callback({ data, schedules });
-    // });
+
     socket.on("schedules:create", async (arg, callback) => {
       const { timeSlotsData, schedulesData } = arg;
 
@@ -233,12 +211,6 @@ app.prepare().then(() => {
         if (isExist) {
           throw new Error("Schedule is already exists");
         }
-        // const allTimeSlots = await timeSlots.find({}).toArray();
-
-        const countIsFixed = schedulesData.timeSlots.filter(
-          (slot) => slot.isFixed
-        ).length;
-
         const currentTimeMillis = Date.now();
 
         const uniqueIds = [
@@ -254,22 +226,18 @@ app.prepare().then(() => {
             phone: schedulesData.phone,
             email: schedulesData.email,
             san: schedulesData.details,
-            address: JSON.stringify(schedulesData.facility),
-            date: JSON.stringify(schedulesData.dates),
+            address: Object.values(schedulesData.facility).join(", "),
+            date: schedulesData.dates.join(", "),
             time: schedulesData.totalHours,
             quantity: schedulesData.timeSlots.length,
             total_money: schedulesData.totalPrice,
             voucher_code: schedulesData.applyDiscount ? "True" : "False",
-            trang_thai: "wait",
-            dat_co_dinh: countIsFixed,
+            trang_thai: "Chờ thanh toán",
+            dat_co_dinh: schedulesData.isFixed ? "True" : "False",
           },
         };
-        console.log("new record--------------", new_record);
-        create_record(new_record)
-          .then((res) => {
-            record_id = res.data.record.record_id;
-          })
-          .catch((err) => console.log(err));
+        const res = await create_record(new_record)
+        const record_id = res.data.record.record_id;
         console.log("schedules:created");
         const updateQuery = timeSlotsData.map((timeSlot) => {
           const { facility, id, index } = timeSlot;
@@ -305,6 +273,7 @@ app.prepare().then(() => {
         const insertData = {
           id,
           ...schedulesData,
+          larkRecordId: record_id,
           status: "wait",
           createdAt: new Date(),
         };
@@ -326,28 +295,31 @@ app.prepare().then(() => {
     socket.on("schedules:update", async (arg, callback) => {
       const { code } = arg;
       const schedules = mongoPool.collection("schedules");
-      const timeSlots = db.collection("timeslots");
+      // const timeSlots = db.collection("timeslots");
       try {
         const res = await schedules.findOne({
           transactionCode: code,
-          status: "wait",
+          status: "booked",
         });
         if (!res) {
           throw new Error("Đơn hàng của bạn chưa được thanh toán");
         }
-        update_record(record_id);
-        const updatedData = res.timslots.map((timeSlot) => {
-          timeSlot.status = "booked";
-          return timeSlot;
-        });
-        await updateTimeSlot({
-          collection: timeSlots,
-          timeSlotsData: updatedData,
-        });
-        console.log("schedules:updated");
-        socket.broadcast.emit("schedules:updated", updatedData);
+        const record_id = res.larkRecordId
+        await update_record(record_id);
+        console.log("updated record success")
+        // const updatedData = res.timslots.map((timeSlot) => {
+        //   timeSlot.status = "booked";
+        //   return timeSlot;
+        // });
+        // await updateTimeSlot({
+        //   collection: timeSlots,
+        //   timeSlotsData: updatedData,
+        // });
+        // console.log("schedules:updated");
+        // socket.broadcast.emit("schedules:updated", updatedData);
+        return callback({ success: true, data: record_id })
       } catch (error) {
-        callback({
+        return callback({
           error,
         });
       }

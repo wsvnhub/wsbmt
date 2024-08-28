@@ -67,7 +67,7 @@ export default function useSocket() {
   );
   const deleteSchedules = React.useCallback((data: any) => { }, []);
   const updateSchedules = React.useCallback(async (transactionCode: string) => {
-    const res = await socket.emitWithAck("schedules:create", {
+    const res = await socket.emitWithAck("schedules:update", {
       code: transactionCode,
     });
     return res;
