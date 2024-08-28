@@ -9,7 +9,8 @@
     "next:dev": "next dev",
     "build": "next build",
     "next:start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "migrate": "node ./utils/migration.js"
   },
   "dependencies": {
     "antd": "^5.19.3",

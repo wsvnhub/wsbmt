@@ -124,10 +124,7 @@ export default function Home() {
                   grouped[cluster][index][columnIndex] = item
                 }
               })
-
-
             }
-
             i++
           }
           setFacilities(grouped);
