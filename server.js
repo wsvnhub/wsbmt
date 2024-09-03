@@ -231,7 +231,7 @@ app.prepare().then(() => {
             time: schedulesData.totalHours,
             quantity: schedulesData.timeSlots.length,
             total_money: schedulesData.totalPrice,
-            voucher_code: schedulesData.applyDiscount ? "True" : "False",
+            voucher_code: schedulesData.applyDiscount,
             trang_thai: "Chờ thanh toán",
             dat_co_dinh: schedulesData.isFixed ? "True" : "False",
           },

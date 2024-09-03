@@ -72,7 +72,7 @@ export default function ConfirmPayments({
       userName: name,
       phone,
       email,
-      applyDiscount: isApplyDiscount,
+      applyDiscount: discountCode,
       totalPrice,
     };
     handleChangePage(cloneDate);
