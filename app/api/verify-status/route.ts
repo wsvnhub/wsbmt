@@ -1,5 +1,6 @@
 import clientPromise from "@/lib/mongo";
 import { formatDate } from "@/utils";
+import { logger } from "@/utils/logger";
 
 interface MBBankTransaction {
   id: string;
@@ -92,6 +93,7 @@ export async function POST(request: Request) {
     });
     await Promise.allSettled(updateQuery);
     await client.close();
+    logger.info(`Verification successful: code=${code}, amount=${amount}`);
     return Response.json(
       {
         data: updatedData,
@@ -99,7 +101,7 @@ export async function POST(request: Request) {
       { status: 200, statusText: "success" }
     );
   } catch (error: any) {
-    console.log(error);
+    logger.error(`Verification error: ${error.message}`);
     return Response.json(
       {
         error,

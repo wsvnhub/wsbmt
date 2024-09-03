@@ -65,7 +65,7 @@ const initDB = async () => {
                 userName: "",
                 email: "",
                 isFixed: false,
-                applyDiscount: false,
+                applyDiscount: "",
                 status: "",
                 transactionCode: "",
                 createdAt: new Date(),

@@ -6,6 +6,7 @@ import next from "next";
 import { Server } from "socket.io";
 import { insertTimeslots } from "./utils/insertTimeSlots.js";
 import axios from "axios";
+import { logger } from "./utils/logger.js";
 
 config();
 const url =
@@ -99,7 +100,7 @@ const initDB = async () => {
     const mongoPool = mongoClient.db(process.env.DB);
     return { mongoPool, mongoClient };
   } catch (error) {
-    console.log("MongoClient Error", error);
+    logger.error(`MongoClient Error: ${error}`);
     return null;
   }
 };
@@ -125,6 +126,7 @@ app.prepare().then(() => {
   const io = new Server(httpServer);
 
   const updateTimeSlot = ({ timeSlotsData, collection }) => {
+    logger.info(`Updating time slots: ${JSON.stringify(timeSlotsData)}`);
     const updateQuery = timeSlotsData.map((timeSlot) => {
       const { facility, id, index } = timeSlot;
       return collection.updateOne(
@@ -199,6 +201,7 @@ app.prepare().then(() => {
 
 
     socket.on("schedules:create", async (arg, callback) => {
+      logger.info(`Creating schedule: ${JSON.stringify(arg)}`);
       const { timeSlotsData, schedulesData } = arg;
 
       const schedules = mongoPool.collection("schedules");
@@ -258,9 +261,9 @@ app.prepare().then(() => {
           });
 
           return schedules.deleteOne({ id, status: "wait" }).then((res) => {
-            console.log("deleted", res);
+            logger.info(`Deleted: ${JSON.stringify(res)}`);
             if (res.deletedCount > 0) {
-              console.log("updated", res);
+              logger.info(`Updated: ${JSON.stringify(res)}`);
               socket.broadcast.emit("schedules:updated", updatedData);
               return updateTimeSlot({
                 timeSlotsData: updatedData,
@@ -284,6 +287,7 @@ app.prepare().then(() => {
           return callback({ success: true, data: res });
         });
       } catch (error) {
+        logger.error(`Error creating schedule: ${error}`);
         return callback({ success: false, data: error });
       }
     });
@@ -307,35 +311,49 @@ app.prepare().then(() => {
         const record_id = res.larkRecordId
         await update_record(record_id);
         console.log("updated record success")
-        // const updatedData = res.timslots.map((timeSlot) => {
-        //   timeSlot.status = "booked";
-        //   return timeSlot;
-        // });
-        // await updateTimeSlot({
-        //   collection: timeSlots,
-        //   timeSlotsData: updatedData,
-        // });
-        // console.log("schedules:updated");
-        // socket.broadcast.emit("schedules:updated", updatedData);
         return callback({ success: true, data: record_id })
       } catch (error) {
+        logger.error(`Error updating schedule: ${error}`);
         return callback({
           error,
         });
       }
     });
 
-    socket.on("schedules:delete", () => {
+    socket.on("schedules:delete", (arg) => {
+
+      const { timeSlotsData, id } = arg;
+
+      const schedules = mongoPool.collection("schedules");
+      const timeSlots = mongoPool.collection("timeslots");
+
+      const updatedData = timeSlotsData.map((timeSlot) => {
+        timeSlot.status = "empty";
+        return timeSlot;
+      });
+
       console.log("schedules:deleted");
-      socket.broadcast.emit("schedules:deleted", {});
+
+      return schedules.deleteOne({ id, status: "wait" }).then((res) => {
+        logger.info(`Deleted: ${JSON.stringify(res)}`);
+        if (res.deletedCount > 0) {
+          logger.info(`Updated: ${JSON.stringify(res)}`);
+          socket.broadcast.emit("schedules:updated", updatedData);
+          return updateTimeSlot({
+            timeSlotsData: updatedData,
+            collection: timeSlots,
+          });
+        }
+      });
+
     });
 
-    console.log("connected");
+    console.log("connected", socket.id);
   });
 
   httpServer
     .once("error", (err) => {
-      console.error(err);
+      logger.error(`Server error: ${err}`);
       process.exit(1);
     })
     .listen(port, () => {
