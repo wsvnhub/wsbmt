@@ -37,12 +37,15 @@ export default function WaitPayments({
   const [isLoading, setIsLoading] = React.useState(false);
   const [alertMessage, setAlertMessage] = React.useState<string>();
 
+
   const onFinish: CountdownProps["onFinish"] = () => {
     setAlertMessage("Hết thời gian chờ, đơn hàng của bạn đã bị huỷ");
   };
 
   const { transactionCode } = data;
   const { bankName, bankCode, bankUserName, qrCode } = paymentInfo;
+
+  const QRCODE = qrCode !== "" ? qrCode.replace('{AMOUNT}', totalPrice.toString()).replace('{CODE}', transactionCode) : `https://qr.sepay.vn/img?acc=688112688&bank=MBBank&amount=${totalPrice}&des=${transactionCode}`;
 
   const verifyStatus = async () => {
     setIsLoading(true);
@@ -129,7 +132,7 @@ export default function WaitPayments({
           <Image
             width={150}
             height={150}
-            src={qrCode !== "" ? qrCode : "./qr.png"}
+            src={QRCODE}
             alt="QR code"
           />
         </div>
