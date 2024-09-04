@@ -1,19 +1,26 @@
 import clientPromise from "@/lib/mongo";
+
 export async function GET(request: Request) {
+  let client;
   try {
-    const client = await clientPromise;
+    client = await clientPromise;
     const db = client.db();
     const facilities = await db.collection("facilities").find({}).toArray();
     return Response.json({ data: facilities }, { status: 200 });
   } catch (error) {
     console.error("Error fetching facilities:", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
+  } finally {
+    if (client) {
+      await client.close();
+    }
   }
 }
 
 export async function POST(request: Request) {
+  let client;
   try {
-    const client = await clientPromise;
+    client = await clientPromise;
     const db = client.db();
     const facilityData = await request.json();
 
@@ -30,12 +37,17 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error creating facility:", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
+  } finally {
+    if (client) {
+      await client.close();
+    }
   }
 }
 
 export async function PUT(request: Request) {
+  let client;
   try {
-    const client = await clientPromise;
+    client = await clientPromise;
     const db = client.db();
     const { id, ...updateData } = await request.json();
 
@@ -56,12 +68,17 @@ export async function PUT(request: Request) {
   } catch (error) {
     console.error("Error updating facility:", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
+  } finally {
+    if (client) {
+      await client.close();
+    }
   }
 }
 
 export async function DELETE(request: Request) {
+  let client;
   try {
-    const client = await clientPromise;
+    client = await clientPromise;
     const db = client.db();
     const { id } = await request.json();
 
@@ -79,5 +96,9 @@ export async function DELETE(request: Request) {
   } catch (error) {
     console.error("Error deleting facility:", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
+  } finally {
+    if (client) {
+      await client.close();
+    }
   }
 }

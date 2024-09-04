@@ -90,6 +90,7 @@ const port = 3000 || process.env.PORT;
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
+
 const initDB = async () => {
   const mongoClient = new MongoClient(process.env.MONGODB_URI);
 
@@ -101,11 +102,14 @@ const initDB = async () => {
     return { mongoPool, mongoClient };
   } catch (error) {
     logger.error(`MongoClient Error: ${error}`);
+    if (mongoClient) {
+      await mongoClient.close();
+    }
     return null;
   }
 };
 
-const { mongoPool } = await initDB();
+const { mongoPool, mongoClient } = await initDB();
 
 const job = CronJob.from({
   cronTime: "0 0 1 1 *",
@@ -142,6 +146,13 @@ app.prepare().then(() => {
   };
 
   io.on("connection", (socket) => {
+    const ip = socket.handshake.headers['x-forwarded-for'] ||
+      socket.handshake.address ||
+      socket.request.connection.remoteAddress ||
+      null;
+
+    logger.info(`User IP ${ip}`);
+
     socket.on("app:info", async (arg, callback) => {
       const facilities = mongoPool.collection("facilities").find().toArray();
       const paymentInfo = mongoPool.collection("paymentInfo").find().toArray();
@@ -197,7 +208,6 @@ app.prepare().then(() => {
         .toArray();
       return callback({ data });
     });
-
 
 
     socket.on("schedules:create", async (arg, callback) => {
@@ -349,14 +359,47 @@ app.prepare().then(() => {
     });
 
     console.log("connected", socket.id);
+    socket.on("disconnect", async () => {
+      console.log("User disconnected:", socket.id);
+      
+      // Close MongoDB connection for this socket if needed
+      if (mongoClient) {
+        try {
+          await mongoClient.close();
+          console.log("MongoDB connection closed for socket:", socket.id);
+        } catch (error) {
+          console.error("Error closing MongoDB connection:", error);
+        }
+      }
+      // Clear any socket-specific data or listeners
+      socket.removeAllListeners();
+
+      console.log("Cleanup completed for socket:", socket.id);
+    });
   });
 
   httpServer
     .once("error", (err) => {
       logger.error(`Server error: ${err}`);
-      process.exit(1);
+      if (mongoClient) {
+        mongoClient.close().then(() => {
+          logger.info("MongoDB connection closed due to server error");
+          process.exit(1);
+        });
+      } else {
+        process.exit(1);
+      }
     })
     .listen(port, () => {
       console.log(`> Ready on http://${hostname}:${port}`);
     });
+
+  process.on('SIGINT', async () => {
+    logger.info('Received SIGINT. Closing MongoDB connection and exiting...');
+    if (mongoClient) {
+      await mongoClient.close();
+      logger.info('MongoDB connection closed');
+    }
+    process.exit(0);
+  });
 });

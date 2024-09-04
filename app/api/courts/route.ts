@@ -1,20 +1,26 @@
 import clientPromise from "@/lib/mongo";
 
 export async function GET(request: Request) {
+  let client;
   try {
-    const client = await clientPromise;
+    client = await clientPromise;
     const db = client.db();
     const courts = await db.collection("courts").find({}).toArray();
     return Response.json({ data: courts }, { status: 200 });
   } catch (error) {
     console.error("Error fetching courts:", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
+  } finally {
+    if (client) {
+      await client.close();
+    }
   }
 }
 
 export async function POST(request: Request) {
+  let client;
   try {
-    const client = await clientPromise;
+    client = await clientPromise;
     const db = client.db();
     const courtData = await request.json();
 
@@ -31,12 +37,17 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error creating court:", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
+  } finally {
+    if (client) {
+      await client.close();
+    }
   }
 }
 
 export async function PUT(request: Request) {
+  let client;
   try {
-    const client = await clientPromise;
+    client = await clientPromise;
     const db = client.db();
     const { id, ...updateData } = await request.json();
 
@@ -57,6 +68,10 @@ export async function PUT(request: Request) {
   } catch (error) {
     console.error("Error updating court:", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
+  } finally {
+    if (client) {
+      await client.close();
+    }
   }
 }
 

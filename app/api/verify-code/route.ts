@@ -17,6 +17,7 @@ export async function POST(request: Request) {
     const db = client.db(process.env.DB);
     const data = await db.collection("promotions").findOne({ code });
     logger.info(`POST /api/verify-code ${JSON.stringify(body)}`);
+    await client.close()
     return Response.json(
       {
         data,
