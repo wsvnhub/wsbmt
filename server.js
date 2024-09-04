@@ -90,15 +90,25 @@ const port = 3000 || process.env.PORT;
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
+let mongoClient;
+let mongoPool;
 
 const initDB = async () => {
-  const mongoClient = new MongoClient(process.env.MONGODB_URI);
+  if (mongoClient && mongoClient.isConnected()) {
+    return { mongoPool, mongoClient };
+  }
 
   try {
     console.log("MongoClient connecting...");
+    mongoClient = new MongoClient(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      connectTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+    });
     await mongoClient.connect();
     console.log("Connected to Mongo");
-    const mongoPool = mongoClient.db(process.env.DB);
+    mongoPool = mongoClient.db(process.env.DB);
     return { mongoPool, mongoClient };
   } catch (error) {
     logger.error(`MongoClient Error: ${error}`);
@@ -109,23 +119,24 @@ const initDB = async () => {
   }
 };
 
-const { mongoPool, mongoClient } = await initDB();
-
-const job = CronJob.from({
-  cronTime: "0 0 1 1 *",
-  // cronTime: "0 * * * * *",
-  onTick: async function () {
-    await insertTimeslots({ db: mongoPool });
-    console.log("created 1 year time slots");
-  },
-  start: false,
-  timeZone: "Asia/Ho_Chi_Minh",
-});
-
-app.prepare().then(() => {
+app.prepare().then(async () => {
   const httpServer = createServer(handler);
-  job.start();
+
   console.log("http server started");
+  const { mongoPool } = await initDB();
+
+  const job = CronJob.from({
+    cronTime: "0 0 1 1 *",
+    // cronTime: "0 * * * * *",
+    onTick: async function () {
+     
+      await insertTimeslots({ db: mongoPool });
+      console.log("created 1 year time slots");
+    },
+    start: false,
+    timeZone: "Asia/Ho_Chi_Minh",
+  });
+  job.start();
 
   const io = new Server(httpServer);
 
@@ -145,12 +156,14 @@ app.prepare().then(() => {
     return Promise.allSettled(updateQuery);
   };
 
-  io.on("connection", (socket) => {
+  io.on("connection", async (socket) => {
+
     const ip = socket.handshake.headers['x-forwarded-for'] ||
       socket.handshake.address ||
       socket.request.connection.remoteAddress ||
       null;
 
+    console.log("connected", socket.id);
     logger.info(`User IP ${ip}`);
 
     socket.on("app:info", async (arg, callback) => {
@@ -358,19 +371,8 @@ app.prepare().then(() => {
 
     });
 
-    console.log("connected", socket.id);
     socket.on("disconnect", async () => {
       console.log("User disconnected:", socket.id);
-      
-      // Close MongoDB connection for this socket if needed
-      if (mongoClient) {
-        try {
-          await mongoClient.close();
-          console.log("MongoDB connection closed for socket:", socket.id);
-        } catch (error) {
-          console.error("Error closing MongoDB connection:", error);
-        }
-      }
       // Clear any socket-specific data or listeners
       socket.removeAllListeners();
 
@@ -381,25 +383,19 @@ app.prepare().then(() => {
   httpServer
     .once("error", (err) => {
       logger.error(`Server error: ${err}`);
-      if (mongoClient) {
-        mongoClient.close().then(() => {
-          logger.info("MongoDB connection closed due to server error");
-          process.exit(1);
-        });
-      } else {
-        process.exit(1);
-      }
+      process.exit(1);
     })
     .listen(port, () => {
       console.log(`> Ready on http://${hostname}:${port}`);
     });
+});
 
-  process.on('SIGINT', async () => {
-    logger.info('Received SIGINT. Closing MongoDB connection and exiting...');
-    if (mongoClient) {
-      await mongoClient.close();
-      logger.info('MongoDB connection closed');
-    }
-    process.exit(0);
-  });
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  console.log('Shutting down gracefully...');
+  if (mongoClient) {
+    await mongoClient.close();
+    console.log('MongoDB connection closed.');
+  }
+  process.exit(0);
 });
