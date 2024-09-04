@@ -33,15 +33,6 @@ export default function Page(props: any) {
           Ways Station Badminton
         </a>
       </header>
-      {/* <ResultPayments data={data}
-        totalPrice={data.totalPrice}
-        paymentInfo={paymentInfo}
-        btnText={{ info: "" }}
-        currentPage={""}
-        facilitiesInfo={undefined}
-        handleChangePage={function (state: any): void {
-          throw new Error("Function not implemented.");
-        }} /> */}
       <WaitPayments
         data={data}
         totalPrice={data.totalPrice}

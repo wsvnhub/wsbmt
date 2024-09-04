@@ -84,7 +84,7 @@ export default function Page() {
     email: "",
     dates: [],
     isFixed: false,
-    applyDiscount: false,
+    applyDiscount: "",
     transactionCode: "",
   });
   const [selectedTimeSlots, setSelectedTimeSlots] = React.useState<any>({});
@@ -150,7 +150,7 @@ export default function Page() {
       phone,
       email,
       timeSlots: timeSlotData,
-      applyDiscount: isApplyDiscount,
+      applyDiscount: discountCode,
       totalPrice,
       isFixed,
       dates: Object.keys(selectedTimeSlots),
