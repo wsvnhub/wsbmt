@@ -81,7 +81,6 @@ export default function ConfirmPayments({
   const onVerifyCode = async () => {
     setIsLoading(true);
     try {
-      console.log("discountCode", discountCode)
       const response = await fetch("api/verify-code", {
         method: "POST",
         body: JSON.stringify({ code: discountCode }),
