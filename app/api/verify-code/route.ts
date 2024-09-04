@@ -9,15 +9,15 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  let client;
   try {
     const body = await request.json();
 
     const { code } = body;
-    const client = await clientPromise;
+    client = await clientPromise;
     const db = client.db(process.env.DB);
     const data = await db.collection("promotions").findOne({ code });
     logger.info(`POST /api/verify-code ${JSON.stringify(body)}`);
-    await client.close()
     return Response.json(
       {
         data,
@@ -30,5 +30,9 @@ export async function POST(request: Request) {
     return Response.json({
       error,
     });
+  } finally {
+    if (client) {
+      await client.close();
+    }
   }
 }
