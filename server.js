@@ -393,9 +393,5 @@ app.prepare().then(async () => {
 // Graceful shutdown
 process.on('SIGINT', async () => {
   console.log('Shutting down gracefully...');
-  if (mongoClient) {
-    await mongoClient.close();
-    console.log('MongoDB connection closed.');
-  }
   process.exit(0);
 });

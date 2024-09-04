@@ -10,10 +10,6 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("Error fetching courts:", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
-  } finally {
-    if (client) {
-      await client.close();
-    }
   }
 }
 
@@ -37,10 +33,6 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error creating court:", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
-  } finally {
-    if (client) {
-      await client.close();
-    }
   }
 }
 
@@ -68,10 +60,6 @@ export async function PUT(request: Request) {
   } catch (error) {
     console.error("Error updating court:", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
-  } finally {
-    if (client) {
-      await client.close();
-    }
   }
 }
 

@@ -111,9 +111,5 @@ export async function POST(request: Request) {
         statusText: "error",
       }
     );
-  } finally {
-    if (client) {
-      await client.close();
-    }
   }
 }

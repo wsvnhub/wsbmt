@@ -10,11 +10,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("Error fetching facilities:", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
-  } finally {
-    if (client) {
-      await client.close();
-    }
-  }
+  } 
 }
 
 export async function POST(request: Request) {
@@ -37,11 +33,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error creating facility:", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
-  } finally {
-    if (client) {
-      await client.close();
-    }
-  }
+  } 
 }
 
 export async function PUT(request: Request) {
@@ -68,10 +60,6 @@ export async function PUT(request: Request) {
   } catch (error) {
     console.error("Error updating facility:", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
-  } finally {
-    if (client) {
-      await client.close();
-    }
   }
 }
 
@@ -96,9 +84,5 @@ export async function DELETE(request: Request) {
   } catch (error) {
     console.error("Error deleting facility:", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
-  } finally {
-    if (client) {
-      await client.close();
-    }
   }
 }
