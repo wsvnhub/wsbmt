@@ -129,7 +129,7 @@ app.prepare().then(async () => {
     cronTime: "0 0 1 1 *",
     // cronTime: "0 * * * * *",
     onTick: async function () {
-     
+
       await insertTimeslots({ db: mongoPool });
       console.log("created 1 year time slots");
     },
@@ -230,10 +230,23 @@ app.prepare().then(async () => {
       const schedules = mongoPool.collection("schedules");
       const timeSlots = mongoPool.collection("timeslots");
       const id = new ObjectId().toString();
+  
       try {
         const isExist = await schedules.findOne({
           details: new RegExp(schedulesData.details, "i"),
+          timeSlots: {
+            $elemMatch: {
+              $or: schedulesData.timeSlots.map(item => ({
+                facility: item.facility,
+                court: item.court,
+                from: item.from,
+                to: item.to,
+                id: item.id
+              }))
+            }
+          }
         });
+       
         if (isExist) {
           throw new Error("Schedule is already exists");
         }
