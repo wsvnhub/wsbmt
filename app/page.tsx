@@ -348,6 +348,7 @@ export default function Home() {
                 }}
                 className="bg-white text-primary font-semibold pl-6 pr-2 py-2 rounded-md"
                 type="date"
+                min={new Date().toLocaleDateString('en-ca')}
                 placeholder="dd-mm-yyyy"
                 onKeyDown={(e) => e.preventDefault()}
                 value={selectedDate.toISOString().substring(0, 10)}
