@@ -230,7 +230,7 @@ app.prepare().then(async () => {
       const schedules = mongoPool.collection("schedules");
       const timeSlots = mongoPool.collection("timeslots");
       const id = new ObjectId().toString();
-  
+
       try {
         const isExist = await schedules.findOne({
           details: new RegExp(schedulesData.details, "i"),
@@ -246,7 +246,7 @@ app.prepare().then(async () => {
             }
           }
         });
-       
+
         if (isExist) {
           throw new Error("Schedule is already exists");
         }
@@ -320,7 +320,7 @@ app.prepare().then(async () => {
         return schedules.insertOne(insertData).then((res) => {
           socket.broadcast.emit("schedules:updated", timeSlotsData);
 
-          return callback({ success: true, data: res });
+          return callback({ success: true, data: res, schedulesId: id });
         });
       } catch (error) {
         logger.error(`Error creating schedule: ${error}`);

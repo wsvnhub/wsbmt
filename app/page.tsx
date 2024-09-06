@@ -286,6 +286,7 @@ export default function Home() {
           type: "success",
           message: "Tạo đơn thành công!",
         });
+        newState.schedulesId = res.schedulesId
         setSelected(newState);
       } catch (error) {
         console.log(error);
