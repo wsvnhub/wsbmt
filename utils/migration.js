@@ -65,7 +65,7 @@ const initDB = async () => {
                 userName: "",
                 email: "",
                 isFixed: false,
-                applyDiscount: false,
+                applyDiscount: "",
                 status: "",
                 transactionCode: "",
                 createdAt: new Date(),
@@ -76,7 +76,7 @@ const initDB = async () => {
             bankName: "MB (Quân đội)",
             bankCode: "688112688",
             bankUserName: "NGUYEN THI AI NHAN",
-            qrCode: "https://w.ladicdn.com/5dc39976770cd34186edd2d3/qr-wsb-20240820045649-u73w2.png",
+            qrCode: "https://qr.sepay.vn/img?acc=688112688&bank=MBBank&amount={AMOUNT}&des={CODE}",
         });
         await db.collection("promotions").insertMany([
             {

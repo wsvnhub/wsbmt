@@ -4,8 +4,9 @@ import { ObjectId } from "mongodb";
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
+  let client;
   try {
-    const client = await clientPromise;
+    client = await clientPromise;
 
     const db = client.db(process.env.DB);
     if (!id) {

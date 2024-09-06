@@ -6,6 +6,7 @@ import next from "next";
 import { Server } from "socket.io";
 import { insertTimeslots } from "./utils/insertTimeSlots.js";
 import axios from "axios";
+import { logger } from "./utils/logger.js";
 
 config();
 const url =
@@ -89,42 +90,58 @@ const port = 3000 || process.env.PORT;
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
+let mongoClient;
+let mongoPool;
+
 const initDB = async () => {
-  const mongoClient = new MongoClient(process.env.MONGODB_URI);
+  if (mongoClient && mongoClient.isConnected()) {
+    return { mongoPool, mongoClient };
+  }
 
   try {
     console.log("MongoClient connecting...");
+    mongoClient = new MongoClient(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      connectTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+    });
     await mongoClient.connect();
     console.log("Connected to Mongo");
-    const mongoPool = mongoClient.db(process.env.DB);
+    mongoPool = mongoClient.db(process.env.DB);
     return { mongoPool, mongoClient };
   } catch (error) {
-    console.log("MongoClient Error", error);
+    logger.error(`MongoClient Error: ${error}`);
+    if (mongoClient) {
+      await mongoClient.close();
+    }
     return null;
   }
 };
 
-const { mongoPool } = await initDB();
-
-const job = CronJob.from({
-  cronTime: "0 0 1 1 *",
-  // cronTime: "0 * * * * *",
-  onTick: async function () {
-    await insertTimeslots({ db: mongoPool });
-    console.log("created 1 year time slots");
-  },
-  start: false,
-  timeZone: "Asia/Ho_Chi_Minh",
-});
-
-app.prepare().then(() => {
+app.prepare().then(async () => {
   const httpServer = createServer(handler);
-  job.start();
+
   console.log("http server started");
+  const { mongoPool } = await initDB();
+
+  const job = CronJob.from({
+    cronTime: "0 0 1 1 *",
+    // cronTime: "0 * * * * *",
+    onTick: async function () {
+
+      await insertTimeslots({ db: mongoPool });
+      console.log("created 1 year time slots");
+    },
+    start: false,
+    timeZone: "Asia/Ho_Chi_Minh",
+  });
+  job.start();
 
   const io = new Server(httpServer);
 
   const updateTimeSlot = ({ timeSlotsData, collection }) => {
+    logger.info(`Updating time slots: ${JSON.stringify(timeSlotsData)}`);
     const updateQuery = timeSlotsData.map((timeSlot) => {
       const { facility, id, index } = timeSlot;
       return collection.updateOne(
@@ -139,7 +156,16 @@ app.prepare().then(() => {
     return Promise.allSettled(updateQuery);
   };
 
-  io.on("connection", (socket) => {
+  io.on("connection", async (socket) => {
+
+    const ip = socket.handshake.headers['x-forwarded-for'] ||
+      socket.handshake.address ||
+      socket.request.connection.remoteAddress ||
+      null;
+
+    console.log("connected", socket.id);
+    logger.info(`User IP ${ip}`);
+
     socket.on("app:info", async (arg, callback) => {
       const facilities = mongoPool.collection("facilities").find().toArray();
       const paymentInfo = mongoPool.collection("paymentInfo").find().toArray();
@@ -197,17 +223,30 @@ app.prepare().then(() => {
     });
 
 
-
     socket.on("schedules:create", async (arg, callback) => {
+      logger.info(`Creating schedule: ${JSON.stringify(arg)}`);
       const { timeSlotsData, schedulesData } = arg;
 
       const schedules = mongoPool.collection("schedules");
       const timeSlots = mongoPool.collection("timeslots");
       const id = new ObjectId().toString();
+
       try {
         const isExist = await schedules.findOne({
           details: new RegExp(schedulesData.details, "i"),
+          timeSlots: {
+            $elemMatch: {
+              $or: schedulesData.timeSlots.map(item => ({
+                facility: item.facility,
+                court: item.court,
+                from: item.from,
+                to: item.to,
+                id: item.id
+              }))
+            }
+          }
         });
+
         if (isExist) {
           throw new Error("Schedule is already exists");
         }
@@ -231,7 +270,7 @@ app.prepare().then(() => {
             time: schedulesData.totalHours,
             quantity: schedulesData.timeSlots.length,
             total_money: schedulesData.totalPrice,
-            voucher_code: schedulesData.applyDiscount ? "True" : "False",
+            voucher_code: schedulesData.applyDiscount,
             trang_thai: "Chờ thanh toán",
             dat_co_dinh: schedulesData.isFixed ? "True" : "False",
           },
@@ -258,9 +297,9 @@ app.prepare().then(() => {
           });
 
           return schedules.deleteOne({ id, status: "wait" }).then((res) => {
-            console.log("deleted", res);
+            logger.info(`Deleted: ${JSON.stringify(res)}`);
             if (res.deletedCount > 0) {
-              console.log("updated", res);
+              logger.info(`Updated: ${JSON.stringify(res)}`);
               socket.broadcast.emit("schedules:updated", updatedData);
               return updateTimeSlot({
                 timeSlotsData: updatedData,
@@ -281,9 +320,10 @@ app.prepare().then(() => {
         return schedules.insertOne(insertData).then((res) => {
           socket.broadcast.emit("schedules:updated", timeSlotsData);
 
-          return callback({ success: true, data: res });
+          return callback({ success: true, data: res, schedulesId: id });
         });
       } catch (error) {
+        logger.error(`Error creating schedule: ${error}`);
         return callback({ success: false, data: error });
       }
     });
@@ -307,38 +347,64 @@ app.prepare().then(() => {
         const record_id = res.larkRecordId
         await update_record(record_id);
         console.log("updated record success")
-        // const updatedData = res.timslots.map((timeSlot) => {
-        //   timeSlot.status = "booked";
-        //   return timeSlot;
-        // });
-        // await updateTimeSlot({
-        //   collection: timeSlots,
-        //   timeSlotsData: updatedData,
-        // });
-        // console.log("schedules:updated");
-        // socket.broadcast.emit("schedules:updated", updatedData);
         return callback({ success: true, data: record_id })
       } catch (error) {
+        logger.error(`Error updating schedule: ${error}`);
         return callback({
           error,
         });
       }
     });
 
-    socket.on("schedules:delete", () => {
+    socket.on("schedules:delete", (arg) => {
+
+      const { timeSlotsData, id } = arg;
+
+      const schedules = mongoPool.collection("schedules");
+      const timeSlots = mongoPool.collection("timeslots");
+
+      const updatedData = timeSlotsData.map((timeSlot) => {
+        timeSlot.status = "empty";
+        return timeSlot;
+      });
+
       console.log("schedules:deleted");
-      socket.broadcast.emit("schedules:deleted", {});
+
+      return schedules.deleteOne({ id, status: "wait" }).then((res) => {
+        logger.info(`Deleted: ${JSON.stringify(res)}`);
+        if (res.deletedCount > 0) {
+          logger.info(`Updated: ${JSON.stringify(res)}`);
+          socket.broadcast.emit("schedules:updated", updatedData);
+          return updateTimeSlot({
+            timeSlotsData: updatedData,
+            collection: timeSlots,
+          });
+        }
+      });
+
     });
 
-    console.log("connected");
+    socket.on("disconnect", async () => {
+      console.log("User disconnected:", socket.id);
+      // Clear any socket-specific data or listeners
+      socket.removeAllListeners();
+
+      console.log("Cleanup completed for socket:", socket.id);
+    });
   });
 
   httpServer
     .once("error", (err) => {
-      console.error(err);
+      logger.error(`Server error: ${err}`);
       process.exit(1);
     })
     .listen(port, () => {
       console.log(`> Ready on http://${hostname}:${port}`);
     });
+});
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  console.log('Shutting down gracefully...');
+  process.exit(0);
 });
