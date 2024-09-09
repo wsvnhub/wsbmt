@@ -27,25 +27,24 @@ interface ResultPaymentsProps {
 export default function ResultPayments({
   data,
   totalPrice,
-  paymentInfo,
   btnText,
   currentPage,
   facilitiesInfo,
-  handleChangePage,
 }: ResultPaymentsProps) {
   const { details, dates, facility, applyDiscount, phone, userName, email } =
     data;
 
-  const detailArr = details
-    .split(";")
-  const facDetail = detailArr
-    .map((key: string, index: number) => <p key={index}>- {key}</p>);
+  const detailArr = details.split(";");
+  const facDetail = detailArr.map((detail: any, index: number) => (
+    <p key={index}>- {detail}</p>
+  ));
 
-  const facAddress = Object.keys(facility).map((key) => (
+  const facilityKeys = Object.keys(facility);
+  const facAddress = facilityKeys.map((key) => (
     <p key={key}>- {facilitiesInfo[key].address}</p>
   ));
 
-  const facText = Object.keys(facility).map((key) => (
+  const facText = facilityKeys.map((key) => (
     <p key={key}>- {facilitiesInfo[key].name}</p>
   ));
 

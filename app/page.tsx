@@ -194,34 +194,46 @@ export default function Home() {
     if (cell.status === "pending") {
       cloneSelected.details.push(detail);
 
-      cell.id = row.courtId;
-      cell.facility = row.facility;
-      cell.court = row.court;
+      const updatedCell = {
+        ...cell,
+        id: row.courtId,
+        facility: row.facility,
+        court: row.court,
+        index: {
+          tableIndex,
+          rowIndex,
+          columnIndex,
+          createdAt: row.createdAt,
+          cluster
+        }
+      };
 
-      setSelectedTimeSlots({
-        ...selectedTimeSlots, [date.toLocaleDateString()]: [...selectedTimeSlots[date.toLocaleDateString()] || [],
-
-        {
-          ...cell,
-          index: {
-            tableIndex,
-            rowIndex,
-            columnIndex,
-            createdAt: row.createdAt,
-            cluster
-          },
-        },
+      setSelectedTimeSlots((prevSlots:any) => ({
+        ...prevSlots,
+        [date.toLocaleDateString()]: [
+          ...(prevSlots[date.toLocaleDateString()] || []),
+          updatedCell
         ]
-      });
+      }));
     } else {
       cloneSelected.details = cloneSelected.details.filter(
         (item: any) => item !== detail
       );
-
-      const filtered = (selectedTimeSlots[selectedDate.toLocaleDateString()]).filter(
-        (item: any) => item.id !== row.courtId && item.facility !== row.facility
+      const currentDateSlots = selectedTimeSlots[selectedDate.toLocaleDateString()] || [];
+      const filtered = currentDateSlots.filter(
+        (item: any) => item.id !== row.courtId || item.facility !== row.facility
       );
-      setSelectedTimeSlots({ ...selectedTimeSlots, [selectedDate.toLocaleDateString()]: filtered });
+
+      if (filtered.length > 0) {
+        setSelectedTimeSlots({ 
+          ...selectedTimeSlots, 
+          [selectedDate.toLocaleDateString()]: filtered 
+        });
+      } else {
+        const newSelectedTimeSlots = { ...selectedTimeSlots };
+        delete newSelectedTimeSlots[selectedDate.toLocaleDateString()];
+        setSelectedTimeSlots(newSelectedTimeSlots);
+      }
     }
 
     setFacilities((preState: any) => {
@@ -247,6 +259,7 @@ export default function Home() {
   };
   const handleChangePage = async (newState: any) => {
     if (isSchedule) {
+      console.log("selectedTimeSlots", selectedTimeSlots)
       setSelected((pre: any) => ({
         ...pre,
         dates: Object.keys(selectedTimeSlots),

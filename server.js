@@ -234,6 +234,7 @@ app.prepare().then(async () => {
       try {
         const isExist = await schedules.findOne({
           details: new RegExp(schedulesData.details, "i"),
+          status:"wait",
           timeSlots: {
             $elemMatch: {
               $or: schedulesData.timeSlots.map(item => ({
