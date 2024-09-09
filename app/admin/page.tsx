@@ -214,34 +214,50 @@ export default function Page() {
     if (cell.status === "pending") {
       cloneSelected.details.push(detail);
 
-      cell.id = row.courtId;
-      cell.facility = row.facility;
-      cell.court = row.court;
+      const updatedCell = {
+        ...cell,
+        id: row.courtId,
+        facility: row.facility,
+        court: row.court,
+        index: {
+          tableIndex,
+          rowIndex,
+          columnIndex,
+          createdAt: row.createdAt,
+          cluster
+        }
+      };
 
-      setSelectedTimeSlots({
-        ...selectedTimeSlots, [currentDate.toLocaleDateString()]: [...selectedTimeSlots[currentDate.toLocaleDateString()] || [],
-
-        {
-          ...cell,
-          index: {
-            tableIndex,
-            rowIndex,
-            columnIndex,
-            createdAt: row.createdAt,
-            cluster
-          },
-        },
+      setSelectedTimeSlots((prevSlots: any) => ({
+        ...prevSlots,
+        [currentDate.toLocaleDateString()]: [
+          ...(prevSlots[currentDate.toLocaleDateString()] || []),
+          updatedCell
         ]
-      });
+      }));
     } else {
       cloneSelected.details = cloneSelected.details.filter(
         (item: any) => item !== detail
       );
 
-      const filtered = (selectedTimeSlots[currentDate.toLocaleDateString()]).filter(
-        (item: any) => item.id !== row.courtId && item.facility !== row.facility
+      const currentDateSlots = selectedTimeSlots[currentDate.toLocaleDateString()] || [];
+      const filtered = currentDateSlots.filter(
+        (item: any) => item.id !== row.courtId || item.facility !== row.facility
       );
-      setSelectedTimeSlots({ ...selectedTimeSlots, [currentDate.toLocaleDateString()]: filtered });
+
+      if (filtered.length > 0) {
+        setSelectedTimeSlots({
+          ...selectedTimeSlots,
+          [currentDate.toLocaleDateString()]: filtered
+        });
+      } else {
+        setSelectedTimeSlots((prevState: any) => {
+          const newState = { ...prevState };
+          delete newState[currentDate.toLocaleDateString()];
+          return newState;
+        });
+      }
+
     }
 
     setFacilities((preState: any) => {
@@ -315,7 +331,8 @@ export default function Page() {
         const data = Object.keys(preState).reduce((memo: any, value) => {
           const stateItems = preState[value] || [];
           const data = clusters.reduce((memo: any, cluster) => {
-            const items = stateItems[cluster.id];
+
+            const items = stateItems[cluster.id] || [];
             const newState = items.map((item: any) => {
               if (item) {
                 arg.forEach((cell: any) => {
