@@ -208,7 +208,7 @@ export default function Home() {
         }
       };
 
-      setSelectedTimeSlots((prevSlots:any) => ({
+      setSelectedTimeSlots((prevSlots: any) => ({
         ...prevSlots,
         [date.toLocaleDateString()]: [
           ...(prevSlots[date.toLocaleDateString()] || []),
@@ -225,9 +225,9 @@ export default function Home() {
       );
 
       if (filtered.length > 0) {
-        setSelectedTimeSlots({ 
-          ...selectedTimeSlots, 
-          [selectedDate.toLocaleDateString()]: filtered 
+        setSelectedTimeSlots({
+          ...selectedTimeSlots,
+          [selectedDate.toLocaleDateString()]: filtered
         });
       } else {
         const newSelectedTimeSlots = { ...selectedTimeSlots };
@@ -259,7 +259,7 @@ export default function Home() {
   };
   const handleChangePage = async (newState: any) => {
     if (isSchedule) {
-      console.log("selectedTimeSlots", selectedTimeSlots)
+
       setSelected((pre: any) => ({
         ...pre,
         dates: Object.keys(selectedTimeSlots),
@@ -301,6 +301,7 @@ export default function Home() {
         });
         newState.schedulesId = res.schedulesId
         setSelected(newState);
+      
       } catch (error) {
         console.log(error);
       }

@@ -134,7 +134,7 @@ export default function Page() {
         duration: 3000,
       });
     }
-    const { isApplyDiscount } = discountInfo;
+    // const { isApplyDiscount } = discountInfo;
     const totalPrice = selected.totalHours * pricePerHour;
     const timeSlotData = _.flatMap(Object.values(selectedTimeSlots)).map((timeSlots: any) => {
       return {
