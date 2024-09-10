@@ -9,84 +9,54 @@ import axios from "axios";
 import { logger } from "./utils/logger.js";
 
 config();
-const url =
-  "https://open.larksuite.com/open-apis/auth/v3/tenant_access_token/internal";
 
-const headers = {
+const LARK_API_URL = "https://open.larksuite.com/open-apis";
+const HEADERS = {
   "Content-Type": "application/json; charset=utf-8",
 };
-const data = {
-  app_id: process.env.APP_ID,
-  app_secret: process.env.APP_SECRET,
+
+const { APP_ID, APP_SECRET, APP_TOKEN, TABLE_ID, MONGODB_URI, DB, NODE_ENV, PORT } = process.env;
+
+const getLarkAccessToken = async () => {
+  const response = await axios.post(`${LARK_API_URL}/auth/v3/tenant_access_token/internal`, {
+    app_id: APP_ID,
+    app_secret: APP_SECRET,
+  }, { headers: HEADERS });
+  
+  if (response.status !== 200) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+  
+  return response.data.tenant_access_token;
 };
-const app_token = process.env.APP_TOKEN;
-const table_id = process.env.TABLE_ID;
-async function create_record(new_record) {
-  try {
-    const response = await axios.post(url, data, { headers });
 
-    // Kiểm tra nếu yêu cầu thành công
-    if (response.status !== 200) {
-      throw new Error(`Request failed with status ${response.status}`);
-    }
-    // Lấy dữ liệu từ phản hồi
-    const responseData = response.data;
+const createLarkRecord = async (newRecord) => {
+  const token = await getLarkAccessToken();
+  const url = `${LARK_API_URL}/bitable/v1/apps/${APP_TOKEN}/tables/${TABLE_ID}/records`;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  };
+  
+  const response = await axios.post(url, newRecord, { headers });
+  return response.data;
+};
 
-    const url_create_record = `https://open.larksuite.com/open-apis/bitable/v1/apps/${app_token}/tables/${table_id}/records`;
-    const authorizationToken = `Bearer ${responseData.tenant_access_token}`;
-    const nextApiHeaders = {
-      Authorization: authorizationToken,
-      "Content-Type": "application/json",
-    };
-    const nextResponse = await axios.post(url_create_record, new_record, {
-      headers: nextApiHeaders,
-    });
-    console.log("nextResponse.data---------", nextResponse.data);
-    // Trả về dữ liệu phản hồi từ yêu cầu thứ hai
-    return nextResponse.data;
-  } catch (error) {
-    console.error("Error:", error.message);
-  }
-}
-async function update_record(record_id) {
-  try {
-    const response = await axios.post(url, data, { headers });
+const updateLarkRecord = async (recordId, newData) => {
+  const token = await getLarkAccessToken();
+  const url = `${LARK_API_URL}/bitable/v1/apps/${APP_TOKEN}/tables/${TABLE_ID}/records/${recordId}`;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  };
+  
+  const response = await axios.put(url, newData, { headers });
+  return response.data;
+};
 
-    // Kiểm tra nếu yêu cầu thành công
-    if (response.status !== 200) {
-      throw new Error(`Request failed with status ${response.status}`);
-    }
-
-    // Lấy dữ liệu từ phản hồi
-    const responseData = response.data;
-    const url_create_record = `https://open.larksuite.com/open-apis/bitable/v1/apps/${app_token}/tables/${table_id}/records/${record_id}`;
-    const authorizationToken = `Bearer ${responseData.tenant_access_token}`;
-    const nextApiHeaders = {
-      Authorization: authorizationToken,
-      "Content-Type": "application/json",
-    };
-    var new_record = {
-      fields: {
-        trang_thai: "booked",
-      },
-    };
-
-    const nextResponse = await axios.put(url_create_record, new_record, {
-      headers: nextApiHeaders,
-    });
-
-    // Trả về dữ liệu phản hồi từ yêu cầu thứ hai
-    return nextResponse.data;
-  } catch (error) {
-    console.error("Error:", error.message);
-  }
-}
-
-// var record_id = "";
-const dev = process.env.NODE_ENV !== "production";
+const dev = NODE_ENV !== "production";
 const hostname = "localhost";
-const port = 3000 || process.env.PORT;
-// when using middleware `hostname` and `port` must be provided below
+const port = PORT || 3000;
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
@@ -99,16 +69,14 @@ const initDB = async () => {
   }
 
   try {
-    console.log("MongoClient connecting...");
-    mongoClient = new MongoClient(process.env.MONGODB_URI, {
+    mongoClient = new MongoClient(MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       connectTimeoutMS: 10000,
       socketTimeoutMS: 45000,
     });
     await mongoClient.connect();
-    console.log("Connected to Mongo");
-    mongoPool = mongoClient.db(process.env.DB);
+    mongoPool = mongoClient.db(DB);
     return { mongoPool, mongoClient };
   } catch (error) {
     logger.error(`MongoClient Error: ${error}`);
@@ -119,70 +87,47 @@ const initDB = async () => {
   }
 };
 
+const updateTimeSlot = async ({ timeSlotsData, collection }) => {
+  logger.info(`Updating time slots: ${JSON.stringify(timeSlotsData)}`);
+  const updatePromises = timeSlotsData.map(({ facility, id, index, ...rest }) => 
+    collection.updateOne(
+      { facility, courtId: id, createdAt: index.createdAt },
+      { $set: { [index.columnIndex]: { facility, id, index, ...rest } } }
+    )
+  );
+  return Promise.allSettled(updatePromises);
+};
+
 app.prepare().then(async () => {
   const httpServer = createServer(handler);
-
-  console.log("http server started");
   const { mongoPool } = await initDB();
 
-  const job = CronJob.from({
-    cronTime: "0 0 1 1 *",
-    // cronTime: "0 * * * * *",
-    onTick: async function () {
-
-      await insertTimeslots({ db: mongoPool });
-      console.log("created 1 year time slots");
-    },
-    start: false,
-    timeZone: "Asia/Ho_Chi_Minh",
-  });
-  job.start();
+  new CronJob('0 0 1 1 *', async () => {
+    await insertTimeslots({ db: mongoPool });
+    console.log("Created 1 year time slots");
+  }, null, true, 'Asia/Ho_Chi_Minh').start();
 
   const io = new Server(httpServer);
 
-  const updateTimeSlot = ({ timeSlotsData, collection }) => {
-    logger.info(`Updating time slots: ${JSON.stringify(timeSlotsData)}`);
-    const updateQuery = timeSlotsData.map((timeSlot) => {
-      const { facility, id, index } = timeSlot;
-      return collection.updateOne(
-        { facility, courtId: id, createdAt: index.createdAt },
-        {
-          $set: {
-            [index.columnIndex]: timeSlot,
-          },
-        }
-      );
-    });
-    return Promise.allSettled(updateQuery);
-  };
-
   io.on("connection", async (socket) => {
+    const ip = socket.handshake.headers['x-forwarded-for'] || 
+               socket.handshake.address || 
+               socket.request.connection.remoteAddress || 
+               null;
 
-    const ip = socket.handshake.headers['x-forwarded-for'] ||
-      socket.handshake.address ||
-      socket.request.connection.remoteAddress ||
-      null;
-
-    console.log("connected", socket.id);
+    console.log("Connected", socket.id);
     logger.info(`User IP ${ip}`);
 
     socket.on("app:info", async (arg, callback) => {
-      const facilities = mongoPool.collection("facilities").find().toArray();
-      const paymentInfo = mongoPool.collection("paymentInfo").find().toArray();
-      const [facilitiesData, paymentInfoData] = await Promise.allSettled([
-        facilities,
-        paymentInfo,
+      const [facilitiesData, paymentInfoData] = await Promise.all([
+        mongoPool.collection("facilities").find().toArray(),
+        mongoPool.collection("paymentInfo").find().toArray(),
       ]);
 
-      return callback({
-        facilities: facilitiesData.value,
-        paymentInfo: paymentInfoData.value,
-      });
+      callback({ facilities: facilitiesData, paymentInfo: paymentInfoData });
     });
 
-    socket.on("schedules:list", async (arg, callback) => {
-      const { facilitiyIds, range, dates } = arg;
-
+    socket.on("schedules:list", async ({ facilitiyIds, range, dates }, callback) => {
       const filter = { facility: { $in: facilitiyIds } };
       if (dates.length > 0) {
         filter.createdAt = { $in: dates };
@@ -192,41 +137,14 @@ app.prepare().then(async () => {
           $gte: new Date(range.startDate),
           $lte: new Date(range.endDate),
         };
-        const data = await mongoPool
-          .collection("timeslots")
-          .aggregate([
-            {
-              $addFields: {
-                convertedDate: {
-                  $toDate: "$createdAt",
-                },
-              },
-            },
-            {
-              $match: {
-                facility: { $in: facilitiyIds },
-                convertedDate: {
-                  $gte: new Date(range.startDate),
-                  $lte: new Date(range.endDate),
-                },
-              },
-            },
-          ])
-          .toArray();
-        return callback({ data });
       }
-      const data = await mongoPool
-        .collection("timeslots")
-        .find(filter)
-        .toArray();
-      return callback({ data });
+
+      const data = await mongoPool.collection("timeslots").find(filter).toArray();
+      callback({ data });
     });
 
-
-    socket.on("schedules:create", async (arg, callback) => {
-      logger.info(`Creating schedule: ${JSON.stringify(arg)}`);
-      const { timeSlotsData, schedulesData } = arg;
-
+    socket.on("schedules:create", async ({ timeSlotsData, schedulesData }, callback) => {
+      logger.info(`Creating schedule: ${JSON.stringify({ timeSlotsData, schedulesData })}`);
       const schedules = mongoPool.collection("schedules");
       const timeSlots = mongoPool.collection("timeslots");
       const id = new ObjectId().toString();
@@ -234,32 +152,24 @@ app.prepare().then(async () => {
       try {
         const isExist = await schedules.findOne({
           details: new RegExp(schedulesData.details, "i"),
-          status:"wait",
+          status: "wait",
           timeSlots: {
             $elemMatch: {
-              $or: schedulesData.timeSlots.map(item => ({
-                facility: item.facility,
-                court: item.court,
-                from: item.from,
-                to: item.to,
-                id: item.id
-              }))
+              $or: schedulesData.timeSlots.map(({ facility, court, from, to, id }) => 
+                ({ facility, court, from, to, id })
+              )
             }
           }
         });
 
         if (isExist) {
-          throw new Error("Schedule is already exists");
+          throw new Error("Schedule already exists");
         }
-        const currentTimeMillis = Date.now();
 
-        const uniqueIds = [
-          ...new Set(timeSlotsData.map((item) => item.id)),
-        ].join(", ");
-
-        const new_record = {
+        const uniqueIds = [...new Set(timeSlotsData.map(item => item.id))].join(", ");
+        const newRecord = {
           fields: {
-            time_order: currentTimeMillis,
+            time_order: Date.now(),
             chi_nhanh: uniqueIds,
             ND_CK: schedulesData.transactionCode,
             name: schedulesData.userName,
@@ -276,120 +186,81 @@ app.prepare().then(async () => {
             dat_co_dinh: schedulesData.isFixed ? "True" : "False",
           },
         };
-        const res = await create_record(new_record)
-        const record_id = res.data.record.record_id;
-        console.log("schedules:created");
-        const updateQuery = timeSlotsData.map((timeSlot) => {
-          const { facility, id, index } = timeSlot;
-          return timeSlots.updateOne(
-            { facility, courtId: id, createdAt: index.createdAt },
-            {
-              $set: {
-                [index.columnIndex]: timeSlot,
-              },
-            }
-          );
-        });
-        await Promise.allSettled(updateQuery);
-        setTimeout(() => {
-          const updatedData = timeSlotsData.map((timeSlot) => {
-            timeSlot.status = "empty";
-            return timeSlot;
-          });
 
-          return schedules.deleteOne({ id, status: "wait" }).then((res) => {
-            logger.info(`Deleted: ${JSON.stringify(res)}`);
-            if (res.deletedCount > 0) {
-              logger.info(`Updated: ${JSON.stringify(res)}`);
-              socket.broadcast.emit("schedules:updated", updatedData);
-              return updateTimeSlot({
-                timeSlotsData: updatedData,
-                collection: timeSlots,
-              });
-            }
-          });
+        const res = await createLarkRecord(newRecord);
+        const recordId = res.data.record.record_id;
+
+        await updateTimeSlot({ timeSlotsData, collection: timeSlots });
+
+        setTimeout(async () => {
+          const updatedData = timeSlotsData.map(timeSlot => ({ ...timeSlot, status: "empty" }));
+          const deleteResult = await schedules.deleteOne({ id, status: "wait" });
+          
+          if (deleteResult.deletedCount > 0) {
+            logger.info(`Updated: ${JSON.stringify(deleteResult)}`);
+            socket.broadcast.emit("schedules:updated", updatedData);
+            await updateTimeSlot({ timeSlotsData: updatedData, collection: timeSlots });
+          }
         }, 600000);
 
         const insertData = {
           id,
           ...schedulesData,
-          larkRecordId: record_id,
+          larkRecordId: recordId,
           status: "wait",
           createdAt: new Date(),
         };
 
-        return schedules.insertOne(insertData).then((res) => {
-          socket.broadcast.emit("schedules:updated", timeSlotsData);
+        const insertResult = await schedules.insertOne(insertData);
+        socket.broadcast.emit("schedules:updated", timeSlotsData);
 
-          return callback({ success: true, data: res, schedulesId: id });
-        });
+        callback({ success: true, data: insertResult, schedulesId: id });
       } catch (error) {
         logger.error(`Error creating schedule: ${error}`);
-        return callback({ success: false, data: error });
+        callback({ success: false, data: error });
       }
     });
-    socket.on("schedules:send-info", async (arg, callback) => {
-      const { timeSlots } = arg;
+
+    socket.on("schedules:send-info", async ({ timeSlots }, callback) => {
       socket.broadcast.emit("schedules:updated", timeSlots);
       callback({ success: true });
     });
-    socket.on("schedules:update", async (arg, callback) => {
-      const { code } = arg;
+
+    socket.on("schedules:update", async ({ code }, callback) => {
       const schedules = mongoPool.collection("schedules");
-      // const timeSlots = db.collection("timeslots");
       try {
-        const res = await schedules.findOne({
-          transactionCode: code,
-          status: "booked",
-        });
-        if (!res) {
-          throw new Error("Đơn hàng của bạn chưa được thanh toán");
+        const schedule = await schedules.findOne({ transactionCode: code, status: "booked" });
+        if (!schedule) {
+          throw new Error("Order not paid yet");
         }
-        const record_id = res.larkRecordId
-        await update_record(record_id);
-        console.log("updated record success")
-        return callback({ success: true, data: record_id })
+        await updateLarkRecord(schedule.larkRecordId, { fields: { trang_thai: "booked" } });
+        console.log("Updated record successfully");
+        callback({ success: true, data: schedule.larkRecordId });
       } catch (error) {
         logger.error(`Error updating schedule: ${error}`);
-        return callback({
-          error,
-        });
+        callback({ error });
       }
     });
 
-    socket.on("schedules:delete", (arg) => {
-
-      const { timeSlotsData, id } = arg;
-
+    socket.on("schedules:delete", async ({ timeSlotsData, id }) => {
       const schedules = mongoPool.collection("schedules");
       const timeSlots = mongoPool.collection("timeslots");
 
-      const updatedData = timeSlotsData.map((timeSlot) => {
-        timeSlot.status = "empty";
-        return timeSlot;
-      });
+      const updatedData = timeSlotsData.map(timeSlot => ({ ...timeSlot, status: "empty" }));
 
-      console.log("schedules:deleted");
-
-      return schedules.deleteOne({ id, status: "wait" }).then((res) => {
-        logger.info(`Deleted: ${JSON.stringify(res)}`);
-        if (res.deletedCount > 0) {
-          logger.info(`Updated: ${JSON.stringify(res)}`);
-          socket.broadcast.emit("schedules:updated", updatedData);
-          return updateTimeSlot({
-            timeSlotsData: updatedData,
-            collection: timeSlots,
-          });
-        }
-      });
-
+      const deleteResult = await schedules.deleteOne({ id, status: "wait" });
+      logger.info(`Deleted: ${JSON.stringify(deleteResult)}`);
+      
+      if (deleteResult.deletedCount > 0) {
+        logger.info(`Updated: ${JSON.stringify(deleteResult)}`);
+        socket.broadcast.emit("schedules:updated", updatedData);
+        await updateTimeSlot({ timeSlotsData: updatedData, collection: timeSlots });
+      }
     });
 
-    socket.on("disconnect", async () => {
+    socket.on("disconnect", () => {
       console.log("User disconnected:", socket.id);
-      // Clear any socket-specific data or listeners
       socket.removeAllListeners();
-
       console.log("Cleanup completed for socket:", socket.id);
     });
   });
@@ -404,7 +275,6 @@ app.prepare().then(async () => {
     });
 });
 
-// Graceful shutdown
 process.on('SIGINT', async () => {
   console.log('Shutting down gracefully...');
   process.exit(0);
