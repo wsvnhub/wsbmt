@@ -9,9 +9,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  let client;
   try {
-    client = await clientPromise;
+    const client = await clientPromise;
     const db = client.db(process.env.DB);
     const body = await request.json();
     const { code } = body;
