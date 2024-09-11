@@ -32,9 +32,9 @@ export async function POST(request: Request) {
     if (!process.env.BANK_API_BASE_URL) {
       throw new Error("Bank API chưa được cài đặt");
     }
-
+    const url = true ? "http://localhost:3000/api/pay-sanbox" : `${process.env.BANK_API_BASE_URL}/transactions/list?limit=100&amount_in=${amount}&transaction_date_min=${formatDate()}`
     const response = await fetch(
-      `${process.env.BANK_API_BASE_URL}/transactions/list?limit=100&amount_in=${amount}&transaction_date_min=${formatDate()}`,
+      url,
       {
         headers: {
           Authorization: `Bearer ${process.env.BANK_API_KEY}`,
@@ -48,7 +48,9 @@ export async function POST(request: Request) {
     }
     const transaction = transactions.find(
       (t) => {
-        return (t.transaction_content.trim().includes(code) || (code.includes(t.code || ""))) && Number(t.amount_in) === Number("11120.00")
+        // console.log("transaction code ", t.transaction_content.trim().includes(code) || (code.includes(t.code)))
+        // console.log("amount", Number(t.amount_in) === Number(amount), Number(t.amount_in), amount)
+        return (t.transaction_content.trim().includes(code) || (code.includes(t.code))) && Number(t.amount_in) === Number(amount)
       }
     );
     if (!transaction) {
