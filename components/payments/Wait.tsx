@@ -51,7 +51,7 @@ export default function WaitPayments({
       if (response.ok) {
         setAlertMessage("Hết thời gian chờ, đơn hàng của bạn đã bị huỷ");
       } else {
-        setAlertMessage("Có lỗi xảy ra khi huỷ đơn hàng");
+        setAlertMessage("Đơn hàng của bạn đã bị huỷ");
       }
     } catch (error) {
       console.error("Error cancelling order:", error);
