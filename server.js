@@ -80,9 +80,9 @@ const initDB = async () => {
     return { mongoPool, mongoClient };
   } catch (error) {
     logger.error(`MongoClient Error: ${error}`);
-    if (mongoClient) {
-      await mongoClient.close();
-    }
+    // if (mongoClient) {
+    //   await mongoClient.close();
+    // }
     return null;
   }
 };
