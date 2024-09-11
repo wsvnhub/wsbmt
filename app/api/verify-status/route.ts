@@ -84,9 +84,5 @@ export async function POST(request: Request) {
   } catch (error: any) {
     logger.error(`Verification error: ${error.message}`);
     return Response.json({ error }, { status: 202, statusText: "error" });
-  } finally {
-    if (client) {
-      await client.close();
-    }
-  }
+  } 
 }
