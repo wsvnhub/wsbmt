@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     if (!process.env.BANK_API_BASE_URL) {
       throw new Error("Bank API chưa được cài đặt");
     }
-    const url = false ? "http://localhost:3000/api/pay-sanbox" : `${process.env.BANK_API_BASE_URL}/transactions/list?limit=100&amount_in=${amount}&transaction_date_min=${formatDate()}`
+    const url = true ? "http://localhost:3000/api/pay-sanbox" : `${process.env.BANK_API_BASE_URL}/transactions/list?limit=100&amount_in=${amount}&transaction_date_min=${formatDate()}`
     const response = await fetch(
       url,
       {
