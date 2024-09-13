@@ -22,11 +22,11 @@ const getLarkAccessToken = async () => {
     app_id: APP_ID,
     app_secret: APP_SECRET,
   }, { headers: HEADERS });
-  
+
   if (response.status !== 200) {
     throw new Error(`Request failed with status ${response.status}`);
   }
-  
+
   return response.data.tenant_access_token;
 };
 
@@ -37,7 +37,7 @@ const createLarkRecord = async (newRecord) => {
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
   };
-  
+
   const response = await axios.post(url, newRecord, { headers });
   return response.data;
 };
@@ -49,7 +49,7 @@ const updateLarkRecord = async (recordId, newData) => {
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
   };
-  
+
   const response = await axios.put(url, newData, { headers });
   return response.data;
 };
@@ -86,12 +86,17 @@ const initDB = async () => {
     return null;
   }
 };
-
-const updateTimeSlot = async ({ timeSlotsData, collection }) => {
+const actionsStatus = {
+  add: "empty",
+  update: "wait",
+  delete: "wait"
+}
+const updateTimeSlot = async ({ timeSlotsData, collection, action = "add" }) => {
   logger.info(`Updating time slots: ${JSON.stringify(timeSlotsData)}`);
-  const updatePromises = timeSlotsData.map(({ facility, id, index, ...rest }) => 
+
+  const updatePromises = timeSlotsData.map(({ facility, id, index, ...rest }) =>
     collection.updateOne(
-      { facility, courtId: id, createdAt: index.createdAt },
+      { facility, courtId: id, createdAt: index.createdAt, status: actionsStatus[action] },
       { $set: { [index.columnIndex]: { facility, id, index, ...rest } } }
     )
   );
@@ -110,10 +115,10 @@ app.prepare().then(async () => {
   const io = new Server(httpServer);
 
   io.on("connection", async (socket) => {
-    const ip = socket.handshake.headers['x-forwarded-for'] || 
-               socket.handshake.address || 
-               socket.request.connection.remoteAddress || 
-               null;
+    const ip = socket.handshake.headers['x-forwarded-for'] ||
+      socket.handshake.address ||
+      socket.request.connection.remoteAddress ||
+      null;
 
     console.log("Connected", socket.id);
     logger.info(`User IP ${ip}`);
@@ -155,7 +160,7 @@ app.prepare().then(async () => {
           status: "wait",
           timeSlots: {
             $elemMatch: {
-              $or: schedulesData.timeSlots.map(({ facility, court, from, to, id }) => 
+              $or: schedulesData.timeSlots.map(({ facility, court, from, to, id }) =>
                 ({ facility, court, from, to, id })
               )
             }
@@ -193,15 +198,16 @@ app.prepare().then(async () => {
         await updateTimeSlot({ timeSlotsData, collection: timeSlots });
 
         setTimeout(async () => {
-          const updatedData = timeSlotsData.map(timeSlot => ({ ...timeSlot, status: "empty" }));
           const deleteResult = await schedules.deleteOne({ id, status: "wait" });
-          
+
           if (deleteResult.deletedCount > 0) {
+            const updatedData = timeSlotsData.map(timeSlot => ({ ...timeSlot, status: "empty" }));
+
             logger.info(`Updated: ${JSON.stringify(deleteResult)}`);
             socket.broadcast.emit("schedules:updated", updatedData);
-            await updateTimeSlot({ timeSlotsData: updatedData, collection: timeSlots });
+            await updateTimeSlot({ timeSlotsData: updatedData, collection: timeSlots, action: "delete" });
           }
-        }, 600000);
+        }, 605000);
 
         const insertData = {
           id,
@@ -250,11 +256,11 @@ app.prepare().then(async () => {
 
       const deleteResult = await schedules.deleteOne({ id, status: "wait" });
       logger.info(`Deleted: ${JSON.stringify(deleteResult)}`);
-      
+
       if (deleteResult.deletedCount > 0) {
         logger.info(`Updated: ${JSON.stringify(deleteResult)}`);
         socket.broadcast.emit("schedules:updated", updatedData);
-        await updateTimeSlot({ timeSlotsData: updatedData, collection: timeSlots });
+        await updateTimeSlot({ timeSlotsData: updatedData, collection: timeSlots,action:"delete" });
       }
     });
 
