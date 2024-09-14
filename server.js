@@ -93,12 +93,13 @@ const actionsStatus = {
 }
 const updateTimeSlot = async ({ timeSlotsData, collection, action = "add" }) => {
   logger.info(`Updating time slots: ${JSON.stringify(timeSlotsData)}`);
-
-  const updatePromises = timeSlotsData.map(({ facility, id, index, ...rest }) =>
-    collection.updateOne(
-      { facility, courtId: id, createdAt: index.createdAt, status: actionsStatus[action] },
+  const updatePromises = timeSlotsData.map(({ facility, id, index, ...rest }) => {
+    return collection.updateOne(
+      { facility, courtId: id, createdAt: index.createdAt, [index.columnIndex + ".status"]: actionsStatus[action] },
       { $set: { [index.columnIndex]: { facility, id, index, ...rest } } }
     )
+  }
+
   );
   return Promise.allSettled(updatePromises);
 };
@@ -166,8 +167,7 @@ app.prepare().then(async () => {
             }
           }
         });
-
-        if (isExist) {
+        if (isExist !== null) {
           throw new Error("Schedule already exists");
         }
 
@@ -260,7 +260,7 @@ app.prepare().then(async () => {
       if (deleteResult.deletedCount > 0) {
         logger.info(`Updated: ${JSON.stringify(deleteResult)}`);
         socket.broadcast.emit("schedules:updated", updatedData);
-        await updateTimeSlot({ timeSlotsData: updatedData, collection: timeSlots,action:"delete" });
+        await updateTimeSlot({ timeSlotsData: updatedData, collection: timeSlots, action: "delete" });
       }
     });
 
