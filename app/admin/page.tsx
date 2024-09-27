@@ -296,7 +296,7 @@ export default function Page() {
         const groupByDate = groupBy(data, "createdAt");
         const mapped = Object.keys(groupByDate).reduce((memo: any, date) => {
           const timeSlots = selectedTimeSlots[new Date(date).toLocaleDateString()] || []
-          console.log("timeSlots", timeSlots)
+          // console.log("timeSlots", timeSlots)
           memo[date] = splitArr({
             data: groupByDate[date],
           });
@@ -411,7 +411,7 @@ export default function Page() {
             />
 
             <DatePicker
-              pickerValue={dayjs()}
+              // pickerValue={dayjs()}
               suffixIcon={
                 <svg
                   width={32}

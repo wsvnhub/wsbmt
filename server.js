@@ -134,6 +134,7 @@ app.prepare().then(async () => {
     });
 
     socket.on("schedules:list", async ({ facilitiyIds, range, dates }, callback) => {
+
       const filter = { facility: { $in: facilitiyIds } };
       if (dates.length > 0) {
         filter.createdAt = { $in: dates };
@@ -143,10 +144,34 @@ app.prepare().then(async () => {
           $gte: new Date(range.startDate),
           $lte: new Date(range.endDate),
         };
+        const data = await mongoPool
+          .collection("timeslots")
+          .aggregate([
+            {
+              $addFields: {
+                convertedDate: {
+                  $toDate: "$createdAt",
+                },
+              },
+            },
+            {
+              $match: {
+                facility: { $in: facilitiyIds },
+                convertedDate: {
+                  $gte: new Date(range.startDate),
+                  $lte: new Date(range.endDate),
+                },
+              },
+            },
+          ])
+          .toArray();
+        return callback({ data });
       }
-
-      const data = await mongoPool.collection("timeslots").find(filter).toArray();
-      callback({ data });
+      const data = await mongoPool
+        .collection("timeslots")
+        .find(filter)
+        .toArray();
+      return callback({ data });
     });
 
     socket.on("schedules:create", async ({ timeSlotsData, schedulesData }, callback) => {
