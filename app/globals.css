@@ -72,6 +72,10 @@ th.ant-table-cell {
   text-align: center !important;
 }
 
+.update-info-modal > .ant-modal-content {
+  padding: 0, 0, 24px, 0 !important;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

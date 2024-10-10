@@ -41,7 +41,7 @@ export default function ConfigAntd({ children }: any) {
           },
           DatePicker: {
             addonBg: "green",
-        
+
             colorIcon: "#029d81",
             colorPrimary: "#029d81",
             colorText: "#02846c",
@@ -49,11 +49,16 @@ export default function ConfigAntd({ children }: any) {
             colorTextPlaceholder: "#029d81",
             colorTextHeading: "#02846c",
             fontSize: 18,
-          
+
           },
           Spin: {
             colorPrimary: "white",
           },
+          Modal: {
+            contentBg: "#029d81",
+            headerBg: "transparent",
+            titleColor: "white",
+          }
         },
       }}
     >

@@ -289,6 +289,14 @@ app.prepare().then(async () => {
       }
     });
 
+    socket.on("schedules:manual", async ({ timeSlots }, callback) => {
+      logger.info(`Updated: schedules:manual`);
+      const collection = mongoPool.collection("timeslots");
+      await updateTimeSlot({ timeSlotsData: timeSlots, collection });
+      io.emit("schedules:updated", timeSlots);
+      return callback({ success: true, timeSlots });
+    })
+
     socket.on("disconnect", () => {
       console.log("User disconnected:", socket.id);
       socket.removeAllListeners();

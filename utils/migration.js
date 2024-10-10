@@ -84,6 +84,9 @@ const initDB = async () => {
                 code: "y",
                 value: 98,
                 unit: "percent",
+                limit: 100,
+                count: 0,
+                expired: new Date()
             },
         ]);
         await db.collection("courts").insertMany([

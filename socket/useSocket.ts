@@ -78,6 +78,12 @@ export default function useSocket() {
     });
     return res;
   }, []);
+  const sendUpdateSchedulesManual = React.useCallback(async (timeSlots: any) => {
+    const res = await socket.emitWithAck("schedules:manual", {
+      timeSlots,
+    });
+    return res;
+  }, []);
   return {
     socket,
     transport,
@@ -88,5 +94,6 @@ export default function useSocket() {
     createSchedules,
     deleteSchedules,
     sendUpdateSchedules,
+    sendUpdateSchedulesManual
   };
 }

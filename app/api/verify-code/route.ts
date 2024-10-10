@@ -20,10 +20,19 @@ export async function POST(request: Request) {
     console.log("code", code)
 
     const data = await db.collection("promotions").findOne({ code: code.trim() });
-    console.log("data", data)
+
     if (!data) {
-      throw new Error("Mã code không tồn tại");
+      throw new Error("Mã code không tồn tại hoặc hết hạn");
     }
+    
+    if (data.count >= data.limit || new Date(data.expired).getTime() < new Date().getTime()) {
+      throw new Error("Mã code đã đạt giới hạn");
+    }
+
+    await db.collection("promotions").updateOne(
+      { code: code.trim() },
+      { $inc: { count: 1 } }
+    );
 
     logger.info(`POST /api/verify-code ${JSON.stringify({ code })}`);
 
