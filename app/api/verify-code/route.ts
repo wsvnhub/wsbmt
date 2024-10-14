@@ -42,8 +42,16 @@ export async function POST(request: Request) {
     }
 
     const { date, month, year } = dates
-    if (!date.includes(today.getDate()) || !month.includes(today.getMonth() + 1) || !year.includes(today.getFullYear())) {
+
+    if (date.length > 0 && !date.includes(today.getDate())) {
       throw new Error(`Mã code không áp dụng cho ngày ${today.toDateString()}!`);
+    }
+
+    if (month.length > 0 && !month.includes(today.getMonth() + 1)) {
+      throw new Error(`Mã code không áp dụng cho tháng ${today.toDateString()}!`);
+    }
+    if (year.length > 0 && !year.includes(today.getFullYear())) {
+      throw new Error(`Mã code không áp dụng cho năm ${today.getFullYear()}!`);
     }
 
     const { from, to } = times
