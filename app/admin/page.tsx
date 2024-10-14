@@ -138,7 +138,7 @@ export default function Page() {
           Ways Station Badminton
         </h1>
         <button onClick={onChangeInfo} disabled={selected.totalHours === 0 || isProcessing} className="absolute right-5 border border-white p-2 rounded-md disabled:bg-gray-300 hover:bg-gray-200 hover:text-primary">
-          <p>Đổi thông tin</p>
+          <p>Nhập</p>
         </button>
         <div className="flex lg:flex-row flex-col items-center gap-4">
           <div className="flex lg:flex-row flex-col items-center gap-6">

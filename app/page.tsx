@@ -301,7 +301,7 @@ export default function Home() {
         });
         newState.schedulesId = res.schedulesId
         setSelected(newState);
-      
+
       } catch (error) {
         console.log(error);
       }
@@ -348,7 +348,7 @@ export default function Home() {
         {isSchedule && (
           <>
             <div className="flex justify-center items-center gap-4">
-              <a href="#" className="text-white underline italic">
+              <a href="https://diachi.ways.vn/san" target="_blank" className="text-white underline italic">
                 Bảng giá
               </a>
 

@@ -85,11 +85,11 @@ export default function useAdmin() {
         try {
             const response = await fetch("api/verify-code", {
                 method: "POST",
-                body: JSON.stringify({ code: discountCode }),
+                body: JSON.stringify({ code: discountCode, timesSlots: selectedTimeSlots }),
             });
             const res = await response.json();
             if (!res.data && res.status !== 200) {
-                return api.error({ message: "Mã không tồn tại hoặc hết hạn!" })
+                return api.error({ message: res.error ? res.error : "Mã không tồn tại hoặc hết hạn!" })
             }
             const percent = res.data.value;
             const discountAmount = pricePerHour - (pricePerHour * percent) / 100;
@@ -125,7 +125,7 @@ export default function useAdmin() {
             setProcessing(false);
             return api.open({
                 message: "Mật khẩu không hợp lệ",
-                description: "Vui lòng điền mật khẩu của admin",
+                description: "Vui lòng điền mật khẩu được cấp.",
                 duration: 3,
                 type: "error"
             });
@@ -146,7 +146,7 @@ export default function useAdmin() {
             setSelected(defaultSelected);
             setShowModel(false)
         } catch (error) {
-
+            console.log(error)
         }
         finally {
             setProcessing(false);
@@ -331,6 +331,7 @@ export default function useAdmin() {
                 rangefilter,
                 specificsDate
             ).then((data) => {
+                console.log("data", data)
                 const groupByDate = groupBy(data, "createdAt");
                 const mapped = Object.keys(groupByDate).reduce((memo: any, date) => {
                     const timeSlots = selectedTimeSlots[new Date(date).toLocaleDateString()] || []

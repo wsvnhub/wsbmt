@@ -83,9 +83,13 @@ export default function ConfirmPayments({
     try {
       const response = await fetch("api/verify-code", {
         method: "POST",
-        body: JSON.stringify({ code: discountCode }),
+        body: JSON.stringify({ code: discountCode, timesSlots: data.timeSlots }),
       });
       const res = await response.json();
+      if (!res.data && res.status !== 200) {
+        setDiscountMessage(res.error ? res.error : "Mã không tồn tại hoặc hết hạn!")
+        return setIsLoading(false);
+      }
 
       const percent = res.data.value;
       const discountAmount = pricePerHour - (pricePerHour * percent) / 100;
