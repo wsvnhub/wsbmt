@@ -16,6 +16,7 @@ import Loader from "@/components/Loader";
 import { VND } from "@/utils";
 import clusters from "@/data/clusters.json";
 import useAdmin from "./useAdmin";
+import AdminModal from "@/components/AdminModal";
 
 
 
@@ -52,6 +53,8 @@ export default function Page() {
     defaultValue,
     discountInfo,
     discountCode,
+    selectedBookedTimeSlots,
+    onFormUnlockSubmit,
     onChangeInfo,
     handleCellClick,
     handleScrollChange,
@@ -63,7 +66,8 @@ export default function Page() {
     setDiscountCode,
     onVerifyCode,
     setShowModel,
-    onFormFinishUpdateInfo
+    onFormFinishUpdateInfo,
+    onFormEditSubmit
   } = useAdmin()
   if (isLoading) {
     return <Loader />;
@@ -137,9 +141,12 @@ export default function Page() {
           <img src="./logo.png" alt="logo" />
           Ways Station Badminton
         </h1>
-        <button onClick={onChangeInfo} disabled={selected.totalHours === 0 || isProcessing} className="absolute right-5 border border-white p-2 rounded-md disabled:bg-gray-300 hover:bg-gray-200 hover:text-primary">
-          <p>Nhập</p>
-        </button>
+        <div className="flex absolute right-5 gap-2">
+          <button onClick={onChangeInfo} disabled={selected.totalHours === 0 || isProcessing} className="border border-white p-2 rounded-md disabled:bg-gray-300 hover:bg-gray-200 hover:text-primary">
+            <p>Nhập</p>
+          </button>
+          <AdminModal disabled={Object.keys(selectedBookedTimeSlots).length === 0} onEdit={onFormEditSubmit} onUnlock={onFormUnlockSubmit} />
+        </div>
         <div className="flex lg:flex-row flex-col items-center gap-4">
           <div className="flex lg:flex-row flex-col items-center gap-6">
             <DatePicker.RangePicker

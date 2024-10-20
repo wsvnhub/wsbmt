@@ -67,9 +67,9 @@ function generateTimeArray(
       nextDay.setDate(nextDay.getDate() + 1);
       const nextDate = isNextDay
         ? `(${new Intl.DateTimeFormat("en-GB", {
-            day: "2-digit",
-            month: "2-digit",
-          }).format(nextDay)})`
+          day: "2-digit",
+          month: "2-digit",
+        }).format(nextDay)})`
         : "";
       return {
         title: `${time.trim()} ${nextDate}`,
@@ -77,7 +77,18 @@ function generateTimeArray(
         width: slotWidth,
         render: (value: any, _record: DataType, rowIndex: number) => {
           const handleNewBook = () => {
-            if (value?.status === "booked" || value?.status === "wait") {
+            if (value?.status === "booked") {
+              value.isChange = !value.isChange
+              return handleCellClick(
+                value,
+                tableInex,
+                dataIndex,
+                rowIndex,
+                new Date(start),
+                cluster
+              );
+            }
+            if (value?.status === "wait") {
               return;
             }
             value.status = value.status !== "pending" ? "pending" : "";
@@ -91,13 +102,14 @@ function generateTimeArray(
             );
           };
           let bgClass = bgCell["empty"];
+          let isShowBorder = value?.isChange ? "border-2 border-amber-500" : ""
           if (value) {
             bgClass = bgCell[value.status];
           }
           return (
             <div
               onClick={handleNewBook}
-              className={`cursor-pointer ${bgClass} flex flex-col text-xs justify-center items-center w-full h-full absolute inset-0 text-white`}
+              className={`cursor-pointer ${isShowBorder} ${bgClass} flex flex-col text-xs justify-center items-center w-full h-full absolute inset-0 text-white`}
             >
               {value.status === "booked" && value.isFixed && isAdmin && (
                 <p className="absolute -top-1 left-0 bg-red-500 text-[5px] leading-[2] px-1 py-0 z-[9999px]">
