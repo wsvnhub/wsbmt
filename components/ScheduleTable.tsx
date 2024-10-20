@@ -77,7 +77,7 @@ function generateTimeArray(
         width: slotWidth,
         render: (value: any, _record: DataType, rowIndex: number) => {
           const handleNewBook = () => {
-            if (value?.status === "booked") {
+            if (isAdmin && value?.status === "booked") {
               value.isChange = !value.isChange
               return handleCellClick(
                 value,
@@ -88,7 +88,7 @@ function generateTimeArray(
                 cluster
               );
             }
-            if (value?.status === "wait") {
+            if (value?.status === "wait" || (!isAdmin && value?.status === "booked")) {
               return;
             }
             value.status = value.status !== "pending" ? "pending" : "";
