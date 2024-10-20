@@ -88,8 +88,8 @@ const initDB = async () => {
 };
 const actionsStatus = {
   add: "empty",
-  update: "wait",
-  delete: "wait"
+  update: "booked",
+  delete: "wait",
 }
 const updateTimeSlot = async ({ timeSlotsData, collection, action = "add" }) => {
   logger.info(`Updating time slots: ${JSON.stringify(timeSlotsData)}`);
@@ -289,10 +289,10 @@ app.prepare().then(async () => {
       }
     });
 
-    socket.on("schedules:manual", async ({ timeSlots }, callback) => {
+    socket.on("schedules:manual", async ({ timeSlots, action }, callback) => {
       logger.info(`Updated: schedules:manual`);
       const collection = mongoPool.collection("timeslots");
-      await updateTimeSlot({ timeSlotsData: timeSlots, collection });
+      await updateTimeSlot({ timeSlotsData: timeSlots, collection, action });
       io.emit("schedules:updated", timeSlots);
       return callback({ success: true, timeSlots });
     })

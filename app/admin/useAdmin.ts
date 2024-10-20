@@ -71,6 +71,7 @@ export default function useAdmin() {
     const [facilities, setFacilities] = React.useState<any>({});
     const [selected, setSelected] = React.useState<any>(defaultSelected);
     const [selectedTimeSlots, setSelectedTimeSlots] = React.useState<any>({});
+    const [selectedBookedTimeSlots, setSelectedBookedTimeSlots] = React.useState<any>({});
 
     const [selectedFacInfo, setSelectedFacInfo] = React.useState<
         FacilitiesInfo[]
@@ -108,6 +109,75 @@ export default function useAdmin() {
         }
     };
 
+    const onFormUnlockSubmit = async (values: any) => {
+        const { password } = values;
+        if (password !== "TeamMate&2069") {
+            setProcessing(false);
+            return api.open({
+                message: "Mật khẩu không hợp lệ",
+                description: "Vui lòng điền mật khẩu được cấp.",
+                duration: 3,
+                type: "error"
+            });
+        }
+        const timeSlotData = _.flatMap(Object.values(selectedBookedTimeSlots)).map((timeSlots: any) => {
+            return {
+                ...timeSlots,
+                status: "empty",
+                bookedBy: { name: "", phone: "" },
+                isChange: false
+            };
+        });
+        try {
+            const res = await sendUpdateSchedulesManual(timeSlotData, "update")
+            console.log("res", res)
+            setSelectedBookedTimeSlots({});
+        } catch (error) {
+            console.log("error", error)
+        }
+
+    }
+
+    const onFormEditSubmit = async (values: any) => {
+        const { name, phone, password } = values;
+        if (!name || !phone || !password) {
+
+            return api.open({
+                message: "Thiếu thông tin",
+                description: "Vui lòng điền đầy đủ thông tin",
+                duration: 3,
+                type: "error"
+            });
+        }
+        if (password !== "cskhxoxo@#") {
+
+            return api.open({
+                message: "Mật khẩu không hợp lệ",
+                description: "Vui lòng điền mật khẩu được cấp.",
+                duration: 3,
+                type: "error"
+            });
+        }
+        const timeSlotData = _.flatMap(Object.values(selectedBookedTimeSlots)).map((timeSlots: any) => {
+            return {
+                ...timeSlots,
+                bookedBy: { name, phone },
+                isChange: false
+            };
+        });
+
+        try {
+            const res = await sendUpdateSchedulesManual(timeSlotData, "update")
+            console.log("res", res)
+            setSelectedBookedTimeSlots({});
+        } catch (error) {
+            console.log("error", error)
+        }
+
+        // setSelected(defaultSelected);
+
+    }
+
     const onFormFinishUpdateInfo = async (values: any) => {
         setProcessing(true);
         const { name, phone, password } = values;
@@ -138,7 +208,6 @@ export default function useAdmin() {
                 bookedBy: { name, phone },
             };
         });
-        console.log(timeSlotData)
         try {
             const res = await sendUpdateSchedulesManual(timeSlotData)
             console.log("res", res)
@@ -258,6 +327,7 @@ export default function useAdmin() {
         }
 
     }
+
     const handleCellClick = (
         cell: any,
         tableIndex: number,
@@ -266,6 +336,23 @@ export default function useAdmin() {
         currentDate: Date,
         cluster: string
     ) => {
+        if (cell.status === "booked") {
+
+            if (cell.isChange) {
+                return setSelectedBookedTimeSlots((prevSlots: any) => ({
+                    ...prevSlots,
+                    [currentDate.toLocaleDateString()]: [
+                        ...(prevSlots[currentDate.toLocaleDateString()] || []),
+                        cell
+                    ]
+                }));
+            }
+            return setSelectedBookedTimeSlots((prevState: any) => {
+                const newState = { ...prevState };
+                delete newState[currentDate.toLocaleDateString()];
+                return newState;
+            });
+        }
         const row = facilities[currentDate.toDateString()][cluster][rowIndex];
         const detail: string = `${row.court} - ${cell.from} đến ${cell.to}`;
         let cloneSelected: any = { ...selected };
@@ -331,7 +418,6 @@ export default function useAdmin() {
                 rangefilter,
                 specificsDate
             ).then((data) => {
-                console.log("data", data)
                 const groupByDate = groupBy(data, "createdAt");
                 const mapped = Object.keys(groupByDate).reduce((memo: any, date) => {
                     const timeSlots = selectedTimeSlots[new Date(date).toLocaleDateString()] || []
@@ -412,6 +498,9 @@ export default function useAdmin() {
         defaultValue,
         discountInfo,
         discountCode,
+        selectedBookedTimeSlots,
+        onFormEditSubmit,
+        onFormUnlockSubmit,
         onChangeInfo,
         handleCellClick,
         handleScrollChange,
