@@ -3,6 +3,7 @@ import { Table } from "antd";
 import type { TableProps } from "antd";
 import HeaderCell from "./Table/HeaderCell";
 import timeSlots from "@/data/timeSlots.json";
+import { timeToMinutes } from "@/utils";
 
 const bgColors: any = {
   booked: "bg-red-400",
@@ -60,7 +61,7 @@ function generateTimeArray(
   cluster: string
 ): TableProps<DataType>["columns"] {
   return timeSlots[cluster as keyof typeof timeSlots].map(
-    ({ time, isNextDay }, index) => {
+    ({ time, isNextDay, subtitle }, index) => {
       const dataIndex = index;
 
       const nextDay = new Date(start);
@@ -71,11 +72,22 @@ function generateTimeArray(
           month: "2-digit",
         }).format(nextDay)})`
         : "";
+
       return {
-        title: `${time.trim()} ${nextDate}`,
+        title: `${time.trim()} ${nextDate} ${subtitle || ""}`,
         dataIndex,
         width: slotWidth,
         render: (value: any, _record: DataType, rowIndex: number) => {
+
+          const fromTime = timeToMinutes(value.from)
+          const toTime = timeToMinutes(value.to)
+         
+          const isDisable = fromTime <= timeToMinutes(new Date().toTimeString()) && toTime <= timeToMinutes(new Date().toTimeString())
+          if (isDisable) {
+            return <div className={`${value.status === "empty" ? "bg-gray-200" : bgCell[value.status]} bg-opacity-50 absolute inset-0`} />
+          }
+
+
           const handleNewBook = () => {
             if (isAdmin && value?.status === "booked") {
               value.isChange = !value.isChange
@@ -200,7 +212,7 @@ export default function ScheduleTable({
   return (
     <Table
       onScroll={handleScroll}
-      id={`table${tableInex}`}
+      id={`table${tableInex} `}
       className="schedule-table"
       columns={combinedColumns}
       bordered

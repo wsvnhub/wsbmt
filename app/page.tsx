@@ -18,7 +18,7 @@ interface PageState {
 const btnText = {
   schedule: "Tiếp theo",
   confirm: "Xác nhận và thanh toán",
-  info: "Đã thanh toán",
+  info: "Kiểm tra giao dịch",
   result: "Đặt thêm",
 };
 const nextPages = {
@@ -422,17 +422,17 @@ export default function Home() {
               >
                 Khách đặt lịch cố định: <br /> Gọi 0389145575
               </a>
-              <div className="w-7/12 lg:w-full flex items-center gap-2 lg:gap-6 text-[8px]">
+              <div className="w-7/12 lg:w-full flex items-center gap-2 lg:gap-6 text-sm">
                 <div className="flex items-center justify-center gap-2">
-                  <div className="bg-white w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md"></div>
+                  <div className="bg-white w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md" />
                   <span>Trống</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
-                  <div className="bg-red-400 w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md"></div>
+                  <div className="bg-red-400 w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md" />
                   <span>Đã đặt</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
-                  <div className="bg-yellow-500 w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md"></div>
+                  <div className="bg-yellow-500 w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md" />
                   <span>Đang chọn</span>
                 </div>
               </div>

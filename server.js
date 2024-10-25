@@ -206,7 +206,7 @@ app.prepare().then(async () => {
             phone: schedulesData.phone,
             email: schedulesData.email,
             san: schedulesData.details,
-            address: Object.values(schedulesData.facility).join(", "),
+            address: Object.values(schedulesData.address).join(", "),
             date: schedulesData.dates.join(", "),
             time: schedulesData.totalHours,
             quantity: schedulesData.timeSlots.length,
@@ -216,7 +216,7 @@ app.prepare().then(async () => {
             dat_co_dinh: schedulesData.isFixed ? "True" : "False",
           },
         };
-
+        
         const res = await createLarkRecord(newRecord);
         const recordId = res.data.record.record_id;
 

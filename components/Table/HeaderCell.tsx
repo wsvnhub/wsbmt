@@ -7,11 +7,12 @@ export default function HeaderCell(props: any) {
     return <th {...restProps} />;
   }
 
-  const [time, date] = text.split(" ");
+  const [time, date, subtitle] = text.split(" ");
   return (
     <th {...restProps}>
       {time}
       <p className="absolute bottom-0 right-2 text-primary text-[7px]">{date}</p>
+      <p className="absolute bottom-0 right-2 text-primary text-[7px]">{subtitle}</p>
     </th>
   );
 }
