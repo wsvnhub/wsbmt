@@ -18,7 +18,7 @@ interface PageState {
 const btnText = {
   schedule: "Tiếp theo",
   confirm: "Xác nhận và thanh toán",
-  info: "Đã thanh toán",
+  info: "Kiểm tra giao dịch",
   result: "Đặt thêm",
 };
 const nextPages = {
@@ -288,8 +288,8 @@ export default function Home() {
         const res = await createSchedules(newState, timeSlotData);
         if (!res.success) {
           return api.open({
-            message: "Giờ đặt không hợp lệ",
-            description: "Đã có người đặt sân vào thời gian này.",
+            message: "Ô giờ lỗi, để đặt ô giờ này, hãy gọi 0389145575 để được hỗ trợ",
+            description: "Gọi 0389145575 để được hỗ trợ",
             duration: 3000,
             type: "error",
           });
@@ -349,7 +349,7 @@ export default function Home() {
           <>
             <div className="flex justify-center items-center gap-4">
               <a href="https://diachi.ways.vn/san" target="_blank" className="text-white underline italic">
-                Bảng giá
+                Xem giá, hướng dẫn
               </a>
 
               <input
@@ -418,21 +418,21 @@ export default function Home() {
             <div className="w-full lg:w-auto flex flex-row-reverse lg:flex-col gap-2 lg:gap-4 items-center">
               <a
                 href="tel:0389145575"
-                className="w-5/12 text-right lg:hidden lg:w-full p-2 lg:py-2 lg:px-4 rounded-lg font-semibold italic text-[10px] lg:text-[15px] bg-gradient-to-b from-blue-500 to-cyan-500"
+                className="w-5/12 text-right lg:w-full p-2 lg:py-2 lg:px-4 rounded-lg font-semibold italic text-[10px] lg:text-[15px] bg-gradient-to-b from-blue-500 to-cyan-500"
               >
                 Khách đặt lịch cố định: <br /> Gọi 0389145575
               </a>
               <div className="w-7/12 lg:w-full flex items-center gap-2 lg:gap-6 text-[8px]">
                 <div className="flex items-center justify-center gap-2">
-                  <div className="bg-white w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md"></div>
+                  <div className="bg-white w-4 h-4 lg:w-8 lg:h-8 rounded-sm lg:rounded-md"></div>
                   <span>Trống</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
-                  <div className="bg-red-400 w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md"></div>
+                  <div className="bg-red-400 w-4 h-4 lg:w-8 lg:h-8 rounded-sm lg:rounded-md"></div>
                   <span>Đã đặt</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
-                  <div className="bg-yellow-500 w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md"></div>
+                  <div className="bg-yellow-500 w-4 h-4 lg:w-8 lg:h-8 rounded-sm lg:rounded-md"></div>
                   <span>Đang chọn</span>
                 </div>
               </div>
