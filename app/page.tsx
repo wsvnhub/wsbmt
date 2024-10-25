@@ -424,17 +424,6 @@ export default function Home() {
               </a>
               <div className="w-7/12 lg:w-full flex items-center gap-2 lg:gap-6 text-sm">
                 <div className="flex items-center justify-center gap-2">
-<<<<<<< HEAD
-                  <div className="bg-white w-4 h-4 lg:w-8 lg:h-8 rounded-sm lg:rounded-md"></div>
-                  <span>Trống</span>
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <div className="bg-red-400 w-4 h-4 lg:w-8 lg:h-8 rounded-sm lg:rounded-md"></div>
-                  <span>Đã đặt</span>
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <div className="bg-yellow-500 w-4 h-4 lg:w-8 lg:h-8 rounded-sm lg:rounded-md"></div>
-=======
                   <div className="bg-white w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md" />
                   <span>Trống</span>
                 </div>
@@ -444,7 +433,6 @@ export default function Home() {
                 </div>
                 <div className="flex items-center justify-center gap-2">
                   <div className="bg-yellow-500 w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md" />
->>>>>>> e11c12689bacfa1493a3ebe6d89874216c12a33b
                   <span>Đang chọn</span>
                 </div>
               </div>
