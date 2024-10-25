@@ -149,7 +149,7 @@ export default function useAdmin() {
                 type: "error"
             });
         }
-        if (password !== "cskhxoxo@#") {
+        if (password !== "TeamMate&2069") {
 
             return api.open({
                 message: "Mật khẩu không hợp lệ",
@@ -191,7 +191,11 @@ export default function useAdmin() {
             });
         }
 
+<<<<<<< HEAD
         if (password !== "cskhxoxo@#") {
+=======
+        if (password !== "cskhxoxo@# ") {
+>>>>>>> e11c12689bacfa1493a3ebe6d89874216c12a33b
             setProcessing(false);
             return api.open({
                 message: "Mật khẩu không hợp lệ",

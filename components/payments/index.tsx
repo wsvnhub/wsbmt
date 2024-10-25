@@ -74,6 +74,7 @@ export default function ConfirmPayments({
       email,
       applyDiscount: discountCode,
       totalPrice,
+      address: Object.keys(facility)?.map((key) => (facilitiesInfo[key].address))
     };
     handleChangePage(cloneDate);
   };

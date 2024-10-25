@@ -34,8 +34,10 @@ export default function WaitPayments({
   handleChangePage,
 }: WaitPaymentsProps) {
   const deadline = React.useRef(Date.now() + 1000 * 60 * 10).current;
+  const openDeadline = React.useRef(Date.now() + 1000 * 60 * 1).current;
   const [isLoading, setIsLoading] = React.useState(false);
   const [alertMessage, setAlertMessage] = React.useState<string>();
+  const [isOpenVerify, setOpenVerify] = React.useState(false)
 
 
   const onFinish: CountdownProps["onFinish"] = async () => {
@@ -58,6 +60,11 @@ export default function WaitPayments({
       setAlertMessage("Có lỗi xảy ra khi huỷ đơn hàng");
     }
   };
+
+  const onOpenVerify = async () => {
+    setOpenVerify(true)
+    await verifyStatus()
+  }
 
   const { transactionCode } = data;
   const { bankName, bankCode, bankUserName, qrCode } = paymentInfo;
@@ -112,7 +119,7 @@ export default function WaitPayments({
             </svg>
             <div className="flex w-full justify-center items-center">
               <h1 className="font-semibold text-center">
-                Thông tin thanh toán xác nhận tự động
+                Thông tin thanh toán xác nhận
               </h1>
             </div>
           </div>
@@ -127,14 +134,16 @@ export default function WaitPayments({
               <span className="text-[#fa9654]">
                 &nbsp;ghi đúng nội dung theo mã giao dịch ở trên
               </span>
-              &nbsp;để hệ thống xác nhận thành công tự động hoặc quét mã QR bên
+              &nbsp;để hệ thống xác nhận thành công hoặc quét mã QR bên
               dưới và
-              <span className="text-[#fa9654]"> không tắt trang này.</span>
+              <span className="text-[#fa9654]"> không tắt trang này. </span>
+              <span>Nhớ chọn <span className="text-[#fa9654]">"Kiểm tra giao dịch"</span> khi đã chuyển khoản để kiểm tra thành công. </span>
+              <span className="text-[#fa9654]">Ways không chịu trách nhiệm giữ sân</span> nếu bạn quên ấn nút "Kiểm tra giao dịch."
             </p>
           </div>
         </hgroup>
         <p className="font-semibold text-center">
-          Giữ chỗ chờ thanh toán trong 10 phút <br /> Không tắt trang này
+          Giữ chỗ chờ thanh toán trong 10 phút <br />  Nhớ ấn nút "Kiểm tra giao dịch" khi đã chuyển khoản <br /> Nút sẽ mở khoá sau 1 phút
         </p>
         {alertMessage && <p className="text-secondary">{alertMessage}</p>}
         <p className="font-semibold my-2">
@@ -145,6 +154,20 @@ export default function WaitPayments({
             onFinish={onFinish}
           />
         </p>
+
+        <Button
+          disabled={!data.totalPrice || !isOpenVerify}
+          loading={isLoading}
+          onClick={verifyStatus}
+          className="text-white border-0 w-full mb-6 bg-gradient-to-b from-blue-500 to-cyan-500 px-4 py-2 font-semibold rounded-md"
+        >
+          {!isOpenVerify ? <Statistic.Countdown
+            format="mm:ss"
+            title=""
+            value={openDeadline}
+            onFinish={onOpenVerify}
+          /> : btnText[currentPage]}
+        </Button>
         <div className="flex items-center p-2 bg-white rounded-lg">
           <Image
             width={150}
@@ -153,14 +176,6 @@ export default function WaitPayments({
             alt="QR code"
           />
         </div>
-        <Button
-          disabled={!data.totalPrice}
-          loading={isLoading}
-          onClick={verifyStatus}
-          className="text-white border-0 w-full mt-6 bg-gradient-to-b from-blue-500 to-cyan-500 px-4 py-2 font-semibold rounded-md"
-        >
-          {btnText[currentPage]}
-        </Button>
       </div>
     </div>
   );
