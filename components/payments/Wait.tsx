@@ -143,7 +143,7 @@ export default function WaitPayments({
           </div>
         </hgroup>
         <p className="font-semibold text-center">
-          Giữ chỗ chờ thanh toán trong 10 phút <br />  Nhớ ấn nút "Kiểm tra giao dịch" khi đã chuyển khoản <br /> Nút sẽ mở khoá sau 1 phút
+          Giữ chỗ chờ thanh toán trong 10 phút <br />  Nhớ ấn nút &quot;Kiểm tra giao dịch&quot; khi đã chuyển khoản <br /> Nút sẽ mở khoá sau 1 phút
         </p>
         {alertMessage && <p className="text-secondary">{alertMessage}</p>}
         <p className="font-semibold my-2">
