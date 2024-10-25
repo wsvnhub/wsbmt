@@ -137,8 +137,8 @@ export default function WaitPayments({
               &nbsp;để hệ thống xác nhận thành công hoặc quét mã QR bên
               dưới và
               <span className="text-[#fa9654]"> không tắt trang này. </span>
-              <span>Nhớ chọn <span className="text-[#fa9654]">"Kiểm tra giao dịch"</span> khi đã chuyển khoản để kiểm tra thành công. </span>
-              <span className="text-[#fa9654]">Ways không chịu trách nhiệm giữ sân</span> nếu bạn quên ấn nút "Kiểm tra giao dịch."
+              <span>Nhớ chọn <span className="text-[#fa9654]">Kiểm tra giao dịch</span> khi đã chuyển khoản để kiểm tra thành công. </span>
+              <span className="text-[#fa9654]">Ways không chịu trách nhiệm giữ sân</span> nếu bạn quên ấn nút &quot;Kiểm tra giao dịch.&quot;
             </p>
           </div>
         </hgroup>
