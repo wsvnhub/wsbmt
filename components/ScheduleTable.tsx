@@ -81,9 +81,9 @@ function generateTimeArray(
 
           const fromTime = timeToMinutes(value.from)
           const toTime = timeToMinutes(value.to)
-         
+
           const isDisable = fromTime <= timeToMinutes(new Date().toTimeString()) && toTime <= timeToMinutes(new Date().toTimeString())
-          if (isDisable) {
+          if (isDisable && start === new Date().toDateString()) {
             return <div className={`${value.status === "empty" ? "bg-gray-200" : bgCell[value.status]} bg-opacity-50 absolute inset-0`} />
           }
 
