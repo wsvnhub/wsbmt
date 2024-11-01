@@ -2,7 +2,7 @@ import { generateTimeArray } from "./genTimeSlotsByJson.js";
 import { ObjectId } from "mongodb";
 
 
-export const insertTimeslots = async ({ db }) => {
+export const insertTimeslots = async ({ db, courtIds = [] }) => {
     let month = new Date().getMonth()
     while (month < 12) {
         const lastDate = new Date(
@@ -11,8 +11,8 @@ export const insertTimeslots = async ({ db }) => {
             0
         ).getDate();
         let i = new Date(new Date().getFullYear(), month, 1).getDate();
-
-        const courts = await db.collection("courts").find().toArray();
+        const filterCourt = courtIds.length > 0 ? { id: { $in: courtIds } } : {};
+        const courts = await db.collection("courts").find(filterCourt).toArray();
         console.log(i, lastDate);
 
         while (i <= lastDate) {

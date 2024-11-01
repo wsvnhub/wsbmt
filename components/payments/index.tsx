@@ -51,7 +51,7 @@ export default function ConfirmPayments({
 }: ConfirmPaymentsProps) {
   const { details, totalHours, dates, facility } = data;
   const pricePerHour = Number(data.totalPrice) / Number(data.totalHours);
-
+  
   const [discountCode, setDiscountCode] = React.useState("");
   const [discountMessage, setDiscountMessage] = React.useState("");
   const [discountInfo, setDiscountInfo] = React.useState({
@@ -74,7 +74,7 @@ export default function ConfirmPayments({
       email,
       applyDiscount: discountCode,
       totalPrice,
-      address: Object.keys(facility)?.map((key) => (facilitiesInfo[key].address))
+      address: Object.keys(facility)?.map((key) => (facilitiesInfo[key].id))
     };
     handleChangePage(cloneDate);
   };

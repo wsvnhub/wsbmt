@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
 import clientPromise from '@/lib/mongo';
+import { insertTimeslots } from '@/utils/insertTimeSlots';
 
 export async function GET(request: Request) {
     try {
@@ -7,7 +8,7 @@ export async function GET(request: Request) {
         const db = client.db();
         const timeSlots = db.collection("timeslots");
 
-        const data = await timeSlots.find({}).toArray();
+        const data = await timeSlots.find().limit(10).toArray();
         return Response.json(data);
     } catch (error) {
         console.error("Error:", error);
@@ -17,13 +18,13 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     try {
-        const { timeSlotsData } = await request.json();
+        const { courtIds } = await request.json();
         const client = await clientPromise;
         const db = client.db();
         const timeSlots = db.collection("timeslots");
-
-        const result = await timeSlots.insertMany(timeSlotsData);
-        return Response.json({ message: "Time slots created", insertedCount: result.insertedCount }, { status: 201 });
+        await insertTimeslots({ db, courtIds })
+        // const result = await timeSlots.insertMany(timeSlotsData);
+        return Response.json({ message: "Time slots created", insertedCount: courtIds }, { status: 201 });
     } catch (error) {
         console.error("Error:", error);
         return Response.json({ message: "Internal server error" }, { status: 500 });

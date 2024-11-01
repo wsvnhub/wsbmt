@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     const db = client.db();
     const courtData = await request.json();
 
-    if (!courtData.id || !courtData.name || !courtData.facilityId) {
+    if (!courtData.id || !courtData.name || !courtData.facilitiyId) {
       return Response.json({ error: "Missing required fields" }, { status: 400 });
     }
 

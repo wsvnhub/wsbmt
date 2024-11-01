@@ -104,9 +104,17 @@ const updateTimeSlot = async ({ timeSlotsData, collection, action = "add" }) => 
   return Promise.allSettled(updatePromises);
 };
 
+const statificBookedHours = ({ collection }) => {
+  const results = collection.find({})
+}
+
 app.prepare().then(async () => {
   const httpServer = createServer(handler);
   const { mongoPool } = await initDB();
+
+  // new CronJob('0 0 * * *', () => {
+  //   statificBookedHours()
+  // }, null, true, 'Asia/Ho_Chi_Minh').start()
 
   new CronJob('0 0 1 1 *', async () => {
     await insertTimeslots({ db: mongoPool });
@@ -126,7 +134,12 @@ app.prepare().then(async () => {
 
     socket.on("app:info", async (arg, callback) => {
       const [facilitiesData, paymentInfoData] = await Promise.all([
-        mongoPool.collection("facilities").find().toArray(),
+        mongoPool.collection("facilities").find({
+          $or: [
+            { isAvaliable: true },
+            { isAvaliable: { $exists: false } }
+          ]
+        }).toArray(),
         mongoPool.collection("paymentInfo").find().toArray(),
       ]);
 
@@ -216,7 +229,7 @@ app.prepare().then(async () => {
             dat_co_dinh: schedulesData.isFixed ? "True" : "False",
           },
         };
-        
+
         const res = await createLarkRecord(newRecord);
         const recordId = res.data.record.record_id;
 

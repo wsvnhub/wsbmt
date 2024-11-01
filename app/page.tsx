@@ -58,8 +58,8 @@ export default function Home() {
   const [facilitiesInfo, setfacilitiesInfo] = useState<{
     [key: string]: FacilitiesInfo;
   }>({});
+  const [listFac, setListFac] = React.useState<FacilitiesInfo[]>([])
   const [selectedFacInfo, setSelectedFacInfo] = useState<FacilitiesInfo[]>([]);
-
 
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selected, setSelected] = useState<any>({
@@ -94,6 +94,7 @@ export default function Home() {
       setPaymentInfo(data.paymentInfo[0]);
       setfacilitiesInfo(keyBy(data.facilities, "id"));
       setSelectedFacInfo(data.facilities);
+      setListFac(data.facilities)
       setPricePerHour(data.facilities[0].pricePerHour);
     });
   }, [getInfo]);
@@ -108,6 +109,7 @@ export default function Home() {
         },
         [selectedDate.toDateString()]
       ).then((data) => {
+        console.log("data", data)
         const grouped = groupBy(data, "timeClusterId")
         if (grouped) {
           let i = 0
@@ -370,7 +372,27 @@ export default function Home() {
               />
             </div>
             <div className="lg:my-4">
-              <Checkbox
+              {listFac.map((f => {
+                console.log("f", f)
+                return <>
+                  <Checkbox
+                    defaultChecked
+                    name={f.id}
+                    onChange={(e) =>
+                      handleChangeFacilitiesInfo(
+                        e.target.name || "",
+                        e.target.checked
+                      )
+                    }
+                  >
+                    <p className="text-white text-md">
+                      {f.id.split(' ')[1]} = {f.address}
+                    </p>
+                  </Checkbox>
+                  <p></p>
+                </>
+              }))}
+              {/* <Checkbox
                 defaultChecked
                 name="CN NVL"
                 onChange={(e) =>
@@ -413,7 +435,7 @@ export default function Home() {
                 <p className="text-white text-md">
                   NQA = Sân Nguyễn Quý Anh, Tân Phú
                 </p>
-              </Checkbox>
+              </Checkbox> */}
             </div>
             <div className="w-full lg:w-auto flex flex-row-reverse lg:flex-col gap-2 lg:gap-4 items-center">
               <a
