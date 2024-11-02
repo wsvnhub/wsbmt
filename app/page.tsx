@@ -109,7 +109,7 @@ export default function Home() {
         },
         [selectedDate.toDateString()]
       ).then((data) => {
-        console.log("data", data)
+       
         const grouped = groupBy(data, "timeClusterId")
         if (grouped) {
           let i = 0

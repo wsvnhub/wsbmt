@@ -55,6 +55,8 @@ export default function useAdmin() {
         new Date().toDateString(),
     ]);
 
+    const [listFac, setListFac] = React.useState<FacilitiesInfo[]>([])
+    
     const [discountCode, setDiscountCode] = React.useState("");
     const [discountInfo, setDiscountInfo] = React.useState({
         value: 0,
@@ -405,6 +407,7 @@ export default function useAdmin() {
             // setPaymentInfo(data.paymentInfo[0]);
             setfacilitiesInfo(keyBy(data.facilities, "id"));
             setSelectedFacInfo(data.facilities);
+            setListFac(data.facilities)
             setPricePerHour(data.facilities[0].pricePerHour);
         });
     }, [getInfo]);
@@ -490,6 +493,7 @@ export default function useAdmin() {
         isLoading,
         isFixed,
         selected,
+        listFac,
         isProcessing,
         isShowModel,
         facilities,

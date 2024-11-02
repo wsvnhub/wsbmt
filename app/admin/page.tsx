@@ -48,6 +48,7 @@ export default function Page() {
     isProcessing,
     isShowModel,
     facilities,
+    listFac,
     contextHolder,
     pricePerHour,
     defaultValue,
@@ -211,7 +212,27 @@ export default function Page() {
             />
           </div>
           <div className="lg:my-4">
-            <Checkbox
+          {listFac.map((f => {
+                console.log("f", f)
+                return <>
+                  <Checkbox
+                    defaultChecked
+                    name={f.id}
+                    onChange={(e) =>
+                      handleChangeFacilitiesInfo(
+                        e.target.name || "",
+                        e.target.checked
+                      )
+                    }
+                  >
+                    <p className="text-white text-md">
+                      {f.id.split(' ')[1]} = {f.address}
+                    </p>
+                  </Checkbox>
+                  <p></p>
+                </>
+              }))}
+            {/* <Checkbox
               defaultChecked
               name="CN NVL"
               onChange={(e) =>
@@ -254,7 +275,7 @@ export default function Page() {
               <p className="text-white text-base">
                 NQA = Sân Nguyễn Quý Anh, Tân Phú
               </p>
-            </Checkbox>
+            </Checkbox> */}
           </div>
           <div className="flex flex-col lg:flex-row gap-2 items-center">
 
