@@ -213,7 +213,6 @@ export default function Page() {
           </div>
           <div className="lg:my-4">
           {listFac.map((f => {
-                console.log("f", f)
                 return <>
                   <Checkbox
                     defaultChecked

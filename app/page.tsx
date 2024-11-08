@@ -190,6 +190,7 @@ export default function Home() {
     cluster: string
   ) => {
     const row = facilities[cluster][rowIndex];
+    console.log("row",new Date(row.createdAt))
     const detail: string = `${row.court} - ${cell.from} đến ${cell.to}`;
     let cloneSelected: any = { ...selected };
 
@@ -373,7 +374,6 @@ export default function Home() {
             </div>
             <div className="lg:my-4">
               {listFac.map((f => {
-                console.log("f", f)
                 return <>
                   <Checkbox
                     defaultChecked
