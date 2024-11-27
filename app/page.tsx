@@ -62,6 +62,7 @@ export default function Home() {
   const [selectedFacInfo, setSelectedFacInfo] = useState<FacilitiesInfo[]>([]);
 
   const [selectedDate, setSelectedDate] = useState(new Date());
+
   const [selected, setSelected] = useState<any>({
     totalHours: 0,
     totalPrice: 0,
@@ -109,7 +110,7 @@ export default function Home() {
         },
         [selectedDate.toDateString()]
       ).then((data) => {
-       
+
         const grouped = groupBy(data, "timeClusterId")
         if (grouped) {
           let i = 0
@@ -190,7 +191,7 @@ export default function Home() {
     cluster: string
   ) => {
     const row = facilities[cluster][rowIndex];
-    console.log("row",new Date(row.createdAt))
+
     const detail: string = `${row.court} - ${cell.from} đến ${cell.to}`;
     let cloneSelected: any = { ...selected };
 
@@ -222,6 +223,7 @@ export default function Home() {
       cloneSelected.details = cloneSelected.details.filter(
         (item: any) => item !== detail
       );
+     
       const currentDateSlots = selectedTimeSlots[selectedDate.toLocaleDateString()] || [];
       const filtered = currentDateSlots.filter(
         (item: any) => item.id !== row.courtId || item.facility !== row.facility
@@ -238,15 +240,19 @@ export default function Home() {
         setSelectedTimeSlots(newSelectedTimeSlots);
       }
     }
-
     setFacilities((preState: any) => {
       preState[cluster][rowIndex][columnIndex] = cell;
       return { ...preState };
     });
-
+    
     return setSelected((preState: any) => {
       let totalHours = preState.totalHours;
-      preState.facility[row.facility] = row.facility;
+
+      if (cell.status === "pending") {
+        preState.facility[row.facility] = row.facility;
+      } else {
+        delete preState.facility[row.facility];
+      }
       totalHours += cell.status === "pending" && totalHours >= 0 ? 1 : -1;
       return { ...preState, totalHours, details: cloneSelected.details };
     });
@@ -357,19 +363,20 @@ export default function Home() {
 
               <input
                 onChange={(e) => {
-                  const value = e.target.value
-                  let date = new Date()
+                  const value = e.target.value;
+                  const currentDate = new Date();
+                  let date = new Date(currentDate);
                   if (value !== "") {
-                    date = new Date(value)
+                    date = new Date(value);
                   }
-                  setSelectedDate(date)
+                  setSelectedDate(date);
                 }}
                 className="bg-white text-primary font-semibold pl-6 pr-2 py-2 rounded-md"
                 type="date"
                 min={new Date().toLocaleDateString('en-ca')}
                 placeholder="dd-mm-yyyy"
                 onKeyDown={(e) => e.preventDefault()}
-                value={selectedDate.toISOString().substring(0, 10)}
+                value={selectedDate.toLocaleDateString('en-ca')}
               />
             </div>
             <div className="lg:my-4">
@@ -392,50 +399,7 @@ export default function Home() {
                   <p></p>
                 </>
               }))}
-              {/* <Checkbox
-                defaultChecked
-                name="CN NVL"
-                onChange={(e) =>
-                  handleChangeFacilitiesInfo(
-                    e.target.name || "",
-                    e.target.checked
-                  )
-                }
-              >
-                <p className="text-white text-md">
-                  NVL = Sân Nguyễn Văn Lượng, Gò Vấp
-                </p>
-              </Checkbox>
-              <p></p>
-              <Checkbox
-                defaultChecked
-                onChange={(e) =>
-                  handleChangeFacilitiesInfo(
-                    e.target.name || "",
-                    e.target.checked
-                  )
-                }
-                name="CN DQH"
-              >
-                <p className="text-white text-md">
-                  DQH = Sân Dương Quảng Hàm, Gò Vấp
-                </p>
-              </Checkbox>
-              <p></p>
-              <Checkbox
-                defaultChecked
-                onChange={(e) =>
-                  handleChangeFacilitiesInfo(
-                    e.target.name || "",
-                    e.target.checked
-                  )
-                }
-                name="CN NQA"
-              >
-                <p className="text-white text-md">
-                  NQA = Sân Nguyễn Quý Anh, Tân Phú
-                </p>
-              </Checkbox> */}
+
             </div>
             <div className="w-full lg:w-auto flex flex-row-reverse lg:flex-col gap-2 lg:gap-4 items-center">
               <a

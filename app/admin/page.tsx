@@ -231,50 +231,7 @@ export default function Page() {
                   <p></p>
                 </>
               }))}
-            {/* <Checkbox
-              defaultChecked
-              name="CN NVL"
-              onChange={(e) =>
-                handleChangeFacilitiesInfo(
-                  e.target.name || "",
-                  e.target.checked
-                )
-              }
-            >
-              <p className="text-white text-base">
-                NVL = Sân Nguyễn Văn Lượng, Gò Vấp
-              </p>
-            </Checkbox>
-            <p></p>
-            <Checkbox
-              defaultChecked
-              onChange={(e) =>
-                handleChangeFacilitiesInfo(
-                  e.target.name || "",
-                  e.target.checked
-                )
-              }
-              name="CN DQH"
-            >
-              <p className="text-white text-base">
-                DQH = Sân Dương Quảng Hàm, Gò Vấp
-              </p>
-            </Checkbox>
-            <p></p>
-            <Checkbox
-              defaultChecked
-              name="CN NQA"
-              onChange={(e) =>
-                handleChangeFacilitiesInfo(
-                  e.target.name || "",
-                  e.target.checked
-                )
-              }
-            >
-              <p className="text-white text-base">
-                NQA = Sân Nguyễn Quý Anh, Tân Phú
-              </p>
-            </Checkbox> */}
+            
           </div>
           <div className="flex flex-col lg:flex-row gap-2 items-center">
 
