@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("Error fetching facilities:", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
-  } 
+  }
 }
 
 export async function POST(request: Request) {
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     const db = client.db();
     const facilityData = await request.json();
 
-    if (!facilityData.id || !facilityData.name || !facilityData.address || !facilityData.pricePerHour) {
+    if (!facilityData.id || !facilityData.name || !facilityData.address || !facilityData.pricePerHour || !facilityData.openAt) {
       return Response.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error creating facility:", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
-  } 
+  }
 }
 
 export async function PUT(request: Request) {
@@ -79,7 +79,9 @@ export async function DELETE(request: Request) {
     if (result.deletedCount === 0) {
       return Response.json({ error: "Facility not found" }, { status: 404 });
     }
-
+    
+    const timeslotsDeleted = await db.collection("timeslots").deleteMany({ facility: id });
+    console.log("√",timeslotsDeleted)
     return Response.json({ message: "Facility deleted successfully" }, { status: 200 });
   } catch (error) {
     console.error("Error deleting facility:", error);

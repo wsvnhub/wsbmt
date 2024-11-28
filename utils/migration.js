@@ -49,7 +49,14 @@ const initDB = async () => {
                 id: "CN NQA",
                 name: "CN Nguyễn Quý Anh",
                 address: "86 Nguyễn Quý Anh, Tân Phú",
-                pricePerHour: "119000",
+                pricePerHour: "139000",
+                createdAt: new Date().getTime(),
+            },
+            {
+                id: "CN HB",
+                name: "CN Hoà Bình",
+                address: "135 Hiệp Bình, Thủ Đức",
+                pricePerHour: "139000",
                 createdAt: new Date().getTime(),
             },
         ]);
@@ -209,6 +216,13 @@ const initDB = async () => {
                 timeClusterId: "cluster3",
                 createdAt: new Date().getTime(),
             },
+            {
+                facilitiyId: "CN HB",
+                "id": "HB-1",
+                "name": "Sân 1",
+                timeClusterId: "cluster1",
+                createdAt: new Date().getTime(),
+            }
         ]);
 
         await insertTimeslots({ db })
