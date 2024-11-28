@@ -56,7 +56,7 @@ export default function useAdmin() {
     ]);
 
     const [listFac, setListFac] = React.useState<FacilitiesInfo[]>([])
-    
+
     const [discountCode, setDiscountCode] = React.useState("");
     const [discountInfo, setDiscountInfo] = React.useState({
         value: 0,
@@ -403,7 +403,7 @@ export default function useAdmin() {
     const defaultValue = [dayjs()];
 
     React.useEffect(() => {
-        getInfo().then((data) => {
+        getInfo({ isAdmin: true, selectedDate: new Date() }).then((data) => {
             // setPaymentInfo(data.paymentInfo[0]);
             setfacilitiesInfo(keyBy(data.facilities, "id"));
             setSelectedFacInfo(data.facilities);

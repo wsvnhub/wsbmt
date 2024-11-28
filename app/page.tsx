@@ -91,14 +91,14 @@ export default function Home() {
    * @AddGlobalPricePerHour
    */
   React.useEffect(() => {
-    getInfo().then((data) => {
-      setPaymentInfo(data.paymentInfo[0]);
+    getInfo({ selectedDate }).then((data) => {
       setfacilitiesInfo(keyBy(data.facilities, "id"));
-      setSelectedFacInfo(data.facilities);
       setListFac(data.facilities)
-      setPricePerHour(data.facilities[0].pricePerHour);
+      setSelectedFacInfo(data.facilities);
+      setPaymentInfo(data.paymentInfo[0]);
+      setPricePerHour(data.facilities[0]?.pricePerHour);
     });
-  }, [getInfo]);
+  }, [getInfo, selectedDate]);
 
   React.useEffect(() => {
     if (selectedFacInfo.length > 0) {
@@ -223,7 +223,7 @@ export default function Home() {
       cloneSelected.details = cloneSelected.details.filter(
         (item: any) => item !== detail
       );
-     
+
       const currentDateSlots = selectedTimeSlots[selectedDate.toLocaleDateString()] || [];
       const filtered = currentDateSlots.filter(
         (item: any) => item.id !== row.courtId || item.facility !== row.facility
@@ -244,7 +244,7 @@ export default function Home() {
       preState[cluster][rowIndex][columnIndex] = cell;
       return { ...preState };
     });
-    
+
     return setSelected((preState: any) => {
       let totalHours = preState.totalHours;
 

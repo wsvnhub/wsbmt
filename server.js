@@ -104,9 +104,9 @@ const updateTimeSlot = async ({ timeSlotsData, collection, action = "add" }) => 
   return Promise.allSettled(updatePromises);
 };
 
-const statificBookedHours = ({ collection }) => {
-  const results = collection.find({})
-}
+// const statificBookedHours = ({ collection }) => {
+//   const results = collection.find({})
+// }
 
 app.prepare().then(async () => {
   const httpServer = createServer(handler);
@@ -124,34 +124,49 @@ app.prepare().then(async () => {
   const io = new Server(httpServer);
 
   io.on("connection", async (socket) => {
-    const ip = socket.handshake.headers['x-forwarded-for'] ||
-      socket.handshake.address ||
+    const ip = socket.request.headers['x-forwarded-for'] ||
       socket.request.connection.remoteAddress ||
+      socket.handshake.address ||
       null;
 
     console.log("Connected", socket.id);
     logger.info(`User IP ${ip}`);
 
-    socket.on("app:info", async (arg, callback) => {
-      const [facilitiesData, paymentInfoData] = await Promise.all([
-        mongoPool.collection("facilities").find({
-          $or: [
-            { isAvaliable: true },
-            { isAvaliable: { $exists: false } }
-          ]
-        }).toArray(),
-        mongoPool.collection("paymentInfo").find().toArray(),
-      ]);
+    socket.on("app:info", async (args, callback) => {
+      const { selectedDate, isAdmin } = args
 
-      callback({ facilities: facilitiesData, paymentInfo: paymentInfoData });
+      let facilitiesData = await mongoPool.collection("facilities").find({
+        $or: [
+          { isAvaliable: true },
+          { isAvaliable: { $exists: false } }
+        ],
+      }).toArray();
+
+      if (!isAdmin) {
+        const selectedDateTime = new Date(selectedDate).getTime();
+        facilitiesData = facilitiesData.filter(item => {
+          const openAtTime = item.openAt ? new Date(item.openAt).getTime() : new Date(item.createdAt).getTime();
+          return openAtTime <= selectedDateTime;
+        });
+      }
+
+      const paymentInfoData = await mongoPool.collection("paymentInfo").find().toArray();
+
+      return callback({ facilities: facilitiesData, paymentInfo: paymentInfoData });
     });
 
     socket.on("schedules:list", async ({ facilitiyIds, range, dates }, callback) => {
 
+      if ((!range.startDate || !range.endDate) && dates.length === 0) {
+
+        return callback({ data: [] })
+      }
       const filter = { facility: { $in: facilitiyIds } };
+
       if (dates.length > 0) {
         filter.createdAt = { $in: dates };
       }
+
       if (range.startDate && range.endDate) {
         filter.createdAt = {
           $gte: new Date(range.startDate),
@@ -194,6 +209,7 @@ app.prepare().then(async () => {
       const id = new ObjectId().toString();
 
       try {
+
         const isExist = await schedules.findOne({
           details: new RegExp(schedulesData.details, "i"),
           status: "wait",

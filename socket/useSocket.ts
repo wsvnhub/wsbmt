@@ -32,10 +32,11 @@ export default function useSocket() {
       socket.off("disconnect", onDisconnect);
     };
   }, []);
-  const getInfo = React.useCallback(async () => {
-
+  const getInfo = React.useCallback(async ({ selectedDate, isAdmin = false, size = 10 }: any) => {
     const res = await socket.emitWithAck("app:info", {
-      size: 10,
+      size,
+      selectedDate,
+      isAdmin
     });
     return res;
   }, []);
