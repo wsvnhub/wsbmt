@@ -12,7 +12,7 @@ export default function Page(props: any) {
   const [data, setData] = React.useState<any>({});
   const [paymentInfo, setPaymentInfo] = React.useState({});
   React.useEffect(() => {
-    getInfo().then((data) => {
+    getInfo({ selectedDate: new Date() }).then((data) => {
       setPaymentInfo(data.paymentInfo[0]);
     });
   }, [getInfo]);

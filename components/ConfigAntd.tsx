@@ -58,7 +58,18 @@ export default function ConfigAntd({ children }: any) {
             contentBg: "#029d81",
             headerBg: "transparent",
             titleColor: "white",
-          }
+          },
+          Layout: {
+            headerBg:"#047862",
+            siderBg: "#fff",
+            lightSiderBg:"#047862",
+            lightTriggerBg:"#047862",
+            colorText:"white",
+          },
+          Menu:{
+
+          },
+        
         },
       }}
     >

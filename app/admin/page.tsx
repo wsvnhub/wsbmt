@@ -4,6 +4,7 @@ import {
   Button,
   Checkbox,
   DatePicker,
+  Empty,
   Form,
   Input,
   Modal
@@ -73,6 +74,8 @@ export default function Page() {
   if (isLoading) {
     return <Loader />;
   }
+  const keys = Object.keys(facilities)
+
   return (
     <>
       {isShowModel && <Modal
@@ -212,26 +215,26 @@ export default function Page() {
             />
           </div>
           <div className="lg:my-4">
-          {listFac.map((f => {
-                return <>
-                  <Checkbox
-                    defaultChecked
-                    name={f.id}
-                    onChange={(e) =>
-                      handleChangeFacilitiesInfo(
-                        e.target.name || "",
-                        e.target.checked
-                      )
-                    }
-                  >
-                    <p className="text-white text-md">
-                      {f.id.split(' ')[1]} = {f.address}
-                    </p>
-                  </Checkbox>
-                  <p></p>
-                </>
-              }))}
-            
+            {listFac.map((f => {
+              return <>
+                <Checkbox
+                  defaultChecked
+                  name={f.id}
+                  onChange={(e) =>
+                    handleChangeFacilitiesInfo(
+                      e.target.name || "",
+                      e.target.checked
+                    )
+                  }
+                >
+                  <p className="text-white text-md">
+                    {f.id.split(' ')[1]} = {f.address}
+                  </p>
+                </Checkbox>
+                <p></p>
+              </>
+            }))}
+
           </div>
           <div className="flex flex-col lg:flex-row gap-2 items-center">
 
@@ -259,37 +262,40 @@ export default function Page() {
       <main className="bg-white">
         <div className="pb-12">
           <div className="flex flex-col gap-4">
-            {Object.keys(facilities).map((date, index) => {
-              return (
-                <div
-                  key={index}
-                  className={`${bgColor[index < bgColor.length ? index : 0]
-                    } px-2 pb-6 pt-4`}
-                >
-                  <p className="text-primary text-md font-semibold mb-2">
-                    {dayjs(date).format("dd")} {dayjs(date).format("DD/MM")}
-                  </p>
-                  <div className="flex flex-col gap-4">
-                    {clusters.map(({ id }, index) => {
-                      return (
-                        <ScheduleTable
-                          isAdmin
-                          key={index}
-                          tableInex={index}
-                          slotWidth={60}
-                          data={facilities[date][id]}
-                          bgCell={bgCell}
-                          cluster={id}
-                          selectedDate={new Date(date)}
-                          handleCellClick={handleCellClick}
-                          handleScrollChange={handleScrollChange}
-                        />
-                      );
-                    })}
+            {keys.length === 0 ? <div className="my-6">
+              <Empty />
+            </div>
+              : keys.map((date, index) => {
+                return (
+                  <div
+                    key={index}
+                    className={`${bgColor[index < bgColor.length ? index : 0]
+                      } px-2 pb-6 pt-4`}
+                  >
+                    <p className="text-primary text-md font-semibold mb-2">
+                      {dayjs(date).format("dd")} {dayjs(date).format("DD/MM")}
+                    </p>
+                    <div className="flex flex-col gap-4">
+                      {clusters.map(({ id }, index) => {
+                        return (
+                          <ScheduleTable
+                            isAdmin
+                            key={index}
+                            tableInex={index}
+                            slotWidth={60}
+                            data={facilities[date][id]}
+                            bgCell={bgCell}
+                            cluster={id}
+                            selectedDate={new Date(date)}
+                            handleCellClick={handleCellClick}
+                            handleScrollChange={handleScrollChange}
+                          />
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
         </div>
       </main>
