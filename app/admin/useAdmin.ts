@@ -2,7 +2,7 @@ import React from 'react'
 import { useRouter } from "next/navigation";
 import useSocket from "@/socket/useSocket";
 import dayjs, { Dayjs } from "dayjs";
-import { FacilitiesInfo } from "../page2";
+import { FacilitiesInfo } from "../page";
 import clusters from "@/data/clusters.json";
 
 import { groupBy, keyBy } from "lodash";
