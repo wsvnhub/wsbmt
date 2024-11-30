@@ -60,16 +60,16 @@ export default function ConfigAntd({ children }: any) {
             titleColor: "white",
           },
           Layout: {
-            headerBg:"#047862",
+            headerBg: "#047862",
             siderBg: "#fff",
-            lightSiderBg:"#047862",
-            lightTriggerBg:"#047862",
-            colorText:"white",
+            lightSiderBg: "#047862",
+            lightTriggerBg: "#047862",
+            colorText: "white",
           },
-          Menu:{
+          Button: {
+            colorPrimary: "#029d81"
+          },
 
-          },
-        
         },
       }}
     >

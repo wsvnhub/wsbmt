@@ -11,6 +11,7 @@ const collections = [
     "promotions",
     "courts",
     "timeslots",
+    // "calendar"
 ];
 
 const initDB = async () => {
@@ -85,6 +86,13 @@ const initDB = async () => {
             bankUserName: "NGUYEN THI AI NHAN",
             qrCode: "https://qr.sepay.vn/img?acc=688112688&bank=MBBank&amount={AMOUNT}&des={CODE}",
         });
+
+        // await db.collection("calendar").insertOne({
+        //     id: new ObjectId().toString(),
+        //     date: "2024-11-29",
+        //     notes: "",
+        //     createdAt: new Date()
+        // });
         await db.collection("promotions").insertMany([
             {
                 id: new ObjectId().toString(),

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from 'antd';
 import axios from 'axios';
+// import json from './bk.json'
 
 
 export default function Page() {
@@ -37,7 +38,7 @@ export default function Page() {
 
 
     return (
-        <div >
+        <div className='text-black'>
             <h1>File Import/Export</h1>
             <div className='flex gap-4'>
                 <input type="file" accept=".json" onChange={handleFileChange} /> {/* Accept only JSON files */}

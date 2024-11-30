@@ -10,11 +10,13 @@ import {
     HarmonyOSOutlined
 } from '@ant-design/icons';
 import { Button, Layout, Menu, theme } from 'antd';
+import { useRouter } from 'next/navigation';
 
 const { Header, Sider, Content } = Layout;
 
 const SettingsLayout = ({ children }: any) => {
     const [collapsed, setCollapsed] = useState(false);
+    const navigation = useRouter()
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
@@ -26,31 +28,33 @@ const SettingsLayout = ({ children }: any) => {
                 <Menu
                     onClick={({ item, key, keyPath, domEvent }) => {
                         console.log("keyPath", keyPath, key)
+                        
+                        return navigation.push(`/admin/settings/${key}`)
                     }}
                     mode="inline"
                     defaultSelectedKeys={['1']}
                     items={[
                         {
-                            key: '0',
+                            key: '/admin/settings',
                             icon: <HarmonyOSOutlined />,
                         },
                         {
-                            key: '1',
+                            key: 'branchs',
                             icon: <PushpinOutlined />,
                             label: 'Chi nhánh',
                         },
                         {
-                            key: '2',
+                            key: 'coupon',
                             icon: <PercentageOutlined />,
                             label: 'Mã giảm',
                         },
                         {
-                            key: '3',
+                            key: 'calendar',
                             icon: <CalendarOutlined />,
                             label: 'Mở thêm tháng',
                         },
                         {
-                            key: '4',
+                            key: 'backup',
                             icon: <CloudDownloadOutlined />,
                             label: 'Sao lưu',
                         },
