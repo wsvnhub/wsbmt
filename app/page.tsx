@@ -4,7 +4,10 @@ import ScheduleTable from "@/components/ScheduleTable";
 import ConfirmPayments from "@/components/payments";
 import WaitPayments from "@/components/payments/Wait";
 import ResultPayments from "@/components/payments/Result";
-import { Checkbox, notification } from "antd";
+
+import { Alert, Checkbox, notification } from "antd";
+import Marquee from 'react-fast-marquee';
+
 import useSocket from "@/socket/useSocket";
 import Loader from "@/components/Loader";
 import { groupBy, keyBy } from "lodash";
@@ -338,13 +341,18 @@ export default function Home() {
   return (
     <>
       {isSchedule && (
-        <p className="hidden lg:block sticky top-0 left-0 z-40">
+        <p className="hidden lg:block sticky top-0 left-0 z-40 bg-primary">
           Để xem giờ tối: Nhấn giữ Shift và Scroll để cuộn ngang
         </p>
       )}
+      <Alert className="sticky top-6 left-0 z-40" banner message={
+        <Marquee pauseOnHover gradient={false}>
+          (Quý KH thuê sân để tổ chức giải hoặc ghi hình cần liên hệ 0389145575 trước, nếu không, Ways có quyền từ chối)
+        </Marquee>
+      } />
       {contextHolder}
       <header
-        className={`${headerPadding} lg:sticky bg-primary top-0 flex flex-col lg:flex-row items-center lg:gap-4 gap-2 justify-between z-30`}
+        className={`${headerPadding} lg:sticky bg-primary top-8 flex flex-col lg:flex-row items-center lg:gap-4 gap-2 justify-between z-30`}
       >
         <h1 className="text-lg lg:text-xl font-semibold my-2 text-center lg:text-left lg:mb-0">
           {isSchedule && (
@@ -425,6 +433,7 @@ export default function Home() {
             </div>
           </>
         )}
+
       </header>
 
       {isSchedule && (
