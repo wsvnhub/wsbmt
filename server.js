@@ -70,8 +70,8 @@ const initDB = async () => {
 
   try {
     mongoClient = new MongoClient(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+      // useNewUrlParser: true,
+      // useUnifiedTopology: true,
       connectTimeoutMS: 10000,
       socketTimeoutMS: 45000,
     });
