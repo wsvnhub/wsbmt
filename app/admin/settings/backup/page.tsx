@@ -34,7 +34,7 @@ export default function Page() {
         await axios.post('/api/backup', importFileData)
         return setImportFileData(null)
     }
-    const loadData = () => axios.get('/api/backup').then(res => setFileData(res.data))
+    const loadData = () => axios.get('/api/backup').then(res => setFileData(res.data.data))
 
 
     return (

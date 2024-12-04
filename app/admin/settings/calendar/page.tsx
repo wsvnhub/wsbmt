@@ -54,11 +54,13 @@ const CalendarPage: React.FC = () => {
 
   React.useEffect(() => {
     fetch("/api/calendar").then(res => res.json()).then(res => {
-      console.log(res.data)
       setListData(res.data.map((item: any) => {
         const { fromDate, notes, toDate } = item
         return {
-          type: "success", content: `${new Date(fromDate).toLocaleDateString()}, ${notes}, `, fromDate
+          type: "success",
+          content: `${new Date(fromDate).toLocaleDateString()}, ${notes}, `,
+          fromDate,
+          toDate
         }
       }))
     })
@@ -75,18 +77,16 @@ const CalendarPage: React.FC = () => {
   };
 
   const dateCellRender = (value: Dayjs) => {
-    console.log("value",)
     return (
       <ul className="events">
-        {listData.map((item) => {
-          console.log(new Date(item.fromDate).getDate(), value.date())
-          if (new Date(item.fromDate).getDate() === value.date()) {
-            return <li className='bg-primary py-4' key={item.content}>
-              <Badge status={item.type as BadgeProps['status']} className='text-white' text={item.content} />
-            </li>
-          }
-          return <li className='py-4' key={item.content}>
-            {/* <Badge status={item.type as BadgeProps['status']} className='text-white' text={item.content} /> */}
+        {listData.filter((item) => {
+          const from = new Date(item.fromDate)
+          const to = new Date(item.toDate)
+          return from.toLocaleDateString() === value.toDate().toLocaleDateString()
+            || to.toLocaleDateString() === value.toDate().toLocaleDateString()
+        }).map(item => {
+          return <li className='bg-primary py-4' key={item.content}>
+            <Badge status={item.type as BadgeProps['status']} className='text-white' text={item.content} />
           </li>
         })}
       </ul>

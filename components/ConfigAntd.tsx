@@ -64,7 +64,7 @@ export default function ConfigAntd({ children }: any) {
             siderBg: "#fff",
             lightSiderBg: "#047862",
             lightTriggerBg: "#047862",
-            colorText: "white",
+            // colorText: "white",
           },
           Button: {
             colorPrimary: "#029d81"

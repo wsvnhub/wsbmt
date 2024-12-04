@@ -161,12 +161,17 @@ export default function WaitPayments({
           onClick={verifyStatus}
           className="text-white border-0 w-full mb-6 bg-gradient-to-b from-blue-500 to-cyan-500 px-4 py-2 font-semibold rounded-md"
         >
-          {!isOpenVerify ? <Statistic.Countdown
-            format="mm:ss"
-            title=""
-            value={openDeadline}
-            onFinish={onOpenVerify}
-          /> : btnText[currentPage]}
+          {!isOpenVerify ?
+            <div className="flex items-center gap-2">
+              <p>Nút kiểm tra giao dịch sau: </p>
+              <Statistic.Countdown
+                format="mm:ss"
+                // title="Kiểm tra giao dịch sau:"
+                value={openDeadline}
+                onFinish={onOpenVerify}
+              />
+            </div>
+            : btnText[currentPage]}
         </Button>
         <div className="flex items-center p-2 bg-white rounded-lg">
           <Image

@@ -21,7 +21,7 @@ export async function POST(request: Request) {
         const client = await clientPromise;
         const db = client.db();
         // const timeSlots = db.collection("timeslots");
-        await insertTimeslots({ db, courtIds })
+        await insertTimeslots({ db, courtIds, maxMonth: new Date().getMonth() + 2 })
         // const result = await timeSlots.insertMany(timeSlotsData);
         return Response.json({ message: "Time slots created", insertedCount: courtIds }, { status: 201 });
     } catch (error) {

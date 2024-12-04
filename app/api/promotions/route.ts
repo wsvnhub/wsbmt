@@ -1,4 +1,5 @@
 import clientPromise from "@/lib/mongo";
+import { ObjectId } from "mongodb";
 
 export async function GET(request: Request) {
     let client;
@@ -68,7 +69,7 @@ export async function DELETE(request: Request) {
             return Response.json({ error: "ID is required" }, { status: 400 });
         }
 
-        const result = await db.collection("promotions").deleteOne({ id: id });
+        const result = await db.collection("promotions").deleteOne({ _id: new ObjectId(id) });
 
         if (result.deletedCount === 0) {
             return Response.json({ error: "Promotion not found" }, { status: 404 });
