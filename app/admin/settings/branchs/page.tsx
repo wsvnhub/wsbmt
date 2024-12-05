@@ -9,9 +9,10 @@ import {
   Card,
   Select,
   notification,
-  Splitter
+
 } from 'antd';
 
+import Splitter from 'antd/es/splitter/Splitter';
 
 import { CloseOutlined } from '@ant-design/icons';
 
