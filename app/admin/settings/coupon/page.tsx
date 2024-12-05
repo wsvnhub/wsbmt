@@ -12,7 +12,6 @@ import {
 
 import axios from 'axios';
 import dayjs from 'dayjs';
-import Splitter from 'antd/es/splitter/Splitter';
 
 interface DataType {
   code: string

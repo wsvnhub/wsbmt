@@ -12,8 +12,6 @@ import {
 
 } from 'antd';
 
-import Splitter from 'antd/es/splitter/Splitter';
-
 import { CloseOutlined } from '@ant-design/icons';
 
 import axios from 'axios';
