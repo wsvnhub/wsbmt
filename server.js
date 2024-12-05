@@ -116,10 +116,10 @@ app.prepare().then(async () => {
   //   statificBookedHours()
   // }, null, true, 'Asia/Ho_Chi_Minh').start()
 
-  new CronJob('0 0 1 1 *', async () => {
-    await insertTimeslots({ db: mongoPool });
-    console.log("Created 1 year time slots");
-  }, null, true, 'Asia/Ho_Chi_Minh').start();
+  // new CronJob('0 0 1 1 *', async () => {
+  //   await insertTimeslots({ db: mongoPool });
+  //   console.log("Created 1 year time slots");
+  // }, null, true, 'Asia/Ho_Chi_Minh').start();
 
   const io = new Server(httpServer);
 
@@ -129,11 +129,13 @@ app.prepare().then(async () => {
       socket.handshake.address ||
       null;
 
-    console.log("Connected", socket.id);
-    logger.info(`User IP ${ip}`);
+
 
     socket.on("app:info", async (args, callback) => {
       const { selectedDate, isAdmin } = args
+
+      console.log("Connected", socket.id);
+      logger.info(`User IP ${ip}`);
 
       let facilitiesData = await mongoPool.collection("facilities").find({
         $or: [
@@ -203,7 +205,7 @@ app.prepare().then(async () => {
     });
 
     socket.on("schedules:create", async ({ timeSlotsData, schedulesData }, callback) => {
-      logger.info(`Creating schedule: ${JSON.stringify({ timeSlotsData, schedulesData })}`);
+      logger.info(`Creating schedule: ${JSON.stringify({ schedulesData })}`);
       const schedules = mongoPool.collection("schedules");
       const timeSlots = mongoPool.collection("timeslots");
       const id = new ObjectId().toString();

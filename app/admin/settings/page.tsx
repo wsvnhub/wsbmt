@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from 'react';
-import { Card, Flex, Form, Table, Input, Button, Select, DatePicker } from 'antd';
+import { Card, Form, Table, Input, Button, Select, DatePicker, Tag } from 'antd';
 import type { TableColumnsType, TableProps } from 'antd';
 import type { FormProps } from 'antd';
 import timeSlots from '@/data/timeSlots.json'
@@ -68,8 +68,8 @@ const schedulesColumns: TableColumnsType<DataType> = [
     dataIndex: 'status',
   },
   {
-    title: 'Trạng thái',
-    dataIndex: 'status',
+    title: 'Đặt lúc',
+    dataIndex: 'createdAt',
   },
 ];
 
@@ -161,9 +161,24 @@ const Page = () => {
   };
 
 
-  return <div className='flex gap-4'>
+  return <div className='flex gap-4 flex-wrap'>
     <Card loading={!loading} title="Danh sách đặt" style={{ maxWidth: 700, flex: 1 }}>
-      <Table<DataType> rowSelection={rowSelection} columns={schedulesColumns} dataSource={schedules} />
+      <Table<DataType> rowSelection={rowSelection} columns={schedulesColumns} dataSource={schedules}>
+        <Table.Column
+          title="Tags"
+          dataIndex="tags"
+          key="tags"
+          render={(status: string) => (
+            <>
+               (
+              <Tag key={status}>
+                {status.toUpperCase()}
+              </Tag>
+              );
+            </>
+          )}
+        />
+      </Table>
     </Card>
     <Card loading={!loading} title="Đặt cố định" style={{ maxWidth: 500, flex: 2 }}>
       <Form
