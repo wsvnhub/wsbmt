@@ -1,7 +1,8 @@
 "use client"
 import React from 'react';
 import {
-  Avatar, Button, List, Skeleton, DatePicker,
+  Avatar, Button, List,
+  DatePicker,
   Form,
   Input,
   InputNumber,
@@ -151,8 +152,9 @@ const Branchs = () => {
           itemLayout="horizontal"
           loadMore={loadMore}
           dataSource={list}
-          renderItem={(item) => (
-            <List.Item
+          renderItem={(item) => {
+            const times = item.times !== undefined ? item.times : { from: "", to: "" }
+            return <List.Item
               actions={[<a key="list-loadmore-edit">Sửa</a>,
               <Popconfirm
                 key={item._id}
@@ -167,18 +169,18 @@ const Branchs = () => {
                 <Button danger>Xoá</Button>
               </Popconfirm>]}
             >
-              <Skeleton avatar title={false} loading={false} active>
-                <List.Item.Meta
-                  avatar={<Avatar src={"https://blog.dktcdn.net/files/coupon-la-gi.jpg"} />}
-                  title={<p>Mã: {item.code} - lượt:{item.count}/{item.limit}</p>}
-                  description={`tối đa: ${item.max} | 
-                  tối thiểu: ${item.min} |
-                  từ: ${item.times.from}- ${item.times.to}`}
-                />
-                <div>Giảm: {item.value} /{item.unit} | HSD: {new Date(item.expired).toLocaleDateString()}</div>
-              </Skeleton>
+              {/* <Skeleton avatar title={false} loading={false} active> */}
+              <List.Item.Meta
+                avatar={<Avatar src={"https://blog.dktcdn.net/files/coupon-la-gi.jpg"} />}
+                title={<p>Mã: {item.code} - lượt:{item.count}/{item.limit}</p>}
+                description={`Max: ${item.max || 0} | 
+                Min: ${item.min || 0} |
+                áp dụng từ: ${times.from}- ${times.to}`}
+              />
+              <div>Giảm: {item.value} /{item.unit} | HSD: {new Date(item.expired).toLocaleDateString()}</div>
+              {/* </Skeleton> */}
             </List.Item>
-          )}
+          }}
         />
       </Card>
       <Card loading={loading} title="Thêm/Sửa mã giảm" style={{ maxWidth: 500, flex: 1 }}>

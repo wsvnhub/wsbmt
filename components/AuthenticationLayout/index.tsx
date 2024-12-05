@@ -2,10 +2,12 @@
 import { Input, Modal, notification } from "antd";
 import { ReactNode, useEffect, useState } from "react";
 
-const correctPassword = "a@20172023";
+// const correctPassword = "a@20172023";
 
 type AuthenticationLayoutProps = {
   children: ReactNode;
+  correctPassword?: string
+  title:string
 };
 const AuthenticationLayout = (props: AuthenticationLayoutProps) => {
   const { children } = props;
@@ -14,7 +16,7 @@ const AuthenticationLayout = (props: AuthenticationLayoutProps) => {
   const [open, setOpen] = useState(false);
 
   const onSubmit = () => {
-    if (inputVal !== correctPassword) {
+    if (inputVal !== props.correctPassword) {
       notification.error({
         message: "Sai mật khẩu",
       });
@@ -29,7 +31,7 @@ const AuthenticationLayout = (props: AuthenticationLayoutProps) => {
 
   if (!isAuthenticated) {
     return (
-      <Modal onOk={onSubmit} open={open} title="Nhập mật khẩu">
+      <Modal onOk={onSubmit} open={open} title={props.title}>
         <Input.Password
           value={inputVal}
           onChange={(e) => setInputVal(e.target.value)}

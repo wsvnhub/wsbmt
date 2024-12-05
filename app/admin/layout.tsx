@@ -8,7 +8,7 @@ const AdminLayout = (props: AdminLayoutProps) => {
   const { children } = props;
 
   return (
-    <AuthenticationLayout>
+    <AuthenticationLayout title="Nhập mật khẩu vào admin" correctPassword="a@20172023">
       {children}
     </AuthenticationLayout>
   )
