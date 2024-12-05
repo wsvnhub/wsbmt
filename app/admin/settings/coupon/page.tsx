@@ -156,6 +156,7 @@ const Branchs = () => {
             <List.Item
               actions={[<a key="list-loadmore-edit">Sửa</a>,
               <Popconfirm
+                key={item._id}
                 id='asdasjdksa,dh'
                 title={`Xoá mã ${item.code}`}
                 description="Bạn muốn xoá mã này?"
