@@ -35,7 +35,7 @@ const SettingsLayout = ({ children }: any) => {
                     defaultSelectedKeys={['1']}
                     items={[
                         {
-                            key: '/admin/settings',
+                            key: '/',
                             icon: <HarmonyOSOutlined />,
                         },
                         {

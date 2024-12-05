@@ -7,7 +7,7 @@ import {
   InputNumber,
   notification,
   PopconfirmProps,
-  message, Popconfirm
+  message, Popconfirm, Card
 } from 'antd';
 
 import axios from 'axios';
@@ -144,8 +144,8 @@ const Branchs = () => {
 
   return <>
     {contextHolder}
-    <Splitter style={{ height: "100%", boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)', color: "black" }}>
-      <Splitter.Panel collapsible defaultSize="60%" min="50%" max="70%">
+    <div className='flex gap-4 flex-col flex-wrap lg:flex-row'>
+      <Card loading={loading} title="Danh chi mã giảm" style={{ maxWidth: 700, flex: 2 }}>
         <List
           className="demo-loadmore-list m-4"
           loading={initLoading}
@@ -181,8 +181,8 @@ const Branchs = () => {
             </List.Item>
           )}
         />
-      </Splitter.Panel>
-      <Splitter.Panel>
+      </Card>
+      <Card loading={loading} title="Thêm/Sửa mã giảm" style={{ maxWidth: 500, flex: 1 }}>
         <Form
           form={form}
           onFinish={onFinish}
@@ -239,8 +239,8 @@ const Branchs = () => {
             </Button>
           </Form.Item>
         </Form>
-      </Splitter.Panel>
-    </Splitter>
+      </Card>
+    </div>
   </>
 };
 

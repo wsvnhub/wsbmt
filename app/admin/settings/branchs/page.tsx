@@ -133,8 +133,8 @@ const Branchs: React.FC = () => {
 
   return <>
     {contextHolder}
-    <Splitter style={{ height: "100%", boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)', color: "black" }}>
-      <Splitter.Panel collapsible defaultSize="60%" min="50%" max="70%">
+    <div className='flex gap-4 flex-col flex-wrap lg:flex-row'>
+      <Card loading={loading} title="Danh chi nhánh" style={{ maxWidth: 700, flex: 2 }}>
         <List
           className="demo-loadmore-list"
           loading={initLoading}
@@ -156,8 +156,8 @@ const Branchs: React.FC = () => {
             </List.Item>
           )}
         />
-      </Splitter.Panel>
-      <Splitter.Panel>
+      </Card>
+      <Card loading={loading} title="Thông tin chi nhánh" style={{ maxWidth: 500, flex: 1 }}>
         <Form
           form={form}
           onFinish={onFinish}
@@ -169,7 +169,6 @@ const Branchs: React.FC = () => {
           size="large"
         // style={{ maxWidth: 600 }}
         >
-          <p className='font-semibold text-white text-2xl my-4'>Thông tin chi nhánh</p>
           <Form.Item className='text-black' name='fid' label="Mã CN">
             <Input />
           </Form.Item>
@@ -236,8 +235,8 @@ const Branchs: React.FC = () => {
             </Button>
           </Form.Item>
         </Form>
-      </Splitter.Panel>
-    </Splitter>
+      </Card>
+    </div>
   </>
 };
 
