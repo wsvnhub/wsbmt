@@ -45,13 +45,33 @@ const columns: TableColumnsType<DataType> = [
   },
 ];
 
-const dataSource = Array.from({ length: 46 }).map<DataType>((_, i) => ({
-  key: i,
-  name: `Edward King ${i}`,
-  phone: 32,
-  court: `London, Park Lane no. ${i}`,
-  days: ""
-}));
+
+const schedulesColumns: TableColumnsType<DataType> = [
+  {
+    title: 'Tên',
+    dataIndex: 'userName',
+  },
+  {
+    title: 'Email',
+    dataIndex: 'email',
+  },
+  {
+    title: 'Chi tiết',
+    dataIndex: 'details',
+  },
+  {
+    title: 'transaction Code',
+    dataIndex: 'transactionCode',
+  },
+  {
+    title: 'Trạng thái',
+    dataIndex: 'status',
+  },
+  {
+    title: 'Trạng thái',
+    dataIndex: 'status',
+  },
+];
 
 const Page = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -62,6 +82,7 @@ const Page = () => {
   const [selectedBranch, setSelectedBranch] = React.useState("")
   const [selectedCourt, setSelectedCourt] = React.useState("-")
   const [courts, setCourts] = React.useState([])
+  const [schedules, setSchedules] = React.useState([])
 
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -72,6 +93,14 @@ const Page = () => {
   React.useEffect(() => {
     axios.get('/api/facilities').then(res => {
       setBranch(res.data.data)
+    })
+
+  }, [])
+
+  React.useEffect(() => {
+    axios.get('/api/schedules').then(res => {
+      console.log(res.data.data)
+      setSchedules(res.data.data)
     })
 
   }, [])
@@ -134,7 +163,7 @@ const Page = () => {
 
   return <div className='flex gap-4'>
     <Card loading={!loading} title="Danh sách đặt" style={{ maxWidth: 700, flex: 1 }}>
-      <Table<DataType> rowSelection={rowSelection} columns={columns} dataSource={dataSource} />
+      <Table<DataType> rowSelection={rowSelection} columns={schedulesColumns} dataSource={schedules} />
     </Card>
     <Card loading={!loading} title="Đặt cố định" style={{ maxWidth: 500, flex: 2 }}>
       <Form
@@ -194,14 +223,14 @@ const Page = () => {
           rules={[{ required: true, message: 'Please input your password!' }]}
         >
           <Select>
-            {timeSlots[(selectedCourt.split("-")[1] != undefined ? "cluster1" : "") as keyof typeof timeSlots].map(t => {
-              return <Select.Option key={t.time} value={t.time}>{t.time}</Select.Option>
+            {timeSlots[(selectedCourt.split("-")[1] != undefined ? "cluster1" : "") as keyof typeof timeSlots].map((t, index) => {
+              return <Select.Option key={index} value={t.time}>{t.time}</Select.Option>
             })}
           </Select>
         </Form.Item>
 
         <Form.Item name="openAt" label="Ngày cố định">
-          <DatePicker multiple />
+          <DatePicker multiple format={"dd"} />
         </Form.Item>
 
         <Form.Item label={null}>

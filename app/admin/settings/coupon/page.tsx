@@ -12,7 +12,6 @@ import {
 } from 'antd';
 
 import axios from 'axios';
-import { String } from 'lodash';
 import dayjs from 'dayjs';
 
 interface DataType {
@@ -116,7 +115,6 @@ const Branchs = () => {
 
 
   const confirm = async (e: any, id: string) => {
-    console.log(id);
     try {
       await onDelete(id)
       message.success('Xoá thành công');

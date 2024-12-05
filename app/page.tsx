@@ -347,7 +347,7 @@ export default function Home() {
           </p>
           <Alert className="sticky top-6 left-0 z-40" banner message={
             <Marquee pauseOnHover gradient={false}>
-              (Quý KH thuê sân để tổ chức giải hoặc ghi hình cần liên hệ 0389145575 trước, nếu không, Ways có quyền từ chối)
+              (Quý KH thuê sân để tổ chức giải hoặc ghi hình cần liên hệ 0389145575 trước, nếu không, Ways có quyền từ chối) - (Quý KH nhớ bỏ chọn sân không cần check lịch khi thao tác đặt để tránh nhầm chi nhánh) - (Sơ đồ sân HB: Sân 1+2) - (Sơ đồ sân NQA: Sân 1; Sân 2+3; Sân 4+5+6) - (Sơ đồ sân NVL: Sân 1+2; Sân 3+4; Sân 5+6+7 ) - (Sơ đồ sân DQH: Sân 1; Sân 2+3; Sân 4)
             </Marquee>
           } />
         </>
