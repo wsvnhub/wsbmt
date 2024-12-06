@@ -100,9 +100,9 @@ function generateTimeArray(
                 cluster
               );
             }
-            // if (value?.status === "wait" || (!isAdmin && value?.status === "booked")) {
-            //   return;
-            // }
+            if (value?.status === "wait" || (!isAdmin && value?.status === "booked")) {
+              return;
+            }
             value.status = value.status !== "pending" ? "pending" : "";
             return handleCellClick(
               value,
