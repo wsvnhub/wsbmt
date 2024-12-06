@@ -36,17 +36,30 @@ export async function PUT(request: Request) {
         const client = await clientPromise;
         const db = client.db();
         const timeSlots = db.collection("timeslots");
-
+       
+        const [timeSlot] = timeSlotsData
+        const res = await timeSlots.findOne({
+            facility: timeSlot.facility,
+            courtId: timeSlot.courtId,
+            timeClusterId: timeSlot.timeClusterId,
+            createdAt: new Date(timeSlot.createdAt).toDateString(),
+        })
+        if (!res) {
+            return Response.json({ message: "item not found" }, { status: 404 });
+        }
         const updatePromises = timeSlotsData.map((timeSlot: any) => {
+            const updateItem = res[timeSlot.index+1]
+            updateItem.status = timeSlot.status
             return timeSlots.updateOne(
                 {
                     facility: timeSlot.facility,
-                    courtId: timeSlot.id,
-                    createdAt: timeSlot.index.createdAt
+                    courtId: timeSlot.courtId,
+                    timeClusterId: timeSlot.timeClusterId,
+                    createdAt: new Date(timeSlot.createdAt).toDateString()
                 },
                 {
                     $set: {
-                        [timeSlot.index.columnIndex]: timeSlot,
+                        [timeSlot.index -1]: updateItem,
                     },
                 }
             );
@@ -59,4 +72,5 @@ export async function PUT(request: Request) {
         return Response.json({ message: "Internal server error" }, { status: 500 });
     }
 }
+
 
