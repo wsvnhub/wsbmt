@@ -48,7 +48,7 @@ export async function PUT(request: Request) {
             return Response.json({ message: "item not found" }, { status: 404 });
         }
         const updatePromises = timeSlotsData.map((timeSlot: any) => {
-            const updateItem = res[timeSlot.index+1]
+            const updateItem = res[timeSlot.index]
             updateItem.status = timeSlot.status
             return timeSlots.updateOne(
                 {
@@ -59,7 +59,7 @@ export async function PUT(request: Request) {
                 },
                 {
                     $set: {
-                        [timeSlot.index -1]: updateItem,
+                        [timeSlot.index]: updateItem,
                     },
                 }
             );
