@@ -67,7 +67,7 @@ export default function ConfirmPayments({
     const { name, phone, email } = values;
     const { isApplyDiscount, newPrice } = discountInfo;
     const totalPrice = isApplyDiscount ? newPrice : data.totalPrice;
-    const cloneDate = {
+    const cloneData = {
       ...data,
       userName: name,
       phone,
@@ -76,7 +76,7 @@ export default function ConfirmPayments({
       totalPrice,
       address: Object.keys(facility)?.map((key) => (facilitiesInfo[key].id))
     };
-    handleChangePage(cloneDate);
+    handleChangePage(cloneData);
   };
 
   const onVerifyCode = async () => {
@@ -84,7 +84,12 @@ export default function ConfirmPayments({
     try {
       const response = await fetch("api/verify-code", {
         method: "POST",
-        body: JSON.stringify({ code: discountCode, timesSlots: data.timeSlots }),
+        body: JSON.stringify({
+          code: discountCode,
+          timesSlots: data.timeSlots,
+          selectedDates: dates,
+          facility: Object.values(facility)
+        }),
       });
       const res = await response.json();
       if (!res.data && res.status !== 200) {

@@ -18,28 +18,49 @@ export async function POST(request: Request) {
     const client = await clientPromise;
     const db = client.db(process.env.DB);
     const body = await request.json();
-    const { code, timesSlots } = body;
+    const { code, timesSlots, selectedDates, facility } = body;
     if (!code) {
       throw new Error("Mã code không hợp lệ");
     }
     console.log("code", code)
 
-    const data = await db.collection("promotions").findOne({ code: code.trim() });
+    const data = await db.collection("promotions").findOne({ code: code.toLowerCase().trim() });
 
     if (!data) {
       throw new Error("Mã code không tồn tại hoặc hết hạn");
     }
+
     const today = new Date()
 
-    const { count, limit, expired, days, dates, times } = data
+    const { count, limit, expired, days, dates, times, } = data
 
     if (count >= limit || new Date(expired).getTime() < today.getTime()) {
       throw new Error("Mã code đã đạt giới hạn");
     }
-    console.log("pass limit", days.includes(today.getDay()))
-    if (!days.includes(today.getDay())) {
-      throw new Error("Mã code không áp dụng cho hôm nay!");
+    const facilities = data.facility
+    console.log(facilities, facility)
+    if (facilities) {
+      let facIndex = 0
+      while (facIndex < facility.length) {
+        const currentFac = facility[facIndex]
+        if (!facilities.includes(currentFac)) {
+          throw new Error(`Đơn của bạn có chi nhánh ${currentFac} không được voucher giảm nên để áp dụng được voucher, bạn hãy đặt lẻ lại giờ áp dụng đúng voucher nhé`);
+        }
+        facIndex++
+      }
     }
+
+    if (days) {
+      let dateIndex = 0
+      while (dateIndex < selectedDates.length) {
+        const selectDate = new Date(selectedDates[dateIndex])
+        if (!days.includes(selectDate.getDay())) {
+          throw new Error(`"Đơn của bạn có chứa ngày ${selectDate.toLocaleDateString()} không được voucher giảm nên để áp dụng được voucher, bạn hãy đặt lẻ lại giờ áp dụng đúng voucher nhé!"`);
+        }
+        dateIndex++
+      }
+    }
+
 
     const { date, month, year } = dates
 

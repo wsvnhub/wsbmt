@@ -5,7 +5,10 @@ export async function GET(request: Request) {
     try {
         client = await clientPromise;
         const db = client.db();
-        const schedules = await db.collection("schedules").find({}).toArray();
+        const page = parseInt(request.url.split('page=')[1]) || 1; // Get the page number from the request URL
+        const limit = 20; // Set the limit for items per page
+        const skip = (page - 1) * limit; // Calculate the number of items to skip
+        const schedules = await db.collection("schedules").find().skip(skip).limit(limit).toArray();
         return Response.json({ data: schedules }, { status: 200 });
     } catch (error) {
         console.error("Error fetching timeslots:", error);
@@ -20,7 +23,7 @@ export async function DELETE(request: Request) {
         const db = client.db();
         // const {} = await request.json();
 
-       
+
         const result = await db.collection("schedules").deleteMany({});
         return Response.json({ data: result }, { status: 201 });
     } catch (error) {

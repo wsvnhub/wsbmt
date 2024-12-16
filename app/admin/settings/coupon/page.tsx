@@ -8,7 +8,9 @@ import {
   InputNumber,
   notification,
   PopconfirmProps,
-  message, Popconfirm, Card
+  message, Popconfirm, Card,
+  Skeleton,
+  Select
 } from 'antd';
 
 import axios from 'axios';
@@ -36,16 +38,24 @@ interface DataType {
 
 
 
-const Branchs = () => {
+const Coupon = () => {
 
   const [form] = Form.useForm();
 
   const [api, contextHolder] = notification.useNotification();
 
+  const [branchs, setBranch] = React.useState([])
   const [initLoading, setInitLoading] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   const [data, setData] = React.useState<DataType[]>([]);
   const [list, setList] = React.useState<DataType[]>([]);
+
+  React.useEffect(() => {
+    axios.get('/api/facilities').then(res => {
+      setBranch(res.data.data)
+    })
+
+  }, [])
 
 
   React.useEffect(() => {
@@ -68,38 +78,44 @@ const Branchs = () => {
 
   const onFinish = async (values: any) => {
     setLoading(true)
-    const { code, expired, value, max, min, date, month, year, from, to, days, limit } = values
-
+    const { code, expired, value, max, min, date, month, year, from, to, days, limit ,branch} = values
+    console.log(branch)
     try {
-      const coupon = await axios.post('/api/promotions', {
-        code,
+      const body = {
+        code: code.toLowerCase(),
         count: 0,
         expired: expired.toDate().toLocaleDateString(),
         limit: Number(limit),
         unit: "percent",
         value: Number(value),
-        max: Number(max),
-        min: Number(min),
+        max: Number(max || 0),
+        min: Number(min || 0),
         dates: {
-          date: date.map((d: dayjs.Dayjs) => d.date()),
-          month: month.map((d: dayjs.Dayjs) => d.month() + 1),
-          year: year.map((d: dayjs.Dayjs) => d.year())
+          date: date?.map((d: dayjs.Dayjs) => d.date()) || [],
+          month: month?.map((d: dayjs.Dayjs) => d.month() + 1) || [],
+          year: year?.map((d: dayjs.Dayjs) => d.year()) || []
         },
         times: { from: `${from.hour()}:${from.minute()}`, to: `${to.hour()}:${to.minute()}` },
-        days: days.map((d: dayjs.Dayjs) => d.day())
-      })
-      console.log(coupon)
+        days: days.map((d: dayjs.Dayjs) => d.day()) || [],
+        facility: branch
+      }
+
+      const coupon = await axios.post('/api/promotions', body)
+
+      console.log(coupon.data)
+
       api.open({
         message: coupon.data.message,
         description: coupon.data.id,
-        duration: 3000,
-        type: "error",
+        duration: 3,
+        type: "success",
       });
     } catch (error: any) {
+      console.log(error)
       api.open({
         message: error.message,
         description: error.message,
-        duration: 3000,
+        duration: 3,
         type: "error",
       });
     } finally {
@@ -155,9 +171,10 @@ const Branchs = () => {
           renderItem={(item) => {
             const times = item.times !== undefined ? item.times : { from: "", to: "" }
             return <List.Item
+              key={item._id}
               actions={[<a key="list-loadmore-edit">Sửa</a>,
               <Popconfirm
-                key={item._id}
+
                 id='asdasjdksa,dh'
                 title={`Xoá mã ${item.code}`}
                 description="Bạn muốn xoá mã này?"
@@ -169,16 +186,16 @@ const Branchs = () => {
                 <Button danger>Xoá</Button>
               </Popconfirm>]}
             >
-              {/* <Skeleton avatar title={false} loading={false} active> */}
-              <List.Item.Meta
-                avatar={<Avatar src={"https://blog.dktcdn.net/files/coupon-la-gi.jpg"} />}
-                title={<p>Mã: {item.code} - lượt:{item.count}/{item.limit}</p>}
-                description={`Max: ${item.max || 0} | 
+              <Skeleton avatar title={false} loading={false} active>
+                <List.Item.Meta
+                  avatar={<Avatar src={"https://blog.dktcdn.net/files/coupon-la-gi.jpg"} />}
+                  title={<p>Mã: {item.code} - lượt:{item.count}/{item.limit}</p>}
+                  description={`Max: ${item.max || 0} | 
                 Min: ${item.min || 0} |
                 áp dụng từ: ${times.from}- ${times.to}`}
-              />
-              <div>Giảm: {item.value} /{item.unit} | HSD: {new Date(item.expired).toLocaleDateString()}</div>
-              {/* </Skeleton> */}
+                />
+                <div>Giảm: {item.value} /{item.unit} | HSD: {new Date(item.expired).toLocaleDateString()}</div>
+              </Skeleton>
             </List.Item>
           }}
         />
@@ -227,6 +244,17 @@ const Branchs = () => {
             <DatePicker minDate={dayjs().startOf('day')} />
           </Form.Item>
 
+          <Form.Item
+            label="Chi nhánh"
+            name="branch"
+          >
+            <Select mode="multiple" allowClear>
+              {branchs.map((b: any) => {
+                return <Select.Option key={b.id} value={b.id}>{b.name}</Select.Option>
+              })}
+            </Select>
+          </Form.Item>
+
           <Form.Item name="min" label="Tối thiểu">
             <InputNumber />
           </Form.Item>
@@ -245,4 +273,4 @@ const Branchs = () => {
   </>
 };
 
-export default Branchs;
+export default Coupon;
