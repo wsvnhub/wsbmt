@@ -51,7 +51,7 @@ export default function ConfirmPayments({
 }: ConfirmPaymentsProps) {
   const { details, totalHours, dates, facility } = data;
   const pricePerHour = Number(data.totalPrice) / Number(data.totalHours);
-  
+
   const [discountCode, setDiscountCode] = React.useState("");
   const [discountMessage, setDiscountMessage] = React.useState("");
   const [discountInfo, setDiscountInfo] = React.useState({
@@ -61,6 +61,7 @@ export default function ConfirmPayments({
     isApplyDiscount: false,
   });
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isSubmiting, setIsSumiting] = React.useState(false);
   const [form] = Form.useForm();
 
   const onFinish = (values: any) => {
@@ -76,6 +77,7 @@ export default function ConfirmPayments({
       totalPrice,
       address: Object.keys(facility)?.map((key) => (facilitiesInfo[key].id))
     };
+    setIsSumiting(true)
     handleChangePage(cloneData);
   };
 
@@ -254,6 +256,7 @@ export default function ConfirmPayments({
             </div>
           </Form.Item>
           <button
+            disabled={isSubmiting}
             type="submit"
             className="w-full mt-8 lg:mt-0 disabled:opacity-80 text-white bg-gradient-to-b from-blue-500 to-cyan-500 px-4 py-2 font-semibold rounded-md"
           >
