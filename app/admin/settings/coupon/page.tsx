@@ -96,7 +96,7 @@ const Coupon = () => {
           year: year?.map((d: dayjs.Dayjs) => d.year()) || []
         },
         times: { from: `${from.hour()}:${from.minute()}`, to: `${to.hour()}:${to.minute()}` },
-        days: days.map((d: dayjs.Dayjs) => d.day()) || [],
+        days: days?.map((d: dayjs.Dayjs) => d.day()) || [],
         facility: branch
       }
 
