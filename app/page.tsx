@@ -14,6 +14,8 @@ import { groupBy, keyBy } from "lodash";
 import { formatDate, VND } from "@/utils";
 import clusters from "@/data/clusters.json";
 import _ from "lodash";
+import { Header } from "@/components/Header";
+// import LightBox from "@/components/LightBox";
 
 interface PageState {
   state: "schedule" | "confirm" | "info" | "result";
@@ -31,6 +33,8 @@ const nextPages = {
   result: "schedule",
 };
 
+const notificationText = '(Quý KH thuê sân để tổ chức giải hoặc ghi hình cần liên hệ 0389145575 trước, nếu không, Ways có quyền từ chối) - (Quý KH nhớ bỏ chọn sân không cần check lịch khi thao tác đặt để tránh nhầm chi nhánh) - (Sơ đồ sân HB: Sân 1+2) - (Sơ đồ sân NQA: Sân 1; Sân 2+3; Sân 4+5+6) - (Sơ đồ sân NVL: Sân 1+2; Sân 3+4; Sân 5+6+7 ) - (Sơ đồ sân DQH: Sân 1; Sân 2+3; Sân 4)'
+
 // export const VND = new Intl.NumberFormat("vi-VN", {
 //   style: "currency",
 //   currency: "VND",
@@ -44,6 +48,37 @@ export interface FacilitiesInfo {
 }
 
 const minWidth = 60;
+
+
+interface ListFacProps {
+  listFac: FacilitiesInfo[];
+  handleChangeFacilitiesInfo: (id: string, checked: boolean) => void;
+}
+
+const ListFac: React.FC<ListFacProps> = ({ listFac, handleChangeFacilitiesInfo }) => {
+  return listFac.map((f) => {
+    return (
+      <>
+        <Checkbox
+          defaultChecked
+          name={f.id}
+          onChange={(e) =>
+            handleChangeFacilitiesInfo(
+              e.target.name || "",
+              e.target.checked
+            )
+          }
+        >
+          <p className="text-white text-md">
+            {f.id.split(' ')[1]} = {f.address}
+          </p>
+        </Checkbox>
+        <p></p>
+      </>
+    );
+  });
+}
+
 
 export default function Home() {
   const { getInfo, getCourts, socket, createSchedules, sendUpdateSchedules, updateSchedules } =
@@ -101,7 +136,7 @@ export default function Home() {
       setPaymentInfo(data.paymentInfo[0]);
       setPricePerHour(data.facilities[0]?.pricePerHour);
     });
-  }, [getInfo, selectedDate]);
+  }, [getInfo]);
 
   React.useEffect(() => {
     if (selectedFacInfo.length > 0) {
@@ -338,6 +373,7 @@ export default function Home() {
   if (isLoading) {
     return <Loader />;
   }
+
   return (
     <>
       {isSchedule && (
@@ -347,97 +383,21 @@ export default function Home() {
           </p>
           <Alert className="sticky top-6 left-0 z-40" banner message={
             <Marquee pauseOnHover gradient={false}>
-              (Quý KH thuê sân để tổ chức giải hoặc ghi hình cần liên hệ 0389145575 trước, nếu không, Ways có quyền từ chối) - (Quý KH nhớ bỏ chọn sân không cần check lịch khi thao tác đặt để tránh nhầm chi nhánh) - (Sơ đồ sân HB: Sân 1+2) - (Sơ đồ sân NQA: Sân 1; Sân 2+3; Sân 4+5+6) - (Sơ đồ sân NVL: Sân 1+2; Sân 3+4; Sân 5+6+7 ) - (Sơ đồ sân DQH: Sân 1; Sân 2+3; Sân 4)
+              {notificationText}
             </Marquee>
           } />
         </>
       )}
-
+      {/* <LightBox /> */}
       {contextHolder}
-      <header
-        className={`${headerPadding} lg:sticky bg-primary ${isSchedule ? "top-8" : "top-0"} flex flex-col lg:flex-row items-center lg:gap-4 gap-2 justify-between z-30`}
+
+      <Header headerPadding={headerPadding}
+        isSchedule={isSchedule}
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
       >
-        <h1 className="text-lg lg:text-xl font-semibold my-2 text-center lg:text-left lg:mb-0">
-          {isSchedule && (
-            <>
-              Đặt sân theo giờ <br />
-            </>
-          )}
-          Ways Station Badminton
-        </h1>
-        {isSchedule && (
-          <>
-            <div className="flex justify-center items-center gap-4">
-              <a href="https://diachi.ways.vn/san" target="_blank" className="text-white underline italic">
-                Xem giá, hướng dẫn
-              </a>
-
-              <input
-                onChange={(e) => {
-                  const value = e.target.value;
-                  const currentDate = new Date();
-                  let date = new Date(currentDate);
-                  if (value !== "") {
-                    date = new Date(value);
-                  }
-                  setSelectedDate(date);
-                }}
-                className="bg-white text-primary font-semibold pl-6 pr-2 py-2 rounded-md"
-                type="date"
-                min={new Date().toLocaleDateString('en-ca')}
-                placeholder="dd-mm-yyyy"
-                onKeyDown={(e) => e.preventDefault()}
-                value={selectedDate.toLocaleDateString('en-ca')}
-              />
-            </div>
-            <div className="lg:my-4">
-              {listFac.map((f => {
-                return <>
-                  <Checkbox
-                    defaultChecked
-                    name={f.id}
-                    onChange={(e) =>
-                      handleChangeFacilitiesInfo(
-                        e.target.name || "",
-                        e.target.checked
-                      )
-                    }
-                  >
-                    <p className="text-white text-md">
-                      {f.id.split(' ')[1]} = {f.address}
-                    </p>
-                  </Checkbox>
-                  <p></p>
-                </>
-              }))}
-
-            </div>
-            <div className="w-full lg:w-auto flex flex-row-reverse lg:flex-col gap-2 lg:gap-4 items-center">
-              <a
-                href="tel:0389145575"
-                className="w-5/12 text-right lg:w-full p-2 lg:py-2 lg:px-4 rounded-lg font-semibold italic text-[10px] lg:text-[15px] bg-gradient-to-b from-blue-500 to-cyan-500"
-              >
-                Khách đặt lịch cố định: <br /> Gọi 0389145575
-              </a>
-              <div className="w-7/12 lg:w-full flex items-center gap-2 lg:gap-6 text-sm">
-                <div className="flex items-center justify-center gap-2">
-                  <div className="bg-white w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md" />
-                  <span>Trống</span>
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <div className="bg-red-400 w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md" />
-                  <span>Đã đặt</span>
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <div className="bg-yellow-500 w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md" />
-                  <span>Đang chọn</span>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-
-      </header>
+        <ListFac listFac={listFac} handleChangeFacilitiesInfo={handleChangeFacilitiesInfo} />
+      </Header>
 
       {isSchedule && (
         <main className="bg-[#edfff6] p-2 lg:p-6 relative">
