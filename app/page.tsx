@@ -229,6 +229,8 @@ export default function Home() {
     cluster: string
   ) => {
     const row = facilities[cluster][rowIndex];
+  
+    let isCanDelete = false
 
     const detail: string = `${row.court} - ${cell.from} đến ${cell.to}`;
     let cloneSelected: any = { ...selected };
@@ -267,6 +269,8 @@ export default function Home() {
         (item: any) => item.id !== row.courtId || item.facility !== row.facility
       );
 
+      isCanDelete = filtered.filter((s: any) => s.facility === row.facility).length === 0
+
       if (filtered.length > 0) {
         setSelectedTimeSlots({
           ...selectedTimeSlots,
@@ -289,12 +293,16 @@ export default function Home() {
       if (cell.status === "pending") {
         preState.facility[row.facility] = row.facility;
       } else {
-        delete preState.facility[row.facility];
+        if (isCanDelete) {
+          delete selected.facility[row.facility];
+        }
       }
+
       totalHours += cell.status === "pending" && totalHours >= 0 ? 1 : -1;
       return { ...preState, totalHours, details: cloneSelected.details };
     });
   };
+
   const handleChangeFacilitiesInfo = (name: string, checked: boolean) => {
     if (checked) {
       const filtered = Object.values(facilitiesInfo).filter((item) =>
