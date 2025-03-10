@@ -214,7 +214,7 @@ app.prepare().then(async () => {
 
         const isExist = await schedules.findOne({
           details: new RegExp(schedulesData.details, "i"),
-          status: { $in: ["wait", "booked"] },
+          status: "wait",
           timeSlots: {
             $elemMatch: {
               $or: schedulesData.timeSlots.map(({ facility, court, from, to, id }) =>
@@ -223,6 +223,7 @@ app.prepare().then(async () => {
             }
           }
         });
+        
         if (isExist !== null) {
           throw new Error("Schedule already exists");
         }
