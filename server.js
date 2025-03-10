@@ -213,13 +213,14 @@ app.prepare().then(async () => {
       try {
 
         const isExist = await schedules.findOne({
-          details: new RegExp(schedulesData.details, "i"),
-          status: "wait",
+          status: { $in: ["wait", "booked"] },
           timeSlots: {
             $elemMatch: {
-              $or: schedulesData.timeSlots.map(({ facility, court, from, to, id }) =>
-                ({ facility, court, from, to, id })
-              )
+              facility: { $in: schedulesData.timeSlots.map(ts => ts.facility) },
+              court: { $in: schedulesData.timeSlots.map(ts => ts.court) },
+              from: { $in: schedulesData.timeSlots.map(ts => ts.from) },
+              to: { $in: schedulesData.timeSlots.map(ts => ts.to) },
+              id: { $in: schedulesData.timeSlots.map(ts => ts.id) },
             }
           }
         });
