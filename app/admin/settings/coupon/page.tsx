@@ -78,8 +78,7 @@ const Coupon = () => {
 
   const onFinish = async (values: any) => {
     setLoading(true)
-    const { code, expired, value, max, min, date, month, year, from, to, days, limit ,branch} = values
-    console.log(branch)
+    const { code, expired, value, max, min, date, month, year, from, to, days, limit, branch } = values
     try {
       const body = {
         code: code.toLowerCase(),
@@ -174,7 +173,7 @@ const Coupon = () => {
               key={item._id}
               actions={[<a key="list-loadmore-edit">Sửa</a>,
               <Popconfirm
-
+                key={item._id}
                 id='asdasjdksa,dh'
                 title={`Xoá mã ${item.code}`}
                 description="Bạn muốn xoá mã này?"

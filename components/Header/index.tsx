@@ -1,6 +1,6 @@
 import React from 'react'
 
-export const Header = React.memo(({ isSchedule, selectedDate, setSelectedDate, children, headerPadding }: any) => {
+export const Header = ({ isSchedule, selectedDate, setSelectedDate, children, headerPadding }: any) => {
     return <header
         className={`${headerPadding} lg:sticky bg-primary ${isSchedule ? "top-8" : "top-0"} flex flex-col lg:flex-row items-center lg:gap-4 gap-2 justify-between z-30`}
     >
@@ -65,4 +65,4 @@ export const Header = React.memo(({ isSchedule, selectedDate, setSelectedDate, c
             </>
         )}
     </header>
-});
+};

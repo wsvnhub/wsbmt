@@ -1,5 +1,5 @@
 "use client";
-import ResultPayments from "@/components/payments/Result";
+// import ResultPayments from "@/components/payments/Result";
 import WaitPayments from "@/components/payments/Wait";
 import useSocket from "@/socket/useSocket";
 import React from "react";
