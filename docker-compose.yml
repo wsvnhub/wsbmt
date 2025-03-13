@@ -1,6 +1,6 @@
 services:
   nextjs:
-    image: node:18-alpine
+    image: node:22-alpine
     container_name: nextjs-app
     working_dir: /app
     volumes:
@@ -11,7 +11,7 @@ services:
     environment:
       - NODE_ENV=production 
       - MONGODB_URI=mongodb://root:example@mongo:27017/ways?authSource=admin
-    command: sh -c "npm install --production=false && npm run build && npm start"
+    command: sh -c "npm install --include=dev && npm run build && npm start"
     depends_on:
       - mongo
 
