@@ -29,9 +29,20 @@ export async function POST(request: Request) {
   try {
     const { code, timslots, amount } = await request.json();
 
+
     if (!process.env.BANK_API_BASE_URL) {
       throw new Error("Bank API chưa được cài đặt");
     }
+
+    client = await clientPromise;
+    const db = client.db(process.env.DB);
+    const schedules = db.collection("schedules");
+    const isExist = await schedules.findOne({ transactionCode: code, status: "wait" })
+    
+    if (!isExist) {
+      throw new Error("Đơn hàng của bạn đã bị xoá!!!!!!");
+    }
+
     const url = `${process.env.BANK_API_BASE_URL}/transactions/list?limit=100&amount_in=${amount}&transaction_date_min=${formatDate()}`
     const response = await fetch(
       url,
@@ -58,9 +69,6 @@ export async function POST(request: Request) {
     }
 
 
-    client = await clientPromise;
-    const db = client.db(process.env.DB);
-    const schedules = db.collection("schedules");
     const timeSlots = db.collection("timeslots");
 
     await schedules.updateOne(
@@ -83,6 +91,6 @@ export async function POST(request: Request) {
     return Response.json({ data: updatedData }, { status: 200, statusText: "success" });
   } catch (error: any) {
     logger.error(`Verification error: ${error.message}`);
-    return Response.json({ error }, { status: 202, statusText: "error" });
+    return Response.json({ error: error.message, data: null }, { status: 202, statusText: "error" });
   }
 }

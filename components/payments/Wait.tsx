@@ -41,6 +41,7 @@ export default function WaitPayments({
 
 
   const onFinish: CountdownProps["onFinish"] = async () => {
+    setOpenVerify(false)
     try {
       const response = await fetch('/api/time-slots', {
         method: 'DELETE',
@@ -83,10 +84,11 @@ export default function WaitPayments({
         }),
       });
       const res = await response.json();
+
       if (response.status === 202) {
         setIsLoading(false);
         return setAlertMessage(
-          `Đơn hàng của bạn chưa được thanh toán.`
+          res.error || `Đơn hàng của bạn chưa được thanh toán.`
         );
       }
       handleChangePage({ data: res.data });
