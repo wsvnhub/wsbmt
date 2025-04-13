@@ -10,13 +10,13 @@ export async function GET(request: Request) {
 
         // Parse URL and query parameters
         const url = new URL(request.url);
-        const phone = url.searchParams.get("phone") || "";
+        const amount = url.searchParams.get("amount") || "";
         const transactionContent = url.searchParams.get("transaction_content") || "";
 
         const query: any = {};
-        if (phone) query.phone = phone;
+        if (amount) query.totalPrice = Number(amount);
         if (transactionContent) query.transactionCode = transactionContent;
-
+ 
         // Find one matching document
         const schedule = await db.collection("schedules").findOne(query);
 

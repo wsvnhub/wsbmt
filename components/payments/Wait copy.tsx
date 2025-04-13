@@ -1,10 +1,6 @@
 import React from "react";
-import {
-  // Button,
-  CountdownProps, Image, Statistic, Typography
-} from "antd";
+import { Button, CountdownProps, Image, Statistic, Typography } from "antd";
 import { VND } from "@/utils";
-import { io } from "socket.io-client";
 
 const Text = ({ title, content, isCopyable = false }: any) => {
   return (
@@ -31,20 +27,18 @@ interface WaitPaymentsProps {
 export default function WaitPayments({
   data,
   totalPrice = 0,
-  // btnText,
+  btnText,
   paymentInfo,
-  // currentPage,
+  currentPage,
   timslots,
   handleChangePage,
 }: WaitPaymentsProps) {
   const deadline = React.useRef(Date.now() + 1000 * 60 * 10).current;
-  // const openDeadline = React.useRef(Date.now() + 1000 * 60 * 1).current;
-  // const [isLoading, setIsLoading] = React.useState(false);
+  const openDeadline = React.useRef(Date.now() + 1000 * 60 * 1).current;
+  const [isLoading, setIsLoading] = React.useState(false);
   const [alertMessage, setAlertMessage] = React.useState<string>();
-  const [_isOpenVerify, setOpenVerify] = React.useState(false)
+  const [isOpenVerify, setOpenVerify] = React.useState(false)
 
-
-  console.log(data)
 
   const onFinish: CountdownProps["onFinish"] = async () => {
     setOpenVerify(false)
@@ -68,65 +62,42 @@ export default function WaitPayments({
     }
   };
 
-  React.useEffect(() => {
-    const socket = io("http://103.48.84.35:5005", { query: { user_id: data.phone }, autoConnect: true })
-
-    function onConnect() {
-      console.log("connected")
-      socket.on("balanceUpdated", (args: any) => {
-        handleChangePage({ data: args });
-      })
-
-    }
-
-    function onDisconnect() {
-
-    }
-    socket.on("connect", onConnect);
-    socket.on("disconnect", onDisconnect);
-
-    return () => {
-      socket.off("connect", onConnect);
-      socket.off("disconnect", onDisconnect);
-    };
-  }, [])
-
-  // const onOpenVerify = async () => {
-  //   setOpenVerify(true)
-  //   await verifyStatus()
-  // }
+  const onOpenVerify = async () => {
+    setOpenVerify(true)
+    await verifyStatus()
+  }
 
   const { transactionCode } = data;
   const { bankName, bankCode, bankUserName, qrCode } = paymentInfo;
 
   const QRCODE = qrCode !== undefined && qrCode !== "" ? qrCode.replace('{AMOUNT}', totalPrice.toString()).replace('{CODE}', transactionCode) : `https://qr.sepay.vn/img?acc=688112688&bank=MBBank&amount=${totalPrice}&des=${transactionCode}`;
 
-  // const verifyStatus = async () => {
-  //   setIsLoading(true);
-  //   try {
-  //     const response = await fetch("/api/verify-status", {
-  //       method: "POST",
-  //       body: JSON.stringify({
-  //         code: transactionCode,
-  //         timslots,
-  //         amount: totalPrice,
-  //       }),
-  //     });
-  //     const res = await response.json();
+  const verifyStatus = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/verify-status", {
+        method: "POST",
+        body: JSON.stringify({
+          code: transactionCode,
+          timslots,
+          amount: totalPrice,
+        }),
+      });
+      const res = await response.json();
 
-  //     if (response.status === 202) {
-  //       setIsLoading(false);
-  //       return setAlertMessage(
-  //         res.error || `Đơn hàng của bạn chưa được thanh toán.`
-  //       );
-  //     }
-  //     handleChangePage({ data: res.data });
-  //   } catch (error: any) {
-  //     console.log(error);
-  //     setAlertMessage(error.message);
-  //     setIsLoading(false);
-  //   }
-  // };
+      if (response.status === 202) {
+        setIsLoading(false);
+        return setAlertMessage(
+          res.error || `Đơn hàng của bạn chưa được thanh toán.`
+        );
+      }
+      handleChangePage({ data: res.data });
+    } catch (error: any) {
+      console.log(error);
+      setAlertMessage(error.message);
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="h-screen px-4 pt-4 pb-2 flex items-center flex-col">
@@ -186,7 +157,7 @@ export default function WaitPayments({
           />
         </p>
 
-        {/* <Button
+        <Button
           disabled={!data.totalPrice || !isOpenVerify}
           loading={isLoading}
           onClick={verifyStatus}
@@ -203,7 +174,7 @@ export default function WaitPayments({
               />
             </div>
             : btnText[currentPage]}
-        </Button> */}
+        </Button>
         <div className="flex items-center p-2 bg-white rounded-lg">
           <Image
             width={150}
