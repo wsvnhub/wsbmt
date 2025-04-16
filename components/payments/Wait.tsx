@@ -69,7 +69,7 @@ export default function WaitPayments({
   };
 
   React.useEffect(() => {
-    const socket = io("http://103.48.84.35:5005", { query: { user_id: data.phone }, autoConnect: true })
+    const socket = io("https://tt.ways.io.vn", { query: { user_id: data.phone }, autoConnect: true })
 
     function onConnect() {
       console.log("connected")
