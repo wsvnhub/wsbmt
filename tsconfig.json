@@ -21,6 +21,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "utils/genTimeSlots.js", "utils/insertTimeSlots.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "utils/genTimeSlots.js", "utils/insertTimeSlots.js", "utils/lark.js"],
   "exclude": ["node_modules"]
 }

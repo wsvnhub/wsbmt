@@ -1,58 +1,18 @@
 import { createServer } from "node:http";
-import { CronJob } from "cron";
+// import { CronJob } from "cron";
 import { config } from "dotenv";
 import { MongoClient, ObjectId } from "mongodb";
 import next from "next";
 import { Server } from "socket.io";
-import { insertTimeslots } from "./utils/insertTimeSlots.js";
-import axios from "axios";
+// import { insertTimeslots } from "./utils/insertTimeSlots.js";
+import { createLarkRecord, updateLarkRecord } from "./utils/lark.js";
+// import axios from "axios";
 import { logger } from "./utils/logger.js";
 
 config();
 
-const LARK_API_URL = "https://open.larksuite.com/open-apis";
-const HEADERS = {
-  "Content-Type": "application/json; charset=utf-8",
-};
 
-const { APP_ID, APP_SECRET, APP_TOKEN, TABLE_ID, MONGODB_URI, DB, NODE_ENV, PORT } = process.env;
-
-const getLarkAccessToken = async () => {
-  const response = await axios.post(`${LARK_API_URL}/auth/v3/tenant_access_token/internal`, {
-    app_id: APP_ID,
-    app_secret: APP_SECRET,
-  }, { headers: HEADERS });
-
-  if (response.status !== 200) {
-    throw new Error(`Request failed with status ${response.status}`);
-  }
-
-  return response.data.tenant_access_token;
-};
-
-const createLarkRecord = async (newRecord) => {
-  const token = await getLarkAccessToken();
-  const url = `${LARK_API_URL}/bitable/v1/apps/${APP_TOKEN}/tables/${TABLE_ID}/records`;
-  const headers = {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json",
-  };
-
-  const response = await axios.post(url, newRecord, { headers });
-  return response.data;
-};
-
-const updateLarkRecord = async (recordId, newData) => {
-  const token = await getLarkAccessToken();
-  const url = `${LARK_API_URL}/bitable/v1/apps/${APP_TOKEN}/tables/${TABLE_ID}/records/${recordId}`;
-  const headers = {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json",
-  };
-
-  const response = await axios.put(url, newData, { headers });
-  return response.data;
-};
+const { MONGODB_URI, DB, NODE_ENV, PORT } = process.env;
 
 const dev = NODE_ENV !== "production";
 const hostname = "localhost";
@@ -135,7 +95,7 @@ app.prepare().then(async () => {
       const { selectedDate, isAdmin } = args
 
       console.log("Connected", socket.id);
-      logger.info(`User IP ${ip}`);
+      // logger.info(`User IP ${ip}`);
 
       let facilitiesData = await mongoPool.collection("facilities").find({
         $or: [
@@ -223,7 +183,7 @@ app.prepare().then(async () => {
             }
           }
         });
-        
+
         if (isExist !== null) {
           throw new Error("Schedule already exists");
         }
@@ -251,7 +211,7 @@ app.prepare().then(async () => {
 
         const res = await createLarkRecord(newRecord);
         const recordId = res.data.record.record_id;
-
+       
         await updateTimeSlot({ timeSlotsData, collection: timeSlots });
 
         setTimeout(async () => {
