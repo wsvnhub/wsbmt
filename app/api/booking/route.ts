@@ -1,6 +1,6 @@
 import clientPromise from "@/lib/mongo";
 // import { formatDate } from "@/utils";
-import { updateLarkRecord } from "@/utils/lark";
+// import { updateLarkRecord } from "@/utils/lark";
 import { logger } from "@/utils/logger";
 
 
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
         const db = client.db(process.env.DB);
         const schedules = db.collection("schedules");
         const isExist = await schedules.findOne({ transactionCode: code, status: "wait" })
-        console.log("isExist", isExist)
+     
         if (!isExist) {
             throw new Error("Đơn hàng của bạn đã bị xoá!!!!!!");
         }
