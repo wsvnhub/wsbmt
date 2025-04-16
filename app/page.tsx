@@ -323,7 +323,7 @@ export default function Home() {
       }));
     }
     if (isConfirm) {
-      newState.transactionCode = `WSB${new Date().getTime()}`;
+      newState.transactionCode = `WSB${Math.floor(Date.now() / 1000)}`;
       newState.details =
         typeof newState.details === "string"
           ? newState.details
