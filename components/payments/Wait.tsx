@@ -27,6 +27,9 @@ interface WaitPaymentsProps {
   timslots: any[];
   handleChangePage: (state: any) => void;
 }
+const isDev = false
+
+const SOCKET_URL = isDev ? "http://0.0.0.0:5005" : "https://tt.ways.io.vn"
 
 export default function WaitPayments({
   data,
@@ -37,14 +40,12 @@ export default function WaitPayments({
   timslots,
   handleChangePage,
 }: WaitPaymentsProps) {
-  const deadline = React.useRef(Date.now() + 1000 * 60 * 10).current;
+  const deadline = React.useRef(Date.now() + 1500 * 60 * 10).current;
   // const openDeadline = React.useRef(Date.now() + 1000 * 60 * 1).current;
   // const [isLoading, setIsLoading] = React.useState(false);
   const [alertMessage, setAlertMessage] = React.useState<string>();
   const [_isOpenVerify, setOpenVerify] = React.useState(false)
 
-
-  console.log(data)
 
   const onFinish: CountdownProps["onFinish"] = async () => {
     setOpenVerify(false)
@@ -69,18 +70,19 @@ export default function WaitPayments({
   };
 
   React.useEffect(() => {
-    const socket = io("https://tt.ways.io.vn", { query: { user_id: data.phone }, autoConnect: true })
+    const socket = io(SOCKET_URL, { query: { user_id: data.phone }, autoConnect: true })
 
     function onConnect() {
       console.log("connected")
-      socket.on("balanceUpdated", (args: any) => {
-        handleChangePage({ data: args });
+      socket.on("balanceUpdated", () => {
+        const updatedData = timslots.map((timeSlot: any) => ({ ...timeSlot, status: "booked" }));
+        handleChangePage({ data: updatedData });
       })
 
     }
 
     function onDisconnect() {
-
+      console.log("disconnected")
     }
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
@@ -161,20 +163,16 @@ export default function WaitPayments({
             <Text title="Nội dung" content={transactionCode} isCopyable />
             <Text title="Số tiền" content={VND.format(totalPrice)} isCopyable />
             <p className="font-semibold">
-              Vui lòng
-              <span className="text-[#fa9654]">
-                &nbsp;ghi đúng nội dung theo mã giao dịch ở trên
-              </span>
-              &nbsp;để hệ thống xác nhận thành công hoặc quét mã QR bên
-              dưới và
-              <span className="text-[#fa9654]"> không tắt trang này. </span>
-              <span>Nhớ chọn <span className="text-[#fa9654]">Kiểm tra giao dịch</span> khi đã chuyển khoản để kiểm tra thành công. </span>
-              <span className="text-[#fa9654]">Ways không chịu trách nhiệm giữ sân</span> nếu bạn quên ấn nút &quot;Kiểm tra giao dịch.&quot;
+              Thời gian chờ giữ sân 15 phút.
+              Vui lòng <span className="text-[#fa9654]">ghi đúng nội dung theo mã giao dịch ở trên </span>hoặc quét mã QR bên dưới để hệ thống xác nhận tự động thành công và <span className="text-[#fa9654]">không tắt trang này.</span>
+              Ways <span className="text-[#fa9654]">không chịu trách nhiệm giữ sân nếu bạn chuyển khoản không có mã.</span>
+              Nếu trong trường hợp tiền chuyển đã chuyển khoản thành công nhưng hệ thống ngân hàng chưa báo nhận được và hết thời gian chờ 15 phút,<span className="text-[#fa9654]"> bạn hãy gọi 0389145575 (7-23h) </span> để Ways xác nhận giữ sân.
+              <span className="text-[#fa9654]"> Nếu ngoài giờ làm</span>, bạn hãy đặt lại sân 1 lần nữa và nhắn lại Zalo để Ways báo kế toán hoàn tiền chuyển 2 lần nhé.
             </p>
           </div>
         </hgroup>
         <p className="font-semibold text-center">
-          Giữ chỗ chờ thanh toán trong 10 phút <br />  Nhớ ấn nút &quot;Kiểm tra giao dịch&quot; khi đã chuyển khoản <br /> Nút sẽ mở khoá sau 1 phút
+          Giữ chỗ chờ thanh toán trong 15 phút. <br /> Hotline: 0389145575 (7-23h).
         </p>
         {alertMessage && <p className="text-secondary">{alertMessage}</p>}
         <p className="font-semibold my-2">

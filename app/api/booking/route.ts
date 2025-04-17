@@ -74,7 +74,7 @@ export async function POST(request: Request) {
 
         logger.info(`Verification successful: code=${code}, amount=${amount}`);
         return Response.json(
-            { data: isExist },
+            { data: updatedData },
             { status: 200, statusText: "success" }
         );
     } catch (error: any) {

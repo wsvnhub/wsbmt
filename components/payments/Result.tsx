@@ -31,7 +31,7 @@ export default function ResultPayments({
   currentPage,
   facilitiesInfo,
 }: ResultPaymentsProps) {
-  const { details, dates, facility, applyDiscount, phone, userName, email } =
+  const { details, dates, facility, applyDiscount, phone, userName, email} =
     data;
 
   const detailArr = details.split(";");
@@ -100,12 +100,12 @@ export default function ResultPayments({
           <Text title="Chi nhánh" content={facText} />
           <Text title="Địa chỉ" content={facAddress} />
           <Text title="Sân - giờ" content={facDetail} />
-          <Text title="Ngày" content={dates.join(', ')} />
-          <Text
+          <Text title="Ngày" content={dates.map((date: any) => new Intl.DateTimeFormat('en-GB').format(new Date(date))).join(', ')} />
+          {/* <Text
             title="Giá 1 giờ"
             content={totalPrice}
             showDiscount={applyDiscount}
-          />
+          /> */}
           <Text title="Số giờ" content={detailArr.length} />
           <Text
             title="Tổng"

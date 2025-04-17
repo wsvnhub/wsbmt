@@ -229,7 +229,7 @@ export default function Home() {
     cluster: string
   ) => {
     const row = facilities[cluster][rowIndex];
-  
+
     let isCanDelete = false
 
     const detail: string = `${row.court} - ${cell.from} đến ${cell.to}`;
