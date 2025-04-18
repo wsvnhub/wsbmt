@@ -105,6 +105,7 @@ export default function Home() {
     totalHours: 0,
     totalPrice: 0,
     details: [],
+    formateddetails: [],
     facility: {},
     phone: "",
     userName: "",
@@ -233,10 +234,12 @@ export default function Home() {
     let isCanDelete = false
 
     const detail: string = `${row.court} - ${cell.from} đến ${cell.to}`;
+    const formateddetail: string = `${row.court} - ${cell.from} đến ${cell.to} (${new Intl.DateTimeFormat('en-GB').format(new Date(date))} - ${row.facility})`;
     let cloneSelected: any = { ...selected };
 
     if (cell.status === "pending") {
       cloneSelected.details.push(detail);
+      cloneSelected.formateddetails.push(formateddetail)
 
       const updatedCell = {
         ...cell,
@@ -262,6 +265,10 @@ export default function Home() {
     } else {
       cloneSelected.details = cloneSelected.details.filter(
         (item: any) => item !== detail
+      );
+
+      cloneSelected.formateddetails = cloneSelected.formateddetails.filter(
+        (item: any) => item !== formateddetail
       );
 
       const currentDateSlots = selectedTimeSlots[selectedDate.toLocaleDateString()] || [];
@@ -299,7 +306,12 @@ export default function Home() {
       }
 
       totalHours += cell.status === "pending" && totalHours >= 0 ? 1 : -1;
-      return { ...preState, totalHours, details: cloneSelected.details };
+      return {
+        ...preState,
+        totalHours,
+        details: cloneSelected.details,
+        formateddetails: cloneSelected.formateddetails
+      };
     });
   };
 
@@ -328,6 +340,10 @@ export default function Home() {
         typeof newState.details === "string"
           ? newState.details
           : newState.details.join(";");
+      newState.formateddetails =
+        typeof newState.formateddetails === "string"
+          ? newState.formateddetails
+          : newState.formateddetails.join(";");
 
       const timeSlotData = _.flatMap(Object.values(selectedTimeSlots)).map((timeSlots: any) => {
         timeSlots.bookedBy = { name: newState.userName, phone: newState.phone };
@@ -340,6 +356,7 @@ export default function Home() {
           type: "info",
           message: "Đang tạo đơn!",
         });
+        
         const res = await createSchedules(newState, timeSlotData);
         if (!res.success) {
           return api.open({

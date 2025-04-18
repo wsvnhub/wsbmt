@@ -187,7 +187,7 @@ app.prepare().then(async () => {
         if (isExist !== null) {
           throw new Error("Schedule already exists");
         }
-
+        
         const uniqueIds = [...new Set(timeSlotsData.map(item => item.id))].join(", ");
         const newRecord = {
           fields: {
@@ -197,9 +197,9 @@ app.prepare().then(async () => {
             name: schedulesData.userName,
             phone: schedulesData.phone,
             email: schedulesData.email,
-            san: schedulesData.details,
+            san: schedulesData.formateddetails,
             address: Object.values(schedulesData.address).join(", "),
-            date: schedulesData.dates.join(", "),
+            date: schedulesData.dates.map((date) => new Intl.DateTimeFormat('en-GB').format(new Date(date))).join(", "),
             time: schedulesData.totalHours,
             quantity: schedulesData.timeSlots.length,
             total_money: schedulesData.totalPrice,
@@ -211,7 +211,7 @@ app.prepare().then(async () => {
 
         const res = await createLarkRecord(newRecord);
         const recordId = res.data.record.record_id;
-       
+
         await updateTimeSlot({ timeSlotsData, collection: timeSlots });
 
         setTimeout(async () => {
@@ -256,9 +256,10 @@ app.prepare().then(async () => {
         if (!schedule) {
           throw new Error("Order not paid yet");
         }
-        await updateLarkRecord(schedule.larkRecordId, { fields: { trang_thai: "booked" } });
+
         console.log("Updated record successfully");
         callback({ success: true, data: schedule.larkRecordId });
+        return updateLarkRecord(schedule.larkRecordId, { fields: { trang_thai: "booked" } });
       } catch (error) {
         logger.error(`Error updating schedule: ${error}`);
         callback({ error });

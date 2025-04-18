@@ -31,10 +31,11 @@ export default function ResultPayments({
   currentPage,
   facilitiesInfo,
 }: ResultPaymentsProps) {
-  const { details, dates, facility, applyDiscount, phone, userName, email} =
+  const { dates, facility, applyDiscount, phone, userName, email, formateddetails } =
     data;
 
-  const detailArr = details.split(";");
+
+  const detailArr = formateddetails.split(";");
   const facDetail = detailArr.map((detail: any, index: number) => (
     <p key={index}>- {detail}</p>
   ));
