@@ -199,7 +199,7 @@ app.prepare().then(async () => {
             email: schedulesData.email,
             san: schedulesData.formateddetails,
             address: Object.values(schedulesData.address).join(", "),
-            date: schedulesData.dates.map((date) => new Intl.DateTimeFormat('en-GB').format(new Date(date))).join(", "),
+            date: schedulesData.dates.join(", "),
             time: schedulesData.totalHours,
             quantity: schedulesData.timeSlots.length,
             total_money: schedulesData.totalPrice,
