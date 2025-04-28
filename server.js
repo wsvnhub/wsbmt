@@ -1,16 +1,14 @@
 import { createServer } from "node:http";
-// import { CronJob } from "cron";
+
 import { config } from "dotenv";
 import { MongoClient, ObjectId } from "mongodb";
 import next from "next";
 import { Server } from "socket.io";
-// import { insertTimeslots } from "./utils/insertTimeSlots.js";
 import { createLarkRecord, updateLarkRecord } from "./utils/lark.js";
-// import axios from "axios";
 import { logger } from "./utils/logger.js";
+import { checkOrderExist } from "./utils/checkOrderExist.js";
 
 config();
-
 
 const { MONGODB_URI, DB, NODE_ENV, PORT } = process.env;
 
@@ -54,9 +52,10 @@ const actionsStatus = {
 const updateTimeSlot = async ({ timeSlotsData, collection, action = "add" }) => {
   logger.info(`Updating time slots: ${JSON.stringify(timeSlotsData)}`);
   const updatePromises = timeSlotsData.map(({ facility, id, index, ...rest }) => {
+    const availability = action === "add" ? true : false
     return collection.updateOne(
       { facility, courtId: id, createdAt: index.createdAt, [index.columnIndex + ".status"]: actionsStatus[action] },
-      { $set: { [index.columnIndex]: { facility, id, index, ...rest } } }
+      { $set: { [index.columnIndex]: { facility, id, index, availability, ...rest } } }
     )
   }
 
@@ -71,25 +70,9 @@ const updateTimeSlot = async ({ timeSlotsData, collection, action = "add" }) => 
 app.prepare().then(async () => {
   const httpServer = createServer(handler);
   const { mongoPool } = await initDB();
-
-  // new CronJob('0 0 * * *', () => {
-  //   statificBookedHours()
-  // }, null, true, 'Asia/Ho_Chi_Minh').start()
-
-  // new CronJob('0 0 1 1 *', async () => {
-  //   await insertTimeslots({ db: mongoPool });
-  //   console.log("Created 1 year time slots");
-  // }, null, true, 'Asia/Ho_Chi_Minh').start();
-
   const io = new Server(httpServer);
 
   io.on("connection", async (socket) => {
-    const ip = socket.request.headers['x-forwarded-for'] ||
-      socket.request.connection.remoteAddress ||
-      socket.handshake.address ||
-      null;
-
-
 
     socket.on("app:info", async (args, callback) => {
       const { selectedDate, isAdmin } = args
@@ -172,22 +155,15 @@ app.prepare().then(async () => {
 
       try {
 
-        const isExist = await schedules.findOne({
-          details: new RegExp(schedulesData.details, "i"),
-          status: "wait",
-          timeSlots: {
-            $elemMatch: {
-              $or: schedulesData.timeSlots.map(({ facility, court, from, to, id }) =>
-                ({ facility, court, from, to, id })
-              )
-            }
-          }
-        });
 
-        if (isExist !== null) {
+        const isExist = await checkOrderExist(schedulesData, schedules)
+
+        console.log("isExist", isExist)
+
+        if (isExist) {
           throw new Error("Schedule already exists");
         }
-        
+
         const uniqueIds = [...new Set(timeSlotsData.map(item => item.id))].join(", ");
         const newRecord = {
           fields: {
@@ -211,7 +187,7 @@ app.prepare().then(async () => {
 
         const res = await createLarkRecord(newRecord);
         const recordId = res.data.record.record_id;
-
+       
         await updateTimeSlot({ timeSlotsData, collection: timeSlots });
 
         setTimeout(async () => {
