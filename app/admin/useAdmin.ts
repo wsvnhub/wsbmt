@@ -113,7 +113,7 @@ export default function useAdmin() {
 
     const onFormUnlockSubmit = async (values: any) => {
         const { password } = values;
-        if (password !== "TeamMate&2069") {
+        if (password !== "#@tOol6868#") {
             setProcessing(false);
             return api.open({
                 message: "Mật khẩu không hợp lệ",
@@ -151,7 +151,7 @@ export default function useAdmin() {
                 type: "error"
             });
         }
-        if (password !== "TeamMate&2069") {
+        if (password !== "#@tOol6868#") {
 
             return api.open({
                 message: "Mật khẩu không hợp lệ",
@@ -193,7 +193,7 @@ export default function useAdmin() {
             });
         }
 
-        if (password !== "cskhxoxo@#") {
+        if (password !== "#@tOol6868#") {
             setProcessing(false);
             return api.open({
                 message: "Mật khẩu không hợp lệ",
