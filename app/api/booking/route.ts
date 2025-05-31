@@ -35,11 +35,14 @@ export async function POST(request: Request) {
     try {
         const { code, amount } = await request.json();
 
+        if (!process.env.DB) {
+            throw new Error("Chưa cấu hình DB");
+        }
         client = await clientPromise;
         const db = client.db(process.env.DB);
         const schedules = db.collection("schedules");
         const isExist = await schedules.findOne({ transactionCode: code, status: "wait" })
-     
+
         if (!isExist) {
             throw new Error("Đơn hàng của bạn đã bị xoá!!!!!!");
         }
@@ -55,10 +58,10 @@ export async function POST(request: Request) {
 
         // await updateLarkRecord(isExist.larkRecordId, { fields: { trang_thai: "booked" } });
 
-        await schedules.updateOne(
-            { transactionCode: code, status: "wait" },
-            { $set: { status: "booked" } }
-        );
+        // await schedules.updateOne(
+        //     { transactionCode: code, status: "wait" },
+        //     { $set: { status: "booked" } }
+        // );
 
         const updatedData = timslots.map((timeSlot: any) => ({ ...timeSlot, status: "booked" }));
 
