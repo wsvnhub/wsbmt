@@ -35,11 +35,9 @@ export async function POST(request: Request) {
     try {
         const { code, amount } = await request.json();
 
-        if (!process.env.DB) {
-            throw new Error("Chưa cấu hình DB");
-        }
+        
         client = await clientPromise;
-        const db = client.db(process.env.DB);
+        const db = client.db();
         const schedules = db.collection("schedules");
         const isExist = await schedules.findOne({ transactionCode: code, status: "wait" })
 
