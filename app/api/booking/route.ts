@@ -1,6 +1,6 @@
 import clientPromise from "@/lib/mongo";
 // import { formatDate } from "@/utils";
-// import { updateLarkRecord } from "@/utils/lark";
+import { createLarkRecord } from "@/utils/lark";
 import { logger } from "@/utils/logger";
 
 
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
             { status: 200, statusText: "success" }
         );
     } catch (error: any) {
-        logger.error(`Verification error: ${error.message}`);
+        logger.info(`Verification error: ${error.message}`);
         return Response.json({ error: error.message, data: null }, { status: 202, statusText: "error" });
     }
 }

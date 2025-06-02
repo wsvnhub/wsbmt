@@ -1,6 +1,6 @@
 import axios from "axios";
 import { config } from "dotenv";
-import { errorLogger } from "./logger.js";
+import { errorLogger, larkLogger } from "./logger.js";
 
 config();
 
@@ -59,7 +59,7 @@ export const createLarkRecord = async (newRecord) => {
         const response = await axios.post(url, newRecord, {
             headers: buildAuthHeaders(token),
         });
-
+        larkLogger.info(`created record ${JSON.stringify(response.data)}`)
         return response.data;
     } catch (err) {
         errorLogger.error(`Error creating Lark record:: ${JSON.stringify(err.response?.data || err)}`)

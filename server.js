@@ -210,9 +210,7 @@ app.prepare().then(async () => {
         socket.broadcast.emit("schedules:updated", timeSlotsData);
 
         callback({ success: true, data: insertResult, schedulesId: id });
-        return createLarkRecord(newRecord).then(res => {
-          larkLogger.info(`Creating lark record: ${JSON.stringify({ res })}`);
-        });
+        return createLarkRecord(newRecord)
       } catch (error) {
         errorLogger.error(`Error creating schedule: ${JSON.stringify(error)}`)
         callback({ success: false, data: error });
@@ -257,12 +255,7 @@ app.prepare().then(async () => {
           },
         };
 
-        return createLarkRecord(newRecord).then(res => {
-          larkLogger.info(`updated lark in socket ${JSON.stringify(res)}`)
-        }).catch(err => {
-          larkLogger.info(`Error updated lark in socket ${JSON.stringify(err)}`)
-          errorLogger.error(`Error updated lark in socket ${JSON.stringify(err)}`)
-        });
+        return createLarkRecord(newRecord)
         // return updateLarkRecord(schedule.larkRecordId, { fields: { trang_thai: "booked" } });
       } catch (error) {
         logger.error(`Error updating schedule: ${error}`);
