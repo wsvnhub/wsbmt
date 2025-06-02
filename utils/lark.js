@@ -59,7 +59,7 @@ export const createLarkRecord = async (newRecord) => {
         const response = await axios.post(url, newRecord, {
             headers: buildAuthHeaders(token),
         });
-        larkLogger.info(`created record ${response.data.msg} ${JSON.stringify(response.data.record)}`)
+        larkLogger.info(`created record ${response.data.msg} - ${JSON.stringify(response.data)}`)
         return response.data;
     } catch (err) {
         errorLogger.error(`Error creating Lark record:: ${JSON.stringify(err.response?.data || err)}`)
