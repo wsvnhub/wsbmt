@@ -69,7 +69,6 @@ export default function LightBox({ listFac, handleSelectedDate, handleChangeFaci
           <p className='text-white mb-2'><strong>Chọn chi nhánh:</strong></p>
           <ListFac
             type='radio'
-            seletedFac={selectedBranch}
             listFac={listFac}
             handleChangeFacilitiesInfo={handleBranchChange}
           />
