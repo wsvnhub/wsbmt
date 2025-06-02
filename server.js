@@ -4,8 +4,8 @@ import { config } from "dotenv";
 import { MongoClient, ObjectId } from "mongodb";
 import next from "next";
 import { Server } from "socket.io";
-import { createLarkRecord, updateLarkRecord } from "./utils/lark.js";
-import { logger } from "./utils/logger.js";
+import { createLarkRecord } from "./utils/lark.js";
+import { logger, errorLogger, larkLogger } from "./utils/logger.js";
 import { checkOrderExist } from "./utils/checkOrderExist.js";
 
 config();
@@ -154,13 +154,10 @@ app.prepare().then(async () => {
       const id = new ObjectId().toString();
 
       try {
-
-
         const isExist = await checkOrderExist(schedulesData, schedules)
 
-        console.log("isExist", isExist)
-
         if (isExist) {
+          errorLogger.error(`Schedule already exists ${schedulesData.userName} - ${schedulesData.phone} - ${schedulesData.details}`)
           throw new Error("Schedule already exists");
         }
 
@@ -213,9 +210,11 @@ app.prepare().then(async () => {
         socket.broadcast.emit("schedules:updated", timeSlotsData);
 
         callback({ success: true, data: insertResult, schedulesId: id });
-        return createLarkRecord(newRecord);
+        return createLarkRecord(newRecord).then(res => {
+          larkLogger.info(`Creating lark record: ${JSON.stringify({ res })}`);
+        });
       } catch (error) {
-        logger.error(`Error creating schedule: ${error}`);
+        errorLogger.error(`Error creating schedule: ${JSON.stringify(error)}`)
         callback({ success: false, data: error });
       }
     });
@@ -230,10 +229,11 @@ app.prepare().then(async () => {
       try {
         const schedule = await schedules.findOne({ transactionCode: code, status: "booked" });
         if (!schedule) {
+          errorLogger.error(`"Order not paid yet" ${code}`)
           throw new Error("Order not paid yet");
         }
 
-        console.log("Updated record successfully");
+        larkLogger.info(`Updated record successfully: ${code}`);
         // callback({ success: true, data: schedule.larkRecordId });
         callback({ success: true, data: schedule.id });
 
@@ -257,7 +257,12 @@ app.prepare().then(async () => {
           },
         };
 
-        return createLarkRecord(newRecord);
+        return createLarkRecord(newRecord).then(res => {
+          larkLogger.info(`updated lark in socket ${JSON.stringify(res)}`)
+        }).catch(err => {
+          larkLogger.info(`Error updated lark in socket ${JSON.stringify(err)}`)
+          errorLogger.error(`Error updated lark in socket ${JSON.stringify(err)}`)
+        });
         // return updateLarkRecord(schedule.larkRecordId, { fields: { trang_thai: "booked" } });
       } catch (error) {
         logger.error(`Error updating schedule: ${error}`);

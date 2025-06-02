@@ -1,49 +1,87 @@
 import axios from "axios";
 import { config } from "dotenv";
+import { errorLogger } from "./logger.js";
 
 config();
 
-
+// Constants
 const LARK_API_URL = "https://open.larksuite.com/open-apis";
-const HEADERS = {
+
+// Load environment variables
+const { APP_ID, APP_SECRET, APP_TOKEN, TABLE_ID } = process.env;
+
+if (!APP_ID || !APP_SECRET || !APP_TOKEN || !TABLE_ID) {
+    errorLogger.error("Missing required environment variables in Lark.")
+    throw new Error("Missing required environment variables.");
+}
+
+// Shared headers
+const JSON_HEADERS = {
     "Content-Type": "application/json; charset=utf-8",
 };
 
-const { APP_ID, APP_SECRET, APP_TOKEN, TABLE_ID } = process.env;
-
+// Get Lark Tenant Access Token
 const getLarkAccessToken = async () => {
-    const response = await axios.post(`${LARK_API_URL}/auth/v3/tenant_access_token/internal`, {
-        app_id: APP_ID,
-        app_secret: APP_SECRET,
-    }, { headers: HEADERS });
+    try {
+        const { data, status } = await axios.post(
+            `${LARK_API_URL}/auth/v3/tenant_access_token/internal`,
+            {
+                app_id: APP_ID,
+                app_secret: APP_SECRET,
+            },
+            { headers: JSON_HEADERS }
+        );
 
-    if (response.status !== 200) {
-        throw new Error(`Request failed with status ${response.status}`);
+        if (status !== 200 || !data?.tenant_access_token) {
+            throw new Error(`Lark token fetch failed: ${JSON.stringify(data)}`);
+        }
+
+        return data.tenant_access_token;
+    } catch (err) {
+        errorLogger.error(`Error getting Lark access token: ${JSON.stringify(err)}`)
+        console.error("Error getting Lark access token:", err);
+        throw err;
     }
-
-    return response.data.tenant_access_token;
 };
 
+// Helper to create auth headers
+const buildAuthHeaders = (token) => ({
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+});
+
+// Create a new Lark record
 export const createLarkRecord = async (newRecord) => {
-    const token = await getLarkAccessToken();
-    const url = `${LARK_API_URL}/bitable/v1/apps/${APP_TOKEN}/tables/${TABLE_ID}/records`;
-    const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-    };
+    try {
+        const token = await getLarkAccessToken();
+        const url = `${LARK_API_URL}/bitable/v1/apps/${APP_TOKEN}/tables/${TABLE_ID}/records`;
 
-    const response = await axios.post(url, newRecord, { headers });
-    return response.data;
+        const response = await axios.post(url, newRecord, {
+            headers: buildAuthHeaders(token),
+        });
+
+        return response.data;
+    } catch (err) {
+        errorLogger.error(`Error creating Lark record:: ${JSON.stringify(err.response?.data || err)}`)
+
+        console.error("Error creating Lark record:", err.response?.data || err);
+        throw err;
+    }
 };
 
+// Update an existing Lark record
 export const updateLarkRecord = async (recordId, newData) => {
-    const token = await getLarkAccessToken();
-    const url = `${LARK_API_URL}/bitable/v1/apps/${APP_TOKEN}/tables/${TABLE_ID}/records/${recordId}`;
-    const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-    };
+    try {
+        const token = await getLarkAccessToken();
+        const url = `${LARK_API_URL}/bitable/v1/apps/${APP_TOKEN}/tables/${TABLE_ID}/records/${recordId}`;
 
-    const response = await axios.put(url, newData, { headers });
-    return response.data;
+        const response = await axios.put(url, newData, {
+            headers: buildAuthHeaders(token),
+        });
+
+        return response.data;
+    } catch (err) {
+        console.error("Error updating Lark record:", err.response?.data || err);
+        throw err;
+    }
 };

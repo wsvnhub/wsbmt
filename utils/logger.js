@@ -1,4 +1,5 @@
 import winston from "winston";
+
 const { combine, timestamp, json } = winston.format;
 
 const logger = winston.createLogger({
@@ -6,9 +7,31 @@ const logger = winston.createLogger({
     format: combine(timestamp(), json()),
     transports: [
         new winston.transports.File({
-            filename: "app.log"
+            filename: "logs/app.log"
         }),
     ],
 });
 
-export { logger };
+
+const errorLogger = winston.createLogger({
+    level: "error",
+    format: combine(timestamp(), json()),
+    transports: [
+        new winston.transports.File({
+            filename: "logs/errors.log"
+        }),
+    ],
+});
+
+const larkLogger = winston.createLogger({
+    level: "data",
+    format: combine(timestamp(), json()),
+    transports: [
+        new winston.transports.File({
+            filename: "logs/lark.log"
+        }),
+    ],
+});
+
+
+export { logger, errorLogger, larkLogger };

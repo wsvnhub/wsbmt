@@ -21,6 +21,10 @@ export default function LightBox({ listFac, handleChangeFacilitiesInfo }: ListFa
     }
   }, []);
 
+  const handleBranchChange = (branchId: string) => {
+    setSelectedBranch(branchId)
+  }
+
   const handleOk = () => {
     if (!selectedDate || !selectedBranch) {
       message.error('Vui lòng chọn đầy đủ ngày và chi nhánh!');
