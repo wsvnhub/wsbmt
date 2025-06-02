@@ -258,6 +258,10 @@ export default function useBooking() {
         });
     };
 
+    const handleRadioSelectBranch = (id: string) => {
+        return setSelectedFacInfo(preState => preState.filter(item => item.id === id));
+    }
+
     const handleChangeFacilitiesInfo = (name: string, checked: boolean) => {
         if (checked) {
             const filtered = Object.values(facilitiesInfo).filter((item) =>
@@ -327,7 +331,6 @@ export default function useBooking() {
             await sendUpdateSchedules(newState.data);
         }
         if (isShowResult) {
-
             setSelected({});
         }
 
@@ -362,6 +365,7 @@ export default function useBooking() {
         handleChangePage,
         handleScrollChange,
         handleCellClick,
+        handleRadioSelectBranch,
         handleChangeFacilitiesInfo
     }
 }

@@ -13,7 +13,7 @@ import { VND } from "@/utils";
 import clusters from "@/data/clusters.json";
 import _ from "lodash";
 import { Header } from "@/components/Header";
-// import LightBox from "@/components/LightBox";
+import LightBox from "@/components/LightBox";
 import useBooking from "@/hooks/useBooking";
 import ListFac from "@/components/Branch";
 
@@ -71,6 +71,7 @@ export default function Home() {
     handleChangePage,
     handleScrollChange,
     handleCellClick,
+    handleRadioSelectBranch,
     handleChangeFacilitiesInfo } = useBooking()
 
   if (isLoading) {
@@ -91,7 +92,12 @@ export default function Home() {
           } />
         </>
       )}
-      {/* <LightBox listFac={listFac} handleChangeFacilitiesInfo={handleChangeFacilitiesInfo} /> */}
+      <LightBox
+        listFac={listFac}
+        handleSelectedDate={setSelectedDate}
+        handleChangeFacilitiesInfo={handleRadioSelectBranch}
+      />
+
       {contextHolder}
 
       <Header headerPadding={headerPadding}

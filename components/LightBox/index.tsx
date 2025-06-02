@@ -2,10 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, DatePicker, message } from 'antd';
 import dayjs from 'dayjs';
-import ListFac, { ListFacProps } from '../Branch';
+import ListFac from '../Branch';
 
 
-export default function LightBox({ listFac, handleChangeFacilitiesInfo }: ListFacProps) {
+export default function LightBox({ listFac, handleSelectedDate, handleChangeFacilitiesInfo }: any) {
   const [isModalOpen, setIsModalOpen] = useState(true);
   const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs | null>(null);
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
@@ -21,8 +21,8 @@ export default function LightBox({ listFac, handleChangeFacilitiesInfo }: ListFa
     }
   }, []);
 
-  const handleBranchChange = (branchId: string) => {
-    setSelectedBranch(branchId)
+  const handleBranchChange = (branchId: string,) => {
+    return setSelectedBranch(branchId)
   }
 
   const handleOk = () => {
@@ -32,8 +32,11 @@ export default function LightBox({ listFac, handleChangeFacilitiesInfo }: ListFa
     }
 
     // Lưu vào localStorage hoặc truyền lên App nếu cần
-    localStorage.setItem('selectedDate', selectedDate.toISOString());
-    localStorage.setItem('selectedBranch', selectedBranch);
+    // localStorage.setItem('selectedDate', selectedDate.toString());
+    // localStorage.setItem('selectedBranch', selectedBranch);
+
+    handleSelectedDate(selectedDate.toDate())
+    handleChangeFacilitiesInfo(selectedBranch)
     setIsModalOpen(false);
   };
 
@@ -46,7 +49,13 @@ export default function LightBox({ listFac, handleChangeFacilitiesInfo }: ListFa
         maskClosable={false}
         onOk={handleOk}
         okText="Xác nhận"
-        cancelButtonProps={{ style: { display: 'none' } }} // Ẩn nút Cancel
+        okButtonProps={{
+          style: {
+            backgroundColor: "InfoBackground",
+            color: "black"
+          }
+        }}
+        cancelButtonProps={{ style: { display: 'none' } }}
       >
         <div style={{ marginBottom: 16 }}>
           <p className='text-white mb-2'><strong>Chọn ngày:</strong></p>
@@ -60,8 +69,10 @@ export default function LightBox({ listFac, handleChangeFacilitiesInfo }: ListFa
           <p className='text-white mb-2'><strong>Chọn chi nhánh:</strong></p>
           <ListFac
             type='radio'
+            seletedFac={selectedBranch}
             listFac={listFac}
-            handleChangeFacilitiesInfo={handleChangeFacilitiesInfo} />
+            handleChangeFacilitiesInfo={handleBranchChange}
+          />
         </div>
       </Modal>
     </>
