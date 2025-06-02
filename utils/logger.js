@@ -24,7 +24,7 @@ const errorLogger = winston.createLogger({
 });
 
 const larkLogger = winston.createLogger({
-    level: "data",
+    level: "info",
     format: combine(timestamp(), json()),
     transports: [
         new winston.transports.File({
