@@ -70,26 +70,39 @@ export default function WaitPayments({
   };
 
   React.useEffect(() => {
-    const socket = io(SOCKET_URL, { query: { user_id: data.phone }, autoConnect: true })
+    const socket = io(SOCKET_URL, { query: { user_id: data.phone }, autoConnect: true });
+
+    // Định nghĩa handler cho balanceUpdated ở đây để có thể tham chiếu trong off
+    const handleBalanceUpdated = () => {
+      console.log(`[SOCKET EVENT - WaitPayments] balanceUpdated received at ${new Date().toISOString()}`);
+      const updatedData = timslots.map((timeSlot: any) => ({ ...timeSlot, status: "booked" }));
+      // Hãy cẩn thận với việc gọi handleChangePage ở đây.
+      // Nó có thể gây ra side effect không mong muốn nếu `handleChangePage` không được thiết kế để xử lý từ nhiều nguồn.
+      // Có thể bạn chỉ muốn cập nhật UI cục bộ của WaitPayments hoặc điều hướng.
+      return handleChangePage({ data: updatedData, source: 'balanceUpdated' }); // Thêm source để handleChangePage có thể phân biệt
+    };
 
     function onConnect() {
-      console.log("connected")
-      socket.on("balanceUpdated", () => {
-        const updatedData = timslots.map((timeSlot: any) => ({ ...timeSlot, status: "booked" }));
-        handleChangePage({ data: updatedData });
-      })
-
+      console.log("[WaitPayments] Socket connected");
+      // Không đăng ký balanceUpdated ở đây nữa
     }
 
     function onDisconnect() {
-      console.log("disconnected")
+      console.log("[WaitPayments] Socket disconnected");
     }
+
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
+    socket.on("balanceUpdated", handleBalanceUpdated); // Đăng ký một lần ở đây
+
+    console.log('[WaitPayments] Registering socket listeners: connect, disconnect, balanceUpdated');
 
     return () => {
+      console.log('[WaitPayments] Unregistering socket listeners and disconnecting socket');
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
+      socket.off("balanceUpdated", handleBalanceUpdated); // Quan trọng: cleanup
+      socket.disconnect(); // Ngắt kết nối khi component unmount
     };
   }, [])
 
