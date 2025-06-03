@@ -73,12 +73,12 @@ const schedulesColumns: TableColumnsType<DataType> = [
   },
 ];
 
-const SettingPage = () => {
+const SettingPage = ({ branchs }: any) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [fixedDataSource, setFixedDataSource] = React.useState<DataType[]>([])
 
-  const [branchs, setBranch] = React.useState([])
+  // const [branchs, setBranch] = React.useState([])
   const [selectedBranch, setSelectedBranch] = React.useState("")
   const [selectedCourt, setSelectedCourt] = React.useState("-")
   const [courts, setCourts] = React.useState([])
@@ -93,12 +93,12 @@ const SettingPage = () => {
     setSelectedRowKeys(newSelectedRowKeys);
   };
 
-  React.useEffect(() => {
-    axios.get('/api/facilities').then(res => {
-      setBranch(res.data.data)
-    })
+  // React.useEffect(() => {
+  //   axios.get('/api/facilities').then(res => {
+  //     setBranch(res.data.data)
+  //   })
 
-  }, [])
+  // }, [])
 
 
   React.useEffect(() => {

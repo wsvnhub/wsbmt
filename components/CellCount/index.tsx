@@ -3,11 +3,14 @@
 import { useState, useEffect } from "react";
 import StatCard from "../StatCard";
 import { Select } from "antd";
+import axios from "axios";
+import React from "react";
 
 type Slot = {
     date: string;
-    isBooked: boolean;
+    createdAt: string
     branch: string;
+    [key: string]: any
 };
 
 type CellCount = {
@@ -19,33 +22,48 @@ export default function CellCount({ branches }: CellCount) {
     const [filteredSlots, setFilteredSlots] = useState<Slot[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const slots: Slot[] = [
-        { date: "2025-06-02", isBooked: true, branch: "Chi nhánh 1" },
-        { date: "2025-06-03", isBooked: true, branch: "Chi nhánh 2" },
-        { date: "2025-06-04", isBooked: false, branch: "Chi nhánh 1" },
-        { date: "2025-06-05", isBooked: true, branch: "Chi nhánh 3" },
-    ];
-
     const branchOptions = [{ value: 'all', label: "Tất cả" }, ...branches.map((branch: any) => {
         return { value: branch.id, label: branch.name }
     })]
 
     useEffect(() => {
         setLoading(true);
-        const timeout = setTimeout(() => {
-            if (selectedBranch === "all") {
-                setFilteredSlots(slots);
-            } else {
-                setFilteredSlots(slots.filter(s => s.branch === selectedBranch));
-            }
+        let url = "/api/time-slots"
+
+        if (selectedBranch !== "all") {
+            url = url + `?branchId=${selectedBranch}`
+        }
+
+        axios.get(url).then(res => {
+            console.log(res.data.data)
+            setFilteredSlots(res.data.data);
             setLoading(false);
-        }, 300);
-        return () => clearTimeout(timeout);
+        })
     }, [selectedBranch]);
 
-    const today = new Date().toISOString().split("T")[0];
-    const futureCount = filteredSlots.filter(slot => slot.date > today).length;
-    const todayBookedCount = filteredSlots.filter(slot => slot.date === today && slot.isBooked).length;
+    const todayStr = new Date().toDateString();
+
+    const { futureCount, todayBookedCount } = React.useMemo(() => {
+        let future = 0;
+        let todayBooked = 0;
+
+        for (const slot of filteredSlots) {
+            const isToday = slot.createdAt === todayStr;
+
+            for (const [key, value] of Object.entries(slot)) {
+                if (!isNaN(Number(key))) {
+                    if (value.status === "empty") {
+                        future++;
+                    }
+                    if (isToday && value.status === "booked") {
+                        todayBooked++;
+                    }
+                }
+            }
+        }
+
+        return { futureCount: future, todayBookedCount: todayBooked };
+    }, [filteredSlots, todayStr]);
 
     return (
         <div className="py-6 space-y-4">

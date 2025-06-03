@@ -7,7 +7,7 @@ import React from 'react'
 const getBranchs = async () => {
   const client = await clientPromise;
   const db = client.db();
-  return db.collection("facilities").find({}).toArray();
+  return db.collection("facilities").find({}, { projection: { _id: 0 } }).toArray();
 }
 
 export default async function page() {
@@ -15,7 +15,7 @@ export default async function page() {
   return (
     <div>
       <CellCount branches={branchs} />
-      <SettingPage />
+      <SettingPage branchs={branchs} />
     </div>
   )
 }

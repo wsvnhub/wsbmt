@@ -10,10 +10,20 @@ export async function GET(request: Request) {
         const db = client.db();
         const timeSlots = db.collection("timeslots");
 
-        const query = branchId ? { branchId } : {};
-        const data = await timeSlots.find(query).limit(10).toArray();
+        // Lấy hôm nay theo định dạng toDateString() giống lúc insert
+        const todayStr = new Date().toDateString();
 
-        return Response.json(data);
+        const query: any = {
+            createdAt: { $gte: todayStr },
+        };
+
+        if (branchId) {
+            query.facility = branchId;
+        }
+
+        const slots = await timeSlots.find(query).toArray();
+
+        return Response.json({ data: slots });
     } catch (error) {
         console.error("Error:", error);
         return Response.json({ message: "Internal server error" }, { status: 500 });
