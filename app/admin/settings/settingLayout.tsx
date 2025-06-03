@@ -27,8 +27,7 @@ const SettingsLayout = ({ children }: any) => {
                 <div className="demo-logo-vertical" />
                 <Menu
                     onClick={({ item, key, keyPath, domEvent }) => {
-                        console.log("keyPath", keyPath, key)
-                        
+                        navigation.prefetch(`/admin/settings/${key}`)
                         return navigation.push(`/admin/settings/${key}`)
                     }}
                     mode="inline"

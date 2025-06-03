@@ -3,11 +3,16 @@ import { insertTimeslots } from '@/utils/insertTimeSlots';
 
 export async function GET(request: Request) {
     try {
+        const { searchParams } = new URL(request.url);
+        const branchId = searchParams.get("branchId");
+
         const client = await clientPromise;
         const db = client.db();
         const timeSlots = db.collection("timeslots");
 
-        const data = await timeSlots.find().limit(10).toArray();
+        const query = branchId ? { branchId } : {};
+        const data = await timeSlots.find(query).limit(10).toArray();
+
         return Response.json(data);
     } catch (error) {
         console.error("Error:", error);
@@ -36,7 +41,7 @@ export async function PUT(request: Request) {
         const client = await clientPromise;
         const db = client.db();
         const timeSlots = db.collection("timeslots");
-       
+
         const [timeSlot] = timeSlotsData
         const res = await timeSlots.findOne({
             facility: timeSlot.facility,

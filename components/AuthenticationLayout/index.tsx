@@ -12,7 +12,7 @@ type AuthenticationLayoutProps = {
 const AuthenticationLayout = (props: AuthenticationLayoutProps) => {
   const { children } = props;
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [inputVal, setInputVal] = useState("");
+  const [inputVal, setInputVal] = useState("86@#86!Ws");
   const [open, setOpen] = useState(false);
 
   const onSubmit = () => {

@@ -1,18 +1,38 @@
 import clientPromise from "@/lib/mongo";
 
 export async function GET(request: Request) {
-    let client;
     try {
-        client = await clientPromise;
+        const client = await clientPromise;
         const db = client.db();
-        const page = parseInt(request.url.split('page=')[1]) || 1; // Get the page number from the request URL
-        const limit = 20; // Set the limit for items per page
-        const skip = (page - 1) * limit; // Calculate the number of items to skip
-        const schedules = await db.collection("schedules").find().skip(skip).limit(limit).toArray();
-        return Response.json({ data: schedules }, { status: 200 });
+
+        // Lấy query params từ URL
+        const { searchParams } = new URL(request.url);
+        const page = parseInt(searchParams.get('page') || '1');
+        const limit = parseInt(searchParams.get('pageSize') || '20');
+        const skip = (page - 1) * limit;
+
+        // Đếm tổng số tài liệu
+        const totalItems = await db.collection('schedules').countDocuments();
+
+        // Lấy dữ liệu phân trang
+        const schedules = await db
+            .collection('schedules')
+            .find()
+            .skip(skip)
+            .limit(limit)
+            .toArray();
+
+        const totalPages = Math.ceil(totalItems / limit);
+
+        return Response.json({
+            data: schedules,
+            totalItems,
+            totalPages,
+            currentPage: page,
+        });
     } catch (error) {
-        console.error("Error fetching timeslots:", error);
-        return Response.json({ error: "Internal server error" }, { status: 500 });
+        console.error('Error fetching schedules:', error);
+        return Response.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
 

@@ -90,7 +90,7 @@ const CalendarPage: React.FC = () => {
         })
         .then(res => res.json())
       console.log(res)
-      message.success('Xoá thành công');
+      message.success('Thêm thành công');
     } catch (error) {
 
     } finally {

@@ -52,7 +52,7 @@ export default function Page() {
                     Import Data
                 </Button>
             </div>
-            {fileData && <pre>{JSON.stringify(fileData, null, 2)}</pre>} {/* Display JSON data */}
+            {fileData && <pre>{JSON.stringify(fileData[0], null, 2)}</pre>} {/* Display JSON data */}
         </div>
     );
 }
