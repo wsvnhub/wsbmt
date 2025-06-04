@@ -4,6 +4,10 @@ import { Modal, DatePicker, message } from 'antd';
 import dayjs from 'dayjs';
 import ListFac from '../Branch';
 
+const disabledDate = (current: dayjs.Dayjs) => {
+  // Không thể chọn những ngày trước ngày hôm nay
+  return current && current < dayjs().startOf('day');
+};
 
 export default function LightBox({ listFac, handleSelectedDate, handleChangeFacilitiesInfo }: any) {
   const [isModalOpen, setIsModalOpen] = useState(true);
@@ -63,6 +67,8 @@ export default function LightBox({ listFac, handleSelectedDate, handleChangeFaci
             style={{ width: '100%' }}
             value={selectedDate}
             onChange={(date) => setSelectedDate(date)}
+            disabledDate={disabledDate}
+            inputReadOnly={true}
           />
         </div>
         <div>

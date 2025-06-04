@@ -27,6 +27,10 @@ const ListFac: React.FC<ListFacProps> = ({ listFac, type = "checkbox", handleCha
         if (facParam) {
             const facArray = facParam.split(",");
             setSelectedIds(facArray);
+            if (type === "radio") {
+                const [id] = facArray
+                handleChangeFacilitiesInfo(id, true)
+            }
         }
     }, [searchParams]);
 
