@@ -1,6 +1,5 @@
 import clientPromise from "@/lib/mongo";
 // import { formatDate } from "@/utils";
-import { createLarkRecord } from "@/utils/lark";
 import { logger } from "@/utils/logger";
 
 
@@ -52,7 +51,7 @@ export async function POST(request: Request) {
             { transactionCode: code, status: "wait" },
             { $set: { status: "booked" } }
         );
-        logger.info(`updateLarkRecord: ${code} - ${JSON.stringify(isExist)}`);
+        logger.info(`updateLarkRecord: booking ${code} - ${JSON.stringify(isExist)}`);
 
         // const updatedData = timslots.map((timeSlot: any) => ({ ...timeSlot, status: "booked" }));
 

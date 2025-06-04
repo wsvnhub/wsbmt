@@ -149,7 +149,7 @@ app.prepare().then(async () => {
 
     socket.on("schedules:create", async ({ timeSlotsData, schedulesData }, callback) => {
       logger.info(`Creating schedule: ${JSON.stringify({ schedulesData })}`);
-      
+
       const schedules = mongoPool.collection("schedules");
       const timeSlots = mongoPool.collection("timeslots");
       const id = new ObjectId().toString();
@@ -185,7 +185,6 @@ app.prepare().then(async () => {
 
         // const recordId = res.data.record.record_id;
 
-        await updateTimeSlot({ timeSlotsData, collection: timeSlots });
 
         setTimeout(async () => {
           const deleteResult = await schedules.deleteOne({ id, status: "wait" });
@@ -206,6 +205,9 @@ app.prepare().then(async () => {
           status: "wait",
           createdAt: new Date(),
         };
+        const res = await updateTimeSlot({ timeSlotsData, collection: timeSlots });
+
+        logger.info(`create schedules :updateTimeSlot - ${JSON.stringify(res)}`)
 
         const insertResult = await schedules.insertOne(insertData);
         socket.broadcast.emit("schedules:updated", timeSlotsData);
@@ -213,6 +215,7 @@ app.prepare().then(async () => {
         return callback({ success: true, data: insertResult, schedulesId: id });
       } catch (error) {
         errorLogger.error(`Error creating schedule: ${JSON.stringify(error)}`)
+        errorLogger.error(`Error creating schedulesData: ${JSON.stringify(schedulesData)}`)
         return callback({ success: false, data: error });
       }
     });
@@ -258,8 +261,9 @@ app.prepare().then(async () => {
         logger.info(`updated payment status ${JSON.stringify(schedule.timeSlots)}`)
         void createLarkRecord(newRecord)
         const timeSlotsData = schedule.timeSlots.map((timeSlot) => ({ ...timeSlot, status: "booked" }))
-        
-        await updateTimeSlot({ timeSlotsData, collection, action: "delete" });
+
+        const res = await updateTimeSlot({ timeSlotsData, collection, action: "delete" });
+        logger.info(`updated action schedules :updateTimeSlot - ${JSON.stringify(res)}`)
 
         return callback({ success: true, data: schedule.id });
         // return updateLarkRecord(schedule.larkRecordId, { fields: { trang_thai: "booked" } });
@@ -290,35 +294,35 @@ app.prepare().then(async () => {
       logger.info(`Updated: manual ${JSON.stringify(timeSlots)}`);
       const collection = mongoPool.collection("timeslots");
 
-      const [schedule] = timeSlots
+      // const [schedule] = timeSlots
 
-      const facilities = timeSlots.map(item => item.facility).join(", ");
-      const courtIds = timeSlots.map(item => item.id).join(", ");
-      const dates = timeSlots.map(item => item.index.createdAt).join(", ");
-      const quantity = timeSlots.length;
+      // const facilities = timeSlots.map(item => item.facility).join(", ");
+      // const courtIds = timeSlots.map(item => item.id).join(", ");
+      // const dates = timeSlots.map(item => item.index.createdAt).join(", ");
+      // const quantity = timeSlots.length;
 
-      const newRecord = {
-        fields: {
-          time_order: Date.now(),
-          chi_nhanh: facilities,
-          ND_CK: "Đặt thủ công",
-          name: schedule.bookedBy.name,
-          phone: schedule.bookedBy.phone,
-          email: "",
-          san: courtIds,
-          address: "",
-          date: dates,
-          time: quantity,
-          quantity: quantity,
-          total_money: 0,
-          voucher_code: "",
-          trang_thai: "booked",
-          dat_co_dinh: "False",
-        },
-      };
+      // const newRecord = {
+      //   fields: {
+      //     time_order: Date.now(),
+      //     chi_nhanh: facilities,
+      //     ND_CK: "Đặt thủ công",
+      //     name: schedule.bookedBy.name,
+      //     phone: schedule.bookedBy.phone,
+      //     email: "",
+      //     san: courtIds,
+      //     address: "",
+      //     date: dates,
+      //     time: quantity,
+      //     quantity: quantity,
+      //     total_money: 0,
+      //     voucher_code: "",
+      //     trang_thai: "booked",
+      //     dat_co_dinh: "False",
+      //   },
+      // };
 
 
-      await createLarkRecord(newRecord);
+      // await createLarkRecord(newRecord);
       await updateTimeSlot({ timeSlotsData: timeSlots, collection, action });
       io.emit("schedules:updated", timeSlots);
       return callback({ success: true, timeSlots });
