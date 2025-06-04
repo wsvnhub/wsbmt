@@ -54,13 +54,6 @@ export async function POST(request: Request) {
         );
         logger.info(`updateLarkRecord: ${code} - ${JSON.stringify(isExist)}`);
 
-        // await updateLarkRecord(isExist.larkRecordId, { fields: { trang_thai: "booked" } });
-
-        // await schedules.updateOne(
-        //     { transactionCode: code, status: "wait" },
-        //     { $set: { status: "booked" } }
-        // );
-
         // const updatedData = timslots.map((timeSlot: any) => ({ ...timeSlot, status: "booked" }));
 
         // const updateOperations = updatedData.map((timeSlot: any) => ({

@@ -149,6 +149,7 @@ app.prepare().then(async () => {
 
     socket.on("schedules:create", async ({ timeSlotsData, schedulesData }, callback) => {
       logger.info(`Creating schedule: ${JSON.stringify({ schedulesData })}`);
+      
       const schedules = mongoPool.collection("schedules");
       const timeSlots = mongoPool.collection("timeslots");
       const id = new ObjectId().toString();
@@ -254,14 +255,16 @@ app.prepare().then(async () => {
           },
         };
 
+        logger.info(`updated payment status ${JSON.stringify(schedule.timeSlots)}`)
         void createLarkRecord(newRecord)
-
-        await updateTimeSlot({ timeSlotsData: schedule.timeSlots, collection, action: "update" });
+        const timeSlotsData = schedule.timeSlots.map((timeSlot) => ({ ...timeSlot, status: "booked" }))
+        
+        await updateTimeSlot({ timeSlotsData, collection, action: "delete" });
 
         return callback({ success: true, data: schedule.id });
         // return updateLarkRecord(schedule.larkRecordId, { fields: { trang_thai: "booked" } });
       } catch (error) {
-        logger.error(`Error updating schedule: ${error}`);
+        errorLogger.error(`Error updating schedule: ${error}`);
         callback({ error });
       }
     });
@@ -288,7 +291,7 @@ app.prepare().then(async () => {
       const collection = mongoPool.collection("timeslots");
 
       const [schedule] = timeSlots
-      
+
       const facilities = timeSlots.map(item => item.facility).join(", ");
       const courtIds = timeSlots.map(item => item.id).join(", ");
       const dates = timeSlots.map(item => item.index.createdAt).join(", ");
