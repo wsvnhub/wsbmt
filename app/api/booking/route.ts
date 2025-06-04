@@ -46,13 +46,13 @@ export async function POST(request: Request) {
         }
         const timslots = isExist.timeSlots
 
-        const timeSlots = db.collection("timeslots");
+        // const timeSlots = db.collection("timeslots");
 
         await schedules.updateOne(
             { transactionCode: code, status: "wait" },
             { $set: { status: "booked" } }
         );
-        logger.info(`updateLarkRecord: ${JSON.stringify(isExist)}`);
+        logger.info(`updateLarkRecord: ${code} - ${JSON.stringify(isExist)}`);
 
         // await updateLarkRecord(isExist.larkRecordId, { fields: { trang_thai: "booked" } });
 
@@ -61,21 +61,21 @@ export async function POST(request: Request) {
         //     { $set: { status: "booked" } }
         // );
 
-        const updatedData = timslots.map((timeSlot: any) => ({ ...timeSlot, status: "booked" }));
+        // const updatedData = timslots.map((timeSlot: any) => ({ ...timeSlot, status: "booked" }));
 
-        const updateOperations = updatedData.map((timeSlot: any) => ({
-            updateOne: {
-                filter: { facility: timeSlot.facility, courtId: timeSlot.id, createdAt: timeSlot.index.createdAt },
-                update: { $set: { [timeSlot.index.columnIndex]: timeSlot } }
-            }
-        }));
-        logger.info(`Updating time slots: ${JSON.stringify(updatedData)}`);
+        // const updateOperations = updatedData.map((timeSlot: any) => ({
+        //     updateOne: {
+        //         filter: { facility: timeSlot.facility, courtId: timeSlot.id, createdAt: timeSlot.index.createdAt },
+        //         update: { $set: { [timeSlot.index.columnIndex]: timeSlot } }
+        //     }
+        // }));
+        // logger.info(`Updating time slots: ${JSON.stringify(updatedData)}`);
 
-        await timeSlots.bulkWrite(updateOperations);
+        // await timeSlots.bulkWrite(updateOperations);
 
         logger.info(`Verification successful: code=${code}, amount=${amount}`);
         return Response.json(
-            { data: updatedData },
+            { data: timslots },
             { status: 200, statusText: "success" }
         );
     } catch (error: any) {

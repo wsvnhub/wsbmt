@@ -208,12 +208,11 @@ app.prepare().then(async () => {
 
         const insertResult = await schedules.insertOne(insertData);
         socket.broadcast.emit("schedules:updated", timeSlotsData);
-
-        callback({ success: true, data: insertResult, schedulesId: id });
-        return createLarkRecord(newRecord)
+        void createLarkRecord(newRecord)
+        return callback({ success: true, data: insertResult, schedulesId: id });
       } catch (error) {
         errorLogger.error(`Error creating schedule: ${JSON.stringify(error)}`)
-        callback({ success: false, data: error });
+        return callback({ success: false, data: error });
       }
     });
 
@@ -230,10 +229,10 @@ app.prepare().then(async () => {
           errorLogger.error(`"Order not paid yet" ${code}`)
           throw new Error("Order not paid yet");
         }
+        const collection = mongoPool.collection("timeslots");
 
         larkLogger.info(`Updated record successfully: ${code}`);
         // callback({ success: true, data: schedule.larkRecordId });
-        callback({ success: true, data: schedule.id });
 
         const newRecord = {
           fields: {
@@ -255,7 +254,11 @@ app.prepare().then(async () => {
           },
         };
 
-        return createLarkRecord(newRecord)
+        void createLarkRecord(newRecord)
+
+        await updateTimeSlot({ timeSlotsData: schedule.timeSlots, collection, action: "update" });
+
+        return callback({ success: true, data: schedule.id });
         // return updateLarkRecord(schedule.larkRecordId, { fields: { trang_thai: "booked" } });
       } catch (error) {
         logger.error(`Error updating schedule: ${error}`);
@@ -281,8 +284,38 @@ app.prepare().then(async () => {
 
     socket.on("schedules:manual", async ({ timeSlots, action }, callback) => {
       logger.info(`Updated: schedules:manual`);
+      logger.info(`Updated: manual ${JSON.stringify(timeSlots)}`);
       const collection = mongoPool.collection("timeslots");
-      // const res = await createLarkRecord(newRecord);
+
+      const [schedule] = timeSlots
+      
+      const facilities = timeSlots.map(item => item.facility).join(", ");
+      const courtIds = timeSlots.map(item => item.id).join(", ");
+      const dates = timeSlots.map(item => item.index.createdAt).join(", ");
+      const quantity = timeSlots.length;
+
+      const newRecord = {
+        fields: {
+          time_order: Date.now(),
+          chi_nhanh: facilities,
+          ND_CK: "Đặt thủ công",
+          name: schedule.bookedBy.name,
+          phone: schedule.bookedBy.phone,
+          email: "",
+          san: courtIds,
+          address: "",
+          date: dates,
+          time: quantity,
+          quantity: quantity,
+          total_money: 0,
+          voucher_code: "",
+          trang_thai: "booked",
+          dat_co_dinh: "False",
+        },
+      };
+
+
+      await createLarkRecord(newRecord);
       await updateTimeSlot({ timeSlotsData: timeSlots, collection, action });
       io.emit("schedules:updated", timeSlots);
       return callback({ success: true, timeSlots });
