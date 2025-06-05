@@ -68,11 +68,16 @@ export default function useSocket() {
   );
   const deleteSchedules = React.useCallback((data: any) => { }, []);
   const updateSchedules = React.useCallback(async (transactionCode: string) => {
-    const res = await socket.emitWithAck("schedules:update", {
-      code: transactionCode,
-    });
-    return res;
-  }, []);
+    try {
+      const res = await socket.emitWithAck("schedules:update", {
+        code: transactionCode,
+      });
+      console.log("send success", transactionCode)
+      return res;
+    } catch (error) {
+      console.log("updateSchedules error", error)
+    }
+  }, [socket]);
   const sendUpdateSchedules = React.useCallback(async (timeSlots: any) => {
     const res = await socket.emitWithAck("schedules:send-info", {
       timeSlots,

@@ -7,6 +7,7 @@ import { Server } from "socket.io";
 import { createLarkRecord } from "./utils/lark.js";
 import { logger, errorLogger, larkLogger } from "./utils/logger.js";
 import { checkOrderExist } from "./utils/checkOrderExist.js";
+import { updateTimeSlot } from "./utils/updateTimeSlotsStatus.js";
 
 config();
 
@@ -44,24 +45,7 @@ const initDB = async () => {
     return null;
   }
 };
-const actionsStatus = {
-  add: "empty",
-  update: "booked",
-  delete: "wait",
-}
-const updateTimeSlot = async ({ timeSlotsData, collection, action = "add" }) => {
-  logger.info(`Updating time slots: ${JSON.stringify(timeSlotsData)}`);
-  const updatePromises = timeSlotsData.map(({ facility, id, index, ...rest }) => {
-    const availability = action === "add" ? true : false
-    return collection.updateOne(
-      { facility, courtId: id, createdAt: index.createdAt, [index.columnIndex + ".status"]: actionsStatus[action] },
-      { $set: { [index.columnIndex]: { facility, id, index, availability, ...rest } } }
-    )
-  }
 
-  );
-  return Promise.allSettled(updatePromises);
-};
 
 // const statificBookedHours = ({ collection }) => {
 //   const results = collection.find({})
@@ -226,46 +210,46 @@ app.prepare().then(async () => {
     });
 
     socket.on("schedules:update", async ({ code }, callback) => {
-      const schedules = mongoPool.collection("schedules");
+      // const schedules = mongoPool.collection("schedules");
       try {
-        const schedule = await schedules.findOne({ transactionCode: code, status: "booked" });
-        if (!schedule) {
-          errorLogger.error(`"Order not paid yet" ${code}`)
-          throw new Error("Order not paid yet");
-        }
-        const collection = mongoPool.collection("timeslots");
+        // const schedule = await schedules.findOne({ transactionCode: code, status: "booked" });
+        //   if (!schedule) {
+        //     errorLogger.error(`"Order not paid yet" ${code}`)
+        //     throw new Error("Order not paid yet");
+        //   }
+        //   const collection = mongoPool.collection("timeslots");
 
-        larkLogger.info(`Updated record successfully: ${code}`);
-        // callback({ success: true, data: schedule.larkRecordId });
+        //   larkLogger.info(`Updated record successfully: ${code}`);
+        //   // callback({ success: true, data: schedule.larkRecordId });
 
-        const newRecord = {
-          fields: {
-            time_order: Date.now(),
-            // chi_nhanh: uniqueIds,
-            ND_CK: schedule.transactionCode,
-            name: schedule.userName,
-            phone: schedule.phone,
-            email: schedule.email,
-            san: schedule.formateddetails,
-            address: Object.values(schedule.address).join(", "),
-            date: schedule.dates.join(", "),
-            time: schedule.totalHours,
-            quantity: schedule.timeSlots.length,
-            total_money: schedule.totalPrice,
-            voucher_code: schedule.applyDiscount,
-            trang_thai: "booked",
-            dat_co_dinh: schedule.isFixed ? "True" : "False",
-          },
-        };
+        //   const newRecord = {
+        //     fields: {
+        //       time_order: Date.now(),
+        //       // chi_nhanh: uniqueIds,
+        //       ND_CK: schedule.transactionCode,
+        //       name: schedule.userName,
+        //       phone: schedule.phone,
+        //       email: schedule.email,
+        //       san: schedule.formateddetails,
+        //       address: Object.values(schedule.address).join(", "),
+        //       date: schedule.dates.join(", "),
+        //       time: schedule.totalHours,
+        //       quantity: schedule.timeSlots.length,
+        //       total_money: schedule.totalPrice,
+        //       voucher_code: schedule.applyDiscount,
+        //       trang_thai: "booked",
+        //       dat_co_dinh: schedule.isFixed ? "True" : "False",
+        //     },
+        //   };
 
-        logger.info(`updated payment status ${JSON.stringify(schedule.timeSlots)}`)
-        void createLarkRecord(newRecord)
-        const timeSlotsData = schedule.timeSlots.map((timeSlot) => ({ ...timeSlot, status: "booked" }))
+        //   logger.info(`updated payment status ${JSON.stringify(schedule.timeSlots)}`)
+        //   void createLarkRecord(newRecord)
+        //   const timeSlotsData = schedule.timeSlots.map((timeSlot) => ({ ...timeSlot, status: "booked" }))
 
-        const res = await updateTimeSlot({ timeSlotsData, collection, action: "delete" });
-        logger.info(`updated action schedules :updateTimeSlot - ${JSON.stringify(res)}`)
+        //   const res = await updateTimeSlot({ timeSlotsData, collection, action: "delete" });
+        //   logger.info(`updated action schedules :updateTimeSlot - ${JSON.stringify(res)}`)
 
-        return callback({ success: true, data: schedule.id });
+        return callback({ success: true, data: code });
         // return updateLarkRecord(schedule.larkRecordId, { fields: { trang_thai: "booked" } });
       } catch (error) {
         errorLogger.error(`Error updating schedule: ${error}`);

@@ -5,7 +5,6 @@ services:
     working_dir: /app
     volumes:
       - ./:/app
-      - /app/node_modules
     ports:
       - '8888:8888'
     environment:
@@ -14,7 +13,6 @@ services:
     command: sh -c "npm install --include=dev && npm run build && npm start"
     depends_on:
       - mongo
-    restart: always
     mem_limit: 2g
     memswap_limit: 4g
     healthcheck:

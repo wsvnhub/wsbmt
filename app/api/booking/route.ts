@@ -1,6 +1,7 @@
 import clientPromise from "@/lib/mongo";
 // import { formatDate } from "@/utils";
 import { logger } from "@/utils/logger";
+import { updatedTimeSlotStatus } from "@/utils/updateTimeSlotsStatus";
 
 
 export async function GET(request: Request) {
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
     try {
         const { code, amount } = await request.json();
 
-        
+
         client = await clientPromise;
         const db = client.db();
         const schedules = db.collection("schedules");
@@ -66,6 +67,9 @@ export async function POST(request: Request) {
         // await timeSlots.bulkWrite(updateOperations);
 
         logger.info(`Verification successful: code=${code}, amount=${amount}`);
+
+        void updatedTimeSlotStatus({ db, code })
+        
         return Response.json(
             { data: timslots },
             { status: 200, statusText: "success" }

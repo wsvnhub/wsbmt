@@ -41,8 +41,6 @@ export default function WaitPayments({
   handleChangePage,
 }: WaitPaymentsProps) {
   const deadline = React.useRef(Date.now() + 1500 * 60 * 10).current;
-  // const openDeadline = React.useRef(Date.now() + 1000 * 60 * 1).current;
-  // const [isLoading, setIsLoading] = React.useState(false);
   const [alertMessage, setAlertMessage] = React.useState<string>();
   const [_isOpenVerify, setOpenVerify] = React.useState(false)
 
@@ -70,7 +68,17 @@ export default function WaitPayments({
   };
 
   React.useEffect(() => {
-    const socket = io(SOCKET_URL, { query: { user_id: data.phone }, autoConnect: true });
+    const socket = io(SOCKET_URL, {
+      query: { user_id: data.phone },
+      autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      timeout: 20000,
+      // forceNew: true,
+      transports: ['websocket', 'polling'],
+    });
 
     // Định nghĩa handler cho balanceUpdated ở đây để có thể tham chiếu trong off
     const handleBalanceUpdated = () => {
@@ -106,42 +114,11 @@ export default function WaitPayments({
     };
   }, [])
 
-  // const onOpenVerify = async () => {
-  //   setOpenVerify(true)
-  //   await verifyStatus()
-  // }
 
   const { transactionCode } = data;
   const { bankName, bankCode, bankUserName, qrCode } = paymentInfo;
 
   const QRCODE = qrCode !== undefined && qrCode !== "" ? qrCode.replace('{AMOUNT}', totalPrice.toString()).replace('{CODE}', transactionCode) : `https://qr.sepay.vn/img?acc=688112688&bank=MBBank&amount=${totalPrice}&des=${transactionCode}`;
-
-  // const verifyStatus = async () => {
-  //   setIsLoading(true);
-  //   try {
-  //     const response = await fetch("/api/verify-status", {
-  //       method: "POST",
-  //       body: JSON.stringify({
-  //         code: transactionCode,
-  //         timslots,
-  //         amount: totalPrice,
-  //       }),
-  //     });
-  //     const res = await response.json();
-
-  //     if (response.status === 202) {
-  //       setIsLoading(false);
-  //       return setAlertMessage(
-  //         res.error || `Đơn hàng của bạn chưa được thanh toán.`
-  //       );
-  //     }
-  //     handleChangePage({ data: res.data });
-  //   } catch (error: any) {
-  //     console.log(error);
-  //     setAlertMessage(error.message);
-  //     setIsLoading(false);
-  //   }
-  // };
 
   return (
     <div className="h-screen px-4 pt-4 pb-2 flex items-center flex-col">
@@ -197,24 +174,7 @@ export default function WaitPayments({
           />
         </p>
 
-        {/* <Button
-          disabled={!data.totalPrice || !isOpenVerify}
-          loading={isLoading}
-          onClick={verifyStatus}
-          className="text-white border-0 w-full mb-6 bg-gradient-to-b from-blue-500 to-cyan-500 px-4 py-2 font-semibold rounded-md"
-        >
-          {!isOpenVerify ?
-            <div className="flex items-center gap-2">
-              <p>Nút kiểm tra giao dịch sau: </p>
-              <Statistic.Countdown
-                format="mm:ss"
-                // title="Kiểm tra giao dịch sau:"
-                value={openDeadline}
-                onFinish={onOpenVerify}
-              />
-            </div>
-            : btnText[currentPage]}
-        </Button> */}
+
         <div className="flex items-center p-2 bg-white rounded-lg">
           <Image
             width={150}
