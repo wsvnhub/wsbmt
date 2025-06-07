@@ -10,19 +10,21 @@ export async function GET(request: Request) {
         const db = client.db();
         const timeSlots = db.collection("timeslots");
 
-        // Lấy hôm nay theo định dạng toDateString() giống lúc insert
+
         const todayStr = new Date().toDateString();
+
 
         const query: any = {
             createdAt: { $gte: todayStr },
         };
+
 
         if (branchId) {
             query.facility = branchId;
         }
 
         const slots = await timeSlots.find(query).toArray();
-
+   
         return Response.json({ data: slots });
     } catch (error) {
         console.error("Error:", error);

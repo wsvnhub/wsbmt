@@ -158,7 +158,7 @@ export default function ConfirmPayments({
             <Text title="Chi nhánh" content={facText} />
             <Text title="Địa chỉ" content={facAddress} />
             <Text title="Sân - giờ" content={facDetail} />
-            <Text title="Ngày" content={dates.join(", ")} />
+            {/* <Text title="Ngày" content={dates.join(", ")} /> */}
             <Text
               title="Giá 1 giờ"
               content={VND.format(pricePerHour)}

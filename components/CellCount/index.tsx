@@ -35,7 +35,6 @@ export default function CellCount({ branches }: CellCount) {
         }
 
         axios.get(url).then(res => {
-            console.log(res.data.data)
             setFilteredSlots(res.data.data);
             setLoading(false);
         })
