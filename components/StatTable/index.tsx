@@ -82,7 +82,7 @@ export default function StatsTable({ data, branchs }: StatsTableProps) {
     }, {} as Record<string, StatItem[]>);
 
     // Tạo rows cho mỗi ngày
-    const dataSource = Object.entries(groupedByDate).map(([date, items], index) => {
+    const dataSource = Object.entries(groupedByDate).map(([date, items]: any, index) => {
         const row: any = {
             key: index,
             date,
@@ -92,7 +92,7 @@ export default function StatsTable({ data, branchs }: StatsTableProps) {
             },
         };
 
-        items.forEach((item) => {
+        items.forEach((item: any) => {
             row[item.branchId] = {
                 bookedSlotsCount: item.stats.bookedSlotsCount,
                 emptySlotsCount: item.stats.emptySlotsCount,
