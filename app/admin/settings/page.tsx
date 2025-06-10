@@ -24,7 +24,7 @@ export default async function page() {
   return (
     <div>
       {/* <CellCount branches={branchs} /> */}
-      <StatsTable data={stats} />
+      <StatsTable branchs={branchs} data={stats} />
       <SettingPage branchs={branchs} />
     </div>
   )
