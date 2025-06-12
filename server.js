@@ -278,35 +278,35 @@ app.prepare().then(async () => {
       logger.info(`Updated: manual ${JSON.stringify(timeSlots)}`);
       const collection = mongoPool.collection("timeslots");
 
-      // const [schedule] = timeSlots
+      const [schedule] = timeSlots
 
-      // const facilities = timeSlots.map(item => item.facility).join(", ");
-      // const courtIds = timeSlots.map(item => item.id).join(", ");
-      // const dates = timeSlots.map(item => item.index.createdAt).join(", ");
-      // const quantity = timeSlots.length;
+      const facilities = timeSlots.map(item => item.facility).join(", ");
+      const courtIds = timeSlots.map(item => item.id).join(", ");
+      const dates = timeSlots.map(item => item.index.createdAt).join(", ");
+      const quantity = timeSlots.length;
 
-      // const newRecord = {
-      //   fields: {
-      //     time_order: Date.now(),
-      //     chi_nhanh: facilities,
-      //     ND_CK: "Đặt thủ công",
-      //     name: schedule.bookedBy.name,
-      //     phone: schedule.bookedBy.phone,
-      //     email: "",
-      //     san: courtIds,
-      //     address: "",
-      //     date: dates,
-      //     time: quantity,
-      //     quantity: quantity,
-      //     total_money: 0,
-      //     voucher_code: "",
-      //     trang_thai: "booked",
-      //     dat_co_dinh: "False",
-      //   },
-      // };
+      const newRecord = {
+        fields: {
+          time_order: Date.now(),
+          chi_nhanh: facilities,
+          ND_CK: "Đặt thủ công",
+          name: schedule.bookedBy.name,
+          phone: schedule.bookedBy.phone,
+          email: "",
+          san: courtIds,
+          address: "",
+          date: dates,
+          time: quantity,
+          quantity: quantity,
+          total_money: quantity * 139000,
+          voucher_code: "",
+          trang_thai: "booked",
+          dat_co_dinh: "False",
+        },
+      };
 
 
-      // await createLarkRecord(newRecord);
+      await createLarkRecord(newRecord);
       await updateTimeSlot({ timeSlotsData: timeSlots, collection, action });
       io.emit("schedules:updated", timeSlots);
       return callback({ success: true, timeSlots });

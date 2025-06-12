@@ -279,7 +279,10 @@ const SettingPage = ({ branchs }: any) => {
             </Button>
           </Form.Item>
         </Form>
-        <Table<DataType> rowSelection={rowSelection} columns={columns} dataSource={fixedDataSource} />
+        <Table<DataType> 
+        rowSelection={rowSelection}
+         columns={columns}
+          dataSource={fixedDataSource} />
       </Card>
     </div>
   </div>

@@ -49,7 +49,7 @@ export default function ConfirmPayments({
   facilitiesInfo,
   handleChangePage,
 }: ConfirmPaymentsProps) {
-  const { details, totalHours, dates, facility } = data;
+  const { formateddetails, totalHours, dates, facility } = data;
   const pricePerHour = Number(data.totalPrice) / Number(data.totalHours);
 
   const [discountCode, setDiscountCode] = React.useState("");
@@ -117,7 +117,7 @@ export default function ConfirmPayments({
     }
   };
 
-  const detailsArr = typeof details === "string" ? details.split(";") : details;
+  const detailsArr = typeof formateddetails === "string" ? formateddetails.split(";") : formateddetails;
   const facDetail = detailsArr.map((key: string, index: number) => (
     <p key={index}>- {key}</p>
   ));

@@ -110,7 +110,14 @@ export default function StatsTable({ data, branchs }: StatsTableProps) {
             <Table
                 columns={columns}
                 dataSource={dataSource}
-                pagination={false}
+                pagination={{
+                    pageSize: 20,
+                    // total: dataSource.length * 20,
+                    // onChange(page, pageSize) {
+                    //     setPage(page)
+                    //     sePageSize(pageSize)
+                    // },
+                }}
                 bordered
                 scroll={{ x: 'max-content' }}
             />
