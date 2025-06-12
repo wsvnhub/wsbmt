@@ -72,6 +72,7 @@ export default function StatsTable({ data, branchs }: StatsTableProps) {
     });
 
     // Nhóm dữ liệu theo ngày
+    console.log("data", data)
     const groupedByDate = data.reduce((acc, item) => {
         const date = dayjs(item.date).format('YYYY-MM-DD');
         if (!acc[date]) {
@@ -85,7 +86,7 @@ export default function StatsTable({ data, branchs }: StatsTableProps) {
     const dataSource = Object.entries(groupedByDate).map(([date, items]: any, index) => {
         const row: any = {
             key: index,
-            date,
+            date: new Date(date).toLocaleDateString('vi-VN'),
             total: {
                 bookedSlotsCount: 0,
                 emptySlotsCount: 0,
