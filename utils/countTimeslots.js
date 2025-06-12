@@ -2,7 +2,7 @@ import { MongoClient } from "mongodb";
 import { config } from "dotenv";
 config()
 const client = new MongoClient(process.env.MONGODB_URI);
-
+console.log("MONGODB_URI", process.env.MONGODB_URI)
 async function run() {
     try {
         await client.connect();
@@ -46,7 +46,7 @@ async function run() {
                     if (value.status === "empty") {
                         statsByBranch[branchIdStr].emptySlotsCount++;
                     }
-                    if ( value.status === "booked") {
+                    if (value.status === "booked") {
                         statsByBranch[branchIdStr].bookedSlotsCount++;
                     }
                 }
