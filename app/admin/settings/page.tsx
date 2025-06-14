@@ -1,8 +1,10 @@
-import CellCount from '@/components/CellCount'
+export const revalidate = 86400;
+
 import SettingPage from '@/components/Settings'
 import StatsTable from '@/components/StatTable';
 import clientPromise from '@/lib/mongo';
 import React from 'react'
+
 
 
 const getBranchs = async () => {

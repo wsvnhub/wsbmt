@@ -13,7 +13,7 @@ async function run() {
         const todayStr = new Date().toDateString();
 
         const query = {
-            createdAt: { $gte: todayStr },
+            createdAt: { $gte: todayStr, $lte: todayStr },
         };
 
         const slots = await timeslotsCollection.find(query).toArray();
