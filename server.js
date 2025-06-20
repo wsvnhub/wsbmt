@@ -189,11 +189,12 @@ app.prepare().then(async () => {
           status: "wait",
           createdAt: new Date(),
         };
+        const insertResult = await schedules.insertOne(insertData);
+
         const res = await updateTimeSlot({ timeSlotsData, collection: timeSlots });
 
         logger.info(`create schedules :updateTimeSlot - ${JSON.stringify(res)}`)
 
-        const insertResult = await schedules.insertOne(insertData);
         socket.broadcast.emit("schedules:updated", timeSlotsData);
         void createLarkRecord(newRecord)
         return callback({ success: true, data: insertResult, schedulesId: id });
@@ -273,38 +274,34 @@ app.prepare().then(async () => {
       }
     });
 
-    socket.on("schedules:manual", async ({ timeSlots, action }, callback) => {
+    socket.on("schedules:manual", async ({ timeSlots, data, action }, callback) => {
       logger.info(`Updated: schedules:manual`);
       logger.info(`Updated: manual ${JSON.stringify(timeSlots)}`);
       const collection = mongoPool.collection("timeslots");
 
-      const [schedule] = timeSlots
-
+      const [schedule] = timeSlots;
       const facilities = timeSlots.map(item => item.facility).join(", ");
-      const courtIds = timeSlots.map(item => item.id).join(", ");
-      const dates = timeSlots.map(item => item.index.createdAt).join(", ");
       const quantity = timeSlots.length;
 
       const newRecord = {
         fields: {
           time_order: Date.now(),
           chi_nhanh: facilities,
-          ND_CK: "Đặt thủ công",
-          name: schedule.bookedBy.name,
-          phone: schedule.bookedBy.phone,
+          ND_CK: action === "add" ? "Đặt thủ công" : "Sửa thủ công",
+          name: schedule?.bookedBy?.name || "",
+          phone: schedule?.bookedBy?.phone || "",
           email: "",
-          san: courtIds,
-          address: "",
-          date: dates,
-          time: quantity,
+          san: data.formateddetails,
+          address: Object.values(data.address).join(", "),
+          date: data.dates.join(", "),
+          time: action === "add" ? data.totalHours : data.totalHours || 0,
           quantity: quantity,
-          total_money: quantity * 139000,
+          total_money: action === "add" ? data.totalPrice : data.totalPrice || 0,
           voucher_code: "",
-          trang_thai: "booked",
-          dat_co_dinh: "False",
+          trang_thai: action === "add" ? "booked" : "",
+          dat_co_dinh: false,
         },
       };
-
 
       await createLarkRecord(newRecord);
       await updateTimeSlot({ timeSlotsData: timeSlots, collection, action });

@@ -26,6 +26,7 @@ const defaultSelected = {
     totalHours: 0,
     totalPrice: 0,
     details: [],
+    formateddetails: [],
     facility: {},
     phone: "",
     userName: "",
@@ -131,8 +132,15 @@ export default function useAdmin() {
             };
         });
         try {
-            const res = await sendUpdateSchedulesManual(timeSlotData, "update")
-            console.log("res", res)
+            await sendUpdateSchedulesManual({
+                data: {
+                    ...selected,
+                    dates: Object.keys(selectedTimeSlots),
+                    totalPrice: 0
+                },
+                timeSlotData
+            }, "update")
+
             setSelectedBookedTimeSlots({});
         } catch (error) {
             console.log("error", error)
@@ -164,13 +172,21 @@ export default function useAdmin() {
             return {
                 ...timeSlots,
                 bookedBy: { name, phone },
-                isChange: false
+                isChange: false,
             };
         });
 
         try {
-            const res = await sendUpdateSchedulesManual(timeSlotData, "update")
-            console.log("res", res)
+            const totalPrice = selected.totalHours * pricePerHour;
+            await sendUpdateSchedulesManual({
+                data: {
+                    ...selected,
+                    dates: Object.keys(selectedTimeSlots),
+                    totalPrice
+                },
+                timeSlotData
+            }, "update")
+
             setSelectedBookedTimeSlots({});
         } catch (error) {
             console.log("error", error)
@@ -211,8 +227,16 @@ export default function useAdmin() {
             };
         });
         try {
-            const res = await sendUpdateSchedulesManual(timeSlotData)
-            console.log("res", res)
+            const totalPrice = selected.totalHours * pricePerHour;
+            await sendUpdateSchedulesManual({
+                data: {
+                    ...selected,
+                    dates: Object.keys(selectedTimeSlots),
+                    totalPrice
+                },
+                timeSlotData
+            })
+
             setSelectedTimeSlots({});
             setSelected(defaultSelected);
             setShowModel(false)
@@ -305,9 +329,12 @@ export default function useAdmin() {
         }
         return setSelectedFacInfo(preState => preState.filter(item => item.id !== name));
     };
-    const handleNotPendingUpdateCell = ({ cloneSelected, row, detail, currentDate }: any) => {
+    const handleNotPendingUpdateCell = ({ cloneSelected, row, detail, currentDate, formateddetail }: any) => {
         cloneSelected.details = cloneSelected.details.filter(
             (item: any) => item !== detail
+        );
+        cloneSelected.formateddetails = cloneSelected.formateddetails.filter(
+            (item: any) => item !== formateddetail
         );
 
         const currentDateSlots = selectedTimeSlots[currentDate.toLocaleDateString()] || [];
@@ -357,10 +384,12 @@ export default function useAdmin() {
         }
         const row = facilities[currentDate.toDateString()][cluster][rowIndex];
         const detail: string = `${row.court} - ${cell.from} đến ${cell.to}`;
+        const formateddetail: string = `${row.court} - ${cell.from} đến ${cell.to} (${new Intl.DateTimeFormat('en-GB').format(new Date(currentDate))} - ${row.facility})`;
         let cloneSelected: any = { ...selected };
 
         if (cell.status === "pending") {
             cloneSelected.details.push(detail);
+            cloneSelected.formateddetails.push(formateddetail);
 
             const updatedCell = {
                 ...cell,
@@ -384,7 +413,7 @@ export default function useAdmin() {
                 ]
             }));
         } else {
-            handleNotPendingUpdateCell({ cloneSelected, row, detail, currentDate })
+            handleNotPendingUpdateCell({ cloneSelected, row, detail, currentDate, formateddetail })
         }
 
         setFacilities((preState: any) => {
@@ -397,7 +426,11 @@ export default function useAdmin() {
             let totalHours = preState.totalHours;
             preState.facility[row.facility] = row.facility;
             totalHours += cell.status === "pending" && totalHours >= 0 ? 1 : -1;
-            return { ...preState, totalHours, details: cloneSelected.details };
+            return {
+                ...preState, totalHours,
+                details: cloneSelected.details,
+                formateddetails: cloneSelected.formateddetails
+            };
         });
     };
     const defaultValue = [dayjs()];

@@ -84,9 +84,10 @@ export default function useSocket() {
     });
     return res;
   }, []);
-  const sendUpdateSchedulesManual = React.useCallback(async (timeSlots: any, action = "add") => {
+  const sendUpdateSchedulesManual = React.useCallback(async ({ timeSlotData, data }: any, action = "add") => {
     const res = await socket.emitWithAck("schedules:manual", {
-      timeSlots,
+      timeSlots: timeSlotData,
+      data,
       action
     });
     return res;
