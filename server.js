@@ -301,9 +301,10 @@ app.prepare().then(async () => {
             total_money: data.totalPrice || 0,
             voucher_code: "",
             trang_thai: "booked",
-            dat_co_dinh: false,
+            dat_co_dinh: "false",
           },
         };
+        console.log("newRecord", newRecord)
         await createLarkRecord(newRecord);
       }
 

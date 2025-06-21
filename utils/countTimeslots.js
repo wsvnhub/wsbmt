@@ -43,7 +43,7 @@ async function run() {
             for (const [key, value] of Object.entries(slot)) {
                 if (!isNaN(Number(key)) && typeof value === 'object' && value !== null) {
                     statsByBranch[branchIdStr].totalSlotsCount++;
-                    if (value.status === "empty" || value.status === "wait") {
+                    if (value.status === "empty") {
                         statsByBranch[branchIdStr].emptySlotsCount++;
                     }
                     if (value.status === "booked") {
