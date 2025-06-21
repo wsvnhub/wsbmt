@@ -280,30 +280,33 @@ app.prepare().then(async () => {
       const collection = mongoPool.collection("timeslots");
 
       const [schedule] = timeSlots;
-      const facilities = timeSlots.map(item => item.facility).join(", ");
+      const facilities = [...new Set(timeSlots.map(item => item.facility))].join(", ");
+
       const quantity = timeSlots.length;
 
-      const newRecord = {
-        fields: {
-          time_order: Date.now(),
-          chi_nhanh: facilities,
-          ND_CK: action === "add" ? "Đặt thủ công" : "Sửa thủ công",
-          name: schedule?.bookedBy?.name || "",
-          phone: schedule?.bookedBy?.phone || "",
-          email: "",
-          san: data.formateddetails,
-          address: Object.values(data.address).join(", "),
-          date: data.dates.join(", "),
-          time: action === "add" ? data.totalHours : data.totalHours || 0,
-          quantity: quantity,
-          total_money: action === "add" ? data.totalPrice : data.totalPrice || 0,
-          voucher_code: "",
-          trang_thai: action === "add" ? "booked" : "",
-          dat_co_dinh: false,
-        },
-      };
+      if (action === "add") {
+        const newRecord = {
+          fields: {
+            time_order: Date.now(),
+            chi_nhanh: facilities,
+            ND_CK: "Đặt thủ công",
+            name: schedule?.bookedBy?.name || "",
+            phone: schedule?.bookedBy?.phone || "",
+            email: "",
+            san: data.formateddetails.join(", "),
+            address: Object.values(data.address).join(", "),
+            date: data.dates.map(date => new Date(date).toLocaleDateString("vi-VN")).join(", "),
+            time: data.totalHours || 0,
+            quantity: quantity,
+            total_money: data.totalPrice || 0,
+            voucher_code: "",
+            trang_thai: "booked",
+            dat_co_dinh: false,
+          },
+        };
+        await createLarkRecord(newRecord);
+      }
 
-      await createLarkRecord(newRecord);
       await updateTimeSlot({ timeSlotsData: timeSlots, collection, action });
       io.emit("schedules:updated", timeSlots);
       return callback({ success: true, timeSlots });

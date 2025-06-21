@@ -228,11 +228,14 @@ export default function useAdmin() {
         });
         try {
             const totalPrice = selected.totalHours * pricePerHour;
+            const address = Object.keys(selected.facility)?.map((key) => (facilitiesInfo[key].id))
+
             await sendUpdateSchedulesManual({
                 data: {
                     ...selected,
                     dates: Object.keys(selectedTimeSlots),
-                    totalPrice
+                    totalPrice,
+                    address
                 },
                 timeSlotData
             })
