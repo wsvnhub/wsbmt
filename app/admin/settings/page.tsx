@@ -1,4 +1,5 @@
 export const revalidate = 86400;
+export const dynamic = 'force-dynamic';
 
 import SettingPage from '@/components/Settings'
 import StatsTable from '@/components/StatTable';
