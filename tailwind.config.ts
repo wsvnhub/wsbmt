@@ -9,17 +9,16 @@ const config: Config = {
   theme: {
     extend: {
       backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+         "gradient-radial": "radial-gradient(#FA9654, #CC3D00)",
+        "gradient-conic": "conic-gradient(from 180deg at 50% 50%, #FA9654, #CC3D00)",
       },
       colors: {
-        primary: "#029d81",
-        secondary: "#ffec88",
-        "table-header": "#c4fff4",
-        "table-col1": "#02846c",
-        "table-col3": "#00acbd",
-        "table-col2": "#d8ffda",
+        primary: "#049AF0", // giữ nguyên
+        secondary: "#ffec88", // giữ nguyên
+        "table-header": "#00acbd", // đổi từ #c4fff4
+        "table-col1": "#049AF0", // đổi từ #02846c
+        "table-col3": "#FF7033", // đổi từ #00acbd
+        "table-col2": "#cceeff", // đổi từ #d8ffda
       },
     },
   },

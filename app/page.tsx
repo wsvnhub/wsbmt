@@ -185,7 +185,7 @@ export default function Home() {
           <button
             disabled={selected.totalHours === 0}
             onClick={handleChangePage}
-            className="w-full disabled:opacity-80 bg-gradient-to-b from-blue-500 to-cyan-500 p-4 font-semibold rounded-md"
+            className="w-full disabled:opacity-80 bg-gradient-to-b from-[#FA9654] to-[#CC3D00] p-4 font-semibold rounded-md"
           >
             {btnText[page.state]}
           </button>

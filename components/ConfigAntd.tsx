@@ -13,13 +13,13 @@ export default function ConfigAntd({ children }: any) {
       locale={locale}
       theme={{
         token: {
-          colorSuccess: "#40ffdc",
+          colorSuccess: "#FF7033", // "#40ffdc" (xanh dương nhạt) → #FF7033
           fontFamilyCode: "Montserrat",
         },
         components: {
           Table: {
-            headerBg: "#c4fff4",
-            headerColor: "#02846c",
+            headerBg: "#cceeff", // "#c4fff4" (gần xanh lá) → #049AF0
+            headerColor: "#049AF0", // "#02846c" (xanh lá) → #049AF0
             borderColor: "#999999",
             headerBorderRadius: 0,
             cellPaddingBlock: 14,
@@ -40,36 +40,32 @@ export default function ConfigAntd({ children }: any) {
             colorTextBase: "white",
           },
           DatePicker: {
-            addonBg: "green",
-
-            colorIcon: "#029d81",
-            colorPrimary: "#029d81",
-            colorText: "#02846c",
-            colorTextDescription: "#02846c",
-            colorTextPlaceholder: "#029d81",
-            colorTextHeading: "#02846c",
+            addonBg: "#049AF0", // "green" → #049AF0
+            colorIcon: "#049AF0", // "#029d81" → #049AF0
+            colorPrimary: "#049AF0", // "#029d81" → #049AF0
+            colorText: "#049AF0", // "#02846c" → #049AF0
+            colorTextDescription: "#049AF0",
+            colorTextPlaceholder: "#049AF0",
+            colorTextHeading: "#049AF0",
             fontSize: 18,
-
           },
           Spin: {
             colorPrimary: "white",
           },
           Modal: {
-            contentBg: "#029d81",
+            contentBg: "#049AF0", // "#029d81" → #049AF0
             headerBg: "transparent",
             titleColor: "white",
           },
           Layout: {
-            headerBg: "#047862",
+            headerBg: "#049AF0", // "#047862" → #049AF0
             siderBg: "#fff",
-            lightSiderBg: "#047862",
-            lightTriggerBg: "#047862",
-            // colorText: "white",
+            lightSiderBg: "#049AF0",
+            lightTriggerBg: "#049AF0",
           },
           Button: {
-            colorPrimary: "#029d81"
+            colorPrimary: "#049AF0", // "#029d81" → #049AF0
           },
-
         },
       }}
     >

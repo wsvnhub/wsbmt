@@ -258,7 +258,7 @@ export default function ConfirmPayments({
           <button
             disabled={isSubmiting}
             type="submit"
-            className="w-full mt-8 lg:mt-0 disabled:opacity-80 text-white bg-gradient-to-b from-blue-500 to-cyan-500 px-4 py-2 font-semibold rounded-md"
+            className="w-full mt-8 lg:mt-0 disabled:opacity-80 text-white bg-gradient-to-b from-[#FA9654] to-[#CC3D00] px-4 py-2 font-semibold rounded-md"
           >
             {btnText[currentPage]}
           </button>
