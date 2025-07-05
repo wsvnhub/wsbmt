@@ -13,6 +13,7 @@ import {
     DatePickerProps,
     notification
 } from "antd";
+import { generateTransactionCode } from '@/utils';
 
 
 export const useAdminTable = () => {
@@ -284,7 +285,7 @@ export default function useAdmin() {
             totalPrice,
             isFixed,
             dates: Object.keys(selectedTimeSlots),
-            transactionCode: `WSB${new Date().getTime()}`,
+            transactionCode: generateTransactionCode(),
             details: selected.details.join(";"),
         };
         console.log(submitedData);

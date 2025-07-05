@@ -8,6 +8,7 @@ import _ from "lodash";
 
 import { notification } from "antd";
 import { FacilitiesInfo } from "@/app/page";
+import { generateTransactionCode } from "@/utils";
 
 interface PageState {
     state: "schedule" | "confirm" | "info" | "result";
@@ -282,7 +283,7 @@ export default function useBooking() {
             }));
         }
         if (isConfirm) {
-            newState.transactionCode = `WSB${Math.floor(Date.now() / 1000)}`;
+            newState.transactionCode = generateTransactionCode();
             newState.details =
                 typeof newState.details === "string"
                     ? newState.details

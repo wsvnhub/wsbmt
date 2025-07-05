@@ -21,3 +21,10 @@ export function timeToMinutes(time: string) {
   const [hours, minutes] = time.split(':').map(Number);
   return hours * 60 + minutes;
 }
+
+export function generateTransactionCode() {
+  const now = Date.now();
+  const timestamp = Math.floor(now / 1000);
+  const micro = Math.floor((now % 1000) / 100);
+  return `WSB${Math.floor(timestamp / 10) * 10 + micro}`;
+}
