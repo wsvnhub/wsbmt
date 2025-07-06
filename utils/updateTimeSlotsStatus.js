@@ -27,7 +27,7 @@ export const updatedTimeSlotStatus = async ({ code, db }) => {
         const schedules = db.collection("schedules");
         const collection = db.collection("timeslots");
 
-        
+
         const schedule = await schedules.findOne({ transactionCode: code, status: "booked" });
         if (!schedule) {
             errorLogger.error(`"Order not paid yet" ${code}`)

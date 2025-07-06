@@ -173,6 +173,9 @@ export default function useBooking() {
         date: Date,
         cluster: string
     ) => {
+        if (cell.status === "pass") {
+            return
+        }
         const row = facilities[cluster][rowIndex];
 
         let isCanDelete = false
@@ -260,7 +263,9 @@ export default function useBooking() {
     };
 
     const handleRadioSelectBranch = (id: string) => {
-        return setSelectedFacInfo(preState => preState.filter(item => item.id === id));
+        const filtered = Object.values(facilitiesInfo).filter((item) => item.id === id);
+
+        return setSelectedFacInfo(filtered);
     }
 
     const handleChangeFacilitiesInfo = (name: string, checked: boolean) => {

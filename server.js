@@ -307,7 +307,7 @@ app.prepare().then(async () => {
         console.log("newRecord", newRecord)
         await createLarkRecord(newRecord);
       }
-
+      
       await updateTimeSlot({ timeSlotsData: timeSlots, collection, action });
       io.emit("schedules:updated", timeSlots);
       return callback({ success: true, timeSlots });

@@ -39,6 +39,8 @@ const bgCell = {
   pending: "bg-orange-400",
   wait: "bg-yellow-500",
   empty: "bg-white",
+  fixed: "bg-blue-400",
+  pass: "bg-purple-400",
 };
 
 export default function Page() {
@@ -57,6 +59,7 @@ export default function Page() {
     discountCode,
     selectedBookedTimeSlots,
     onFormUnlockSubmit,
+    onFormPassSubmit,
     onChangeInfo,
     handleCellClick,
     handleScrollChange,
@@ -146,10 +149,22 @@ export default function Page() {
           Ways Station Badminton
         </h1>
         <div className="flex absolute right-5 gap-2">
-          <button onClick={onChangeInfo} disabled={selected.totalHours === 0 || isProcessing} className="border border-white p-2 rounded-md disabled:bg-gray-300 hover:bg-gray-200 hover:text-primary">
+          <button onClick={onChangeInfo}
+            disabled={selected.totalHours === 0 || isProcessing}
+            className="border border-white p-2 rounded-md disabled:bg-gray-300 hover:bg-gray-200 hover:text-primary">
+            <p>CĐ</p>
+          </button>
+          <button onClick={onChangeInfo}
+            disabled={selected.totalHours === 0 || isProcessing}
+            className="border border-white p-2 rounded-md disabled:bg-gray-300 hover:bg-gray-200 hover:text-primary">
             <p>Nhập</p>
           </button>
-          <AdminModal disabled={Object.keys(selectedBookedTimeSlots).length === 0} onEdit={onFormEditSubmit} onUnlock={onFormUnlockSubmit} />
+          <AdminModal
+            disabled={Object.keys(selectedBookedTimeSlots).length === 0}
+            onEdit={onFormEditSubmit}
+            onPass={onFormPassSubmit}
+            onUnlock={onFormUnlockSubmit}
+          />
         </div>
         <div className="flex lg:flex-row flex-col items-center gap-4">
           <div className="flex lg:flex-row flex-col items-center gap-6">
@@ -245,6 +260,14 @@ export default function Page() {
               <div className="flex items-center justify-center gap-2">
                 <div className="bg-table-col3 w-6 h-6 text-xs rounded-md"></div>
                 <span>Đã đặt</span>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <div className="bg-purple-400 w-6 h-6 text-xs rounded-md"></div>
+                <span>Pass</span>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <div className="bg-blue-600 w-6 h-6 text-xs rounded-md"></div>
+                <span>Cố định</span>
               </div>
               <div className="flex items-center justify-center gap-2">
                 <div className="bg-yellow-500 w-6 h-6 text-xs rounded-md"></div>

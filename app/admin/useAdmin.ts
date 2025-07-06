@@ -149,6 +149,36 @@ export default function useAdmin() {
 
     }
 
+    const onFormPassSubmit = async (values: any) => {
+        const { password } = values;
+        if (password !== "#@tOol6868#") {
+            setProcessing(false);
+            return api.open({
+                message: "Mật khẩu không hợp lệ",
+                description: "Vui lòng điền mật khẩu được cấp.",
+                duration: 3,
+                type: "error"
+            });
+        }
+        const timeSlotData = _.flatMap(Object.values(selectedBookedTimeSlots)).map((timeSlots: any) => {
+            return {
+                ...timeSlots,
+                status: "pass",
+                isChange: false
+            };
+        });
+        try {
+            await sendUpdateSchedulesManual({
+                data: {},
+                timeSlotData
+            }, "update")
+            setSelectedBookedTimeSlots({});
+        } catch (error) {
+            console.log("error", error)
+        }
+
+    }
+
     const onFormEditSubmit = async (values: any) => {
         const { name, phone, password } = values;
         if (!name || !phone || !password) {
@@ -369,7 +399,7 @@ export default function useAdmin() {
         currentDate: Date,
         cluster: string
     ) => {
-        if (cell.status === "booked") {
+        if (cell.status === "booked" || cell.status === "pass") {
 
             if (cell.isChange) {
                 return setSelectedBookedTimeSlots((prevSlots: any) => ({
@@ -542,6 +572,7 @@ export default function useAdmin() {
         selectedBookedTimeSlots,
         onFormEditSubmit,
         onFormUnlockSubmit,
+        onFormPassSubmit,
         onChangeInfo,
         handleCellClick,
         handleScrollChange,

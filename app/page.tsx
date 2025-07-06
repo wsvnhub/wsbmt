@@ -72,7 +72,8 @@ export default function Home() {
     handleScrollChange,
     handleCellClick,
     handleRadioSelectBranch,
-    handleChangeFacilitiesInfo } = useBooking()
+    // handleChangeFacilitiesInfo 
+  } = useBooking()
 
   if (isLoading) {
     return <Loader />;
@@ -105,7 +106,10 @@ export default function Home() {
         selectedDate={selectedDate}
         setSelectedDate={setSelectedDate}
       >
-        <ListFac listFac={listFac} handleChangeFacilitiesInfo={handleChangeFacilitiesInfo} />
+        <ListFac
+          type="radio"
+          listFac={listFac}
+          handleChangeFacilitiesInfo={handleRadioSelectBranch} />
       </Header>
 
       {isSchedule && (

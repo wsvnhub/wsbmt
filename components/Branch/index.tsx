@@ -52,7 +52,9 @@ const ListFac: React.FC<ListFacProps> = ({ listFac, type = "checkbox", handleCha
 
     if (type === "radio") {
         return (
+
             <Radio.Group
+                style={{ display: "flex", flexDirection: "column", gap: 2 }}
                 value={selectedIds[0] || ""}
                 onChange={(e) => handleChange(e.target.value, true)}
                 options={listFac.map((f) => ({

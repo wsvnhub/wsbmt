@@ -10,7 +10,10 @@ const bgColors: any = {
   pending: "bg-yellow-500",
   wait: "bg-red-400",
   empty: "bg-white",
+  fixed: "bg-blue-400",
+  pass: "bg-purple-400",
 };
+
 interface DataType {
   id: string;
   court: string;
@@ -87,9 +90,8 @@ function generateTimeArray(
             return <div className={`${value.status === "empty" ? "bg-gray-200" : bgCell[value.status]} bg-opacity-50 absolute inset-0`} />
           }
 
-
           const handleNewBook = () => {
-            if (isAdmin && value?.status === "booked") {
+            if (isAdmin && value?.status === "booked" || isAdmin && value?.status === "pass") {
               value.isChange = !value.isChange
               return handleCellClick(
                 value,
@@ -100,7 +102,7 @@ function generateTimeArray(
                 cluster
               );
             }
-            if (value?.status === "wait" || (!isAdmin && value?.status === "booked")) {
+            if (value?.status === "wait" || (!isAdmin && value?.status === "booked" || (!isAdmin && value?.status === "pass"))) {
               return;
             }
             value.status = value.status !== "pending" ? "pending" : "";
@@ -114,27 +116,43 @@ function generateTimeArray(
             );
           };
           let bgClass = bgCell["empty"];
-          let isShowBorder = value?.isChange ? "border-2 border-amber-500" : ""
+          let isShowBorder = value?.isChange ? "bg-black/50" : ""
           if (value) {
             bgClass = bgCell[value.status];
           }
+          if (value?.isChange) {
+            bgClass = isShowBorder
+          }
+
           return (
             <div
               onClick={handleNewBook}
-              className={`cursor-pointer ${isShowBorder} ${bgClass} flex flex-col text-xs justify-center items-center w-full h-full absolute inset-0 text-white`}
+              className={`cursor-pointer ${bgClass} absolute inset-0 w-full h-full flex flex-col items-center justify-center text-white text-xs`}
             >
-              {value.status === "booked" && value.isFixed && isAdmin && (
-                <p className="absolute -top-1 left-0 bg-red-500 text-[5px] leading-[2] px-1 py-0 z-[9999px]">
-                  Cố định
-                </p>
+              {!isAdmin && value.status === "pass" && (
+                <a className="text-[5px] hover:text-white hover:underline" href="tel:0389145575">Hotline: 0389145575</a>
               )}
               {value.status === "booked" && isAdmin && (
                 <>
-                  <p className="text-[8px]">{value.bookedBy.name}</p>
+                  {value.isFixed && (
+                    <p className="absolute -top-1 left-0 z-[9999] bg-red-500 text-[5px] leading-[2] px-1 py-0">
+                      Cố định
+                    </p>
+                  )}
+                  <div className="relative group w-full max-w-full">
+                    <p className="text-[6px] text-center truncate w-full overflow-hidden whitespace-nowrap">
+                      {value.bookedBy.name}
+                    </p>
+                    <span className="absolute z-10 hidden group-hover:flex bg-black text-white text-[10px] px-2 py-1 rounded shadow-lg -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                      {value.bookedBy.name}
+                    </span>
+                  </div>
+
                   <p className="text-[8px]">{value.bookedBy.phone}</p>
                 </>
               )}
             </div>
+
           );
         },
       };
