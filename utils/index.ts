@@ -18,6 +18,9 @@ export const formatDate = () => {
 }
 
 export function timeToMinutes(time: string) {
+  if (!time) {
+    return ''
+  }
   const [hours, minutes] = time.split(':').map(Number);
   return hours * 60 + minutes;
 }

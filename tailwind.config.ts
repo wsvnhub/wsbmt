@@ -17,7 +17,7 @@ const config: Config = {
         secondary: "#ffec88", // giữ nguyên
         "table-header": "#00acbd", // đổi từ #c4fff4
         "table-col1": "#049AF0", // đổi từ #02846c
-        "table-col3": "#FF7033", // đổi từ #00acbd
+        "table-col3": "#008849", // đổi từ #00acbd
         "table-col2": "#cceeff", // đổi từ #d8ffda
       },
     },

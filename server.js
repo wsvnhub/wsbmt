@@ -275,9 +275,55 @@ app.prepare().then(async () => {
     });
 
     socket.on("schedules:manual:fixed", async ({ data }, callback) => {
-      console.log("data", data)
+      console.log("data", data);
+
+      const collection = mongoPool.collection("timeslots");
+
+
+      // const testResult = await collection.findOne({
+      //   facility: data.branch,
+      //   courtId: data.court.split("|")[1],
+      //   createdAt: new Date(data.openAt[0]).toDateString(),
+      //   [data.time + ".status"]: "empty"
+      // })
+      // console.log("testResult", testResult)
+      // Tạo array promises cho mỗi openAt date
+      const updatePromises = data.openAt.map((openAtDate) => {
+        const availability = false;
+        const courtId = data.court.split("|")[1]
+        const value = {
+          facility: data.branch,
+          court: courtId,
+          bookedBy: {
+            name: data.username,
+            phone: data.phone,
+          },
+          status: "empty",
+          isFixed: true,
+          availability,
+        }
+
+        return collection.updateOne(
+          {
+            facility: data.branch,
+            courtId,
+            createdAt: new Date(openAtDate).toDateString(),
+            [data.time + ".status"]: "fixed"
+          },
+          {
+            $set: {
+              [data.time]: value
+            }
+          }
+        );
+      });
+      // io.emit("schedules:updated", timeSlots);
+      const res = await Promise.allSettled(updatePromises);
+
+      console.log("value", res)
+
       return callback({ success: true, data });
-    })
+    });
 
     socket.on("schedules:manual", async ({ timeSlots, data, action }, callback) => {
       logger.info(`Updated: schedules:manual`);

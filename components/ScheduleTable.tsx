@@ -91,7 +91,7 @@ function generateTimeArray(
           }
 
           const handleNewBook = () => {
-            if (isAdmin && value?.status === "booked" || isAdmin && value?.status === "pass") {
+            if (isAdmin && value?.status === "booked" || isAdmin && value?.status === "pass" || isAdmin && value?.status === "fixed") {
               value.isChange = !value.isChange
               return handleCellClick(
                 value,
@@ -102,7 +102,7 @@ function generateTimeArray(
                 cluster
               );
             }
-            if (value?.status === "wait" || (!isAdmin && value?.status === "booked" || (!isAdmin && value?.status === "pass"))) {
+            if (value?.status === "wait" || (!isAdmin && value?.status === "booked" || (!isAdmin && value?.status === "pass") || (!isAdmin && value?.status === "fixed"))) {
               return;
             }
             value.status = value.status !== "pending" ? "pending" : "";

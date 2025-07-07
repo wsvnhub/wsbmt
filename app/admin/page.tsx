@@ -10,7 +10,7 @@ import {
   Modal,
   Select
 } from "antd";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import ScheduleTable from "@/components/ScheduleTable";
 
 import Loader from "@/components/Loader";
@@ -91,7 +91,7 @@ export default function Page() {
   } = useAdmin()
 
   const [selectedBranch, setSelectedBranch] = React.useState("")
-  const [selectedCourt, setSelectedCourt] = React.useState("cluster1")
+  const [selectedCourt, setSelectedCourt] = React.useState("cluster1|")
   const [courts, setCourts] = React.useState([])
   const [branchs, setBranch] = React.useState([])
   const [seletedTimeSlots, setSeletedTimeSlots] = React.useState<any[]>([])
@@ -113,9 +113,8 @@ export default function Page() {
 
   React.useEffect(() => {
     if (timeSlots && selectedCourt !== undefined) {
-      setSeletedTimeSlots(
-        timeSlots[selectedCourt as keyof typeof timeSlots]
-      );
+
+      setSeletedTimeSlots(timeSlots[selectedCourt.split("|")[0] as keyof typeof timeSlots]);
     } else {
       setSeletedTimeSlots([]);
     }
@@ -246,7 +245,7 @@ export default function Page() {
           >
             <Select onChange={value => setSelectedCourt(value)}>
               {courts.map((c: any) => {
-                return <Select.Option key={c.id} value={`${c.timeClusterId}`}>{c.name}</Select.Option>
+                return <Select.Option key={c.id} value={`${c.timeClusterId}|${c.id}`}>{c.name}</Select.Option>
               })}
 
             </Select>
@@ -259,13 +258,19 @@ export default function Page() {
           >
             <Select>
               {seletedTimeSlots.map((t, index) => {
-                return <Select.Option key={index} value={t.time}>{t.time}</Select.Option>
+                return <Select.Option key={index} value={index}>{t.time}</Select.Option>
               })}
             </Select>
           </Form.Item>
 
           <Form.Item name="openAt" label="Ngày cố định">
-            <DatePicker multiple format={"dd"} />
+            <DatePicker
+              multiple
+              format={"dd"}
+              disabledDate={(current) => {
+                return current && current < dayjs().startOf("day");
+              }}
+            />
           </Form.Item>
 
           <Form.Item label={null}>
