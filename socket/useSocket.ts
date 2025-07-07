@@ -92,6 +92,10 @@ export default function useSocket() {
     });
     return res;
   }, []);
+  const sendUpdateFixedSchedulesManual = React.useCallback(async ({ data }: any) => {
+    const res = await socket.emitWithAck("schedules:manual:fixed", { data });
+    return res;
+  }, []);
   return {
     socket,
     transport,
@@ -102,6 +106,7 @@ export default function useSocket() {
     createSchedules,
     deleteSchedules,
     sendUpdateSchedules,
-    sendUpdateSchedulesManual
+    sendUpdateSchedulesManual,
+    sendUpdateFixedSchedulesManual
   };
 }

@@ -274,6 +274,11 @@ app.prepare().then(async () => {
       }
     });
 
+    socket.on("schedules:manual:fixed", async ({ data }, callback) => {
+      console.log("data", data)
+      return callback({ success: true, data });
+    })
+
     socket.on("schedules:manual", async ({ timeSlots, data, action }, callback) => {
       logger.info(`Updated: schedules:manual`);
       logger.info(`Updated: manual ${JSON.stringify(timeSlots)}`);
@@ -307,7 +312,7 @@ app.prepare().then(async () => {
         console.log("newRecord", newRecord)
         await createLarkRecord(newRecord);
       }
-      
+
       await updateTimeSlot({ timeSlotsData: timeSlots, collection, action });
       io.emit("schedules:updated", timeSlots);
       return callback({ success: true, timeSlots });

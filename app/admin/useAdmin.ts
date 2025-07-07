@@ -11,6 +11,7 @@ import _ from "lodash";
 
 import {
     DatePickerProps,
+    FormProps,
     notification
 } from "antd";
 import { generateTransactionCode } from '@/utils';
@@ -39,7 +40,7 @@ const defaultSelected = {
 }
 
 export default function useAdmin() {
-    const { socket, getCourts, getInfo, createSchedules, sendUpdateSchedulesManual } = useSocket();
+    const { socket, getCourts, getInfo, createSchedules, sendUpdateSchedulesManual, sendUpdateFixedSchedulesManual } = useSocket();
 
     const router = useRouter();
 
@@ -47,6 +48,7 @@ export default function useAdmin() {
 
 
     const [isShowModel, setShowModel] = React.useState(false)
+    const [isShowSetFixedModel, setShowSetFixedModel] = React.useState(false)
 
     const [rangeDate, setRangeDate] = React.useState({
         startDate: "",
@@ -111,6 +113,18 @@ export default function useAdmin() {
         } finally {
             setProcessing(false);
         }
+    };
+
+    const onFinishSetFixed: FormProps<any>['onFinish'] = async (values) => {
+        try {
+            await sendUpdateFixedSchedulesManual({ data: values })
+        } catch (error) {
+            console.log("error", error)
+        }
+    };
+
+    const onFinishFailed: FormProps<any>['onFinishFailed'] = (errorInfo) => {
+        console.log('Failed:', errorInfo);
     };
 
     const onFormUnlockSubmit = async (values: any) => {
@@ -562,6 +576,7 @@ export default function useAdmin() {
         selected,
         listFac,
         isProcessing,
+        isShowSetFixedModel,
         isShowModel,
         facilities,
         contextHolder,
@@ -570,6 +585,9 @@ export default function useAdmin() {
         discountInfo,
         discountCode,
         selectedBookedTimeSlots,
+        onFinishSetFixed,
+        onFinishFailed,
+
         onFormEditSubmit,
         onFormUnlockSubmit,
         onFormPassSubmit,
@@ -584,6 +602,7 @@ export default function useAdmin() {
         setDiscountCode,
         onVerifyCode,
         setShowModel,
+        setShowSetFixedModel,
         onFormFinishUpdateInfo
     }
 }
