@@ -10,7 +10,7 @@ const bgColors: any = {
   pending: "bg-yellow-500",
   wait: "bg-red-400",
   empty: "bg-white",
-  fixed: "bg-blue-400",
+  fixed: "bg-red-400",
   pass: "bg-purple-400",
 };
 
@@ -132,7 +132,7 @@ function generateTimeArray(
               {!isAdmin && value.status === "pass" && (
                 <a className="text-[5px] hover:text-white hover:underline" href="tel:0389145575">Hotline: 0389145575</a>
               )}
-              {value.status === "booked" && isAdmin && (
+              {(value.status === "booked" || value.status === "pass" || value.status === "fixed") && isAdmin && (
                 <>
                   {value.isFixed && (
                     <p className="absolute -top-1 left-0 z-[9999] bg-red-500 text-[5px] leading-[2] px-1 py-0">

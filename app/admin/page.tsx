@@ -8,7 +8,8 @@ import {
   Form,
   Input,
   Modal,
-  Select
+  Radio,
+  // Select
 } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import ScheduleTable from "@/components/ScheduleTable";
@@ -19,8 +20,8 @@ import { VND } from "@/utils";
 import clusters from "@/data/clusters.json";
 import useAdmin from "./useAdmin";
 import AdminModal from "@/components/AdminModal";
-import timeSlots from '@/data/timeSlots.json'
-import axios from "axios";
+// import timeSlots from '@/data/timeSlots.json'
+// import axios from "axios";
 
 
 const bgColor = [
@@ -45,14 +46,14 @@ const bgCell = {
   pass: "bg-purple-400",
 };
 
-type FieldType = {
-  username?: string;
-  phone?: string;
-  branch: string
-  court?: string;
-  time?: string;
-  days: number
-};
+// type FieldType = {
+//   username?: string;
+//   phone?: string;
+//   branch: string
+//   court?: string;
+//   time?: string;
+//   days: number
+// };
 
 export default function Page() {
 
@@ -61,7 +62,7 @@ export default function Page() {
     selected,
     isProcessing,
     isShowModel,
-    isShowSetFixedModel,
+    // isShowSetFixedModel,
     facilities,
     listFac,
     contextHolder,
@@ -83,42 +84,42 @@ export default function Page() {
     setDiscountCode,
     onVerifyCode,
     setShowModel,
-    setShowSetFixedModel,
+    // setShowSetFixedModel,
     onFormFinishUpdateInfo,
     onFormEditSubmit,
-    onFinishFailed,
-    onFinishSetFixed
+    // onFinishFailed,
+    // onFinishSetFixed
   } = useAdmin()
 
-  const [selectedBranch, setSelectedBranch] = React.useState("")
-  const [selectedCourt, setSelectedCourt] = React.useState("cluster1|")
-  const [courts, setCourts] = React.useState([])
-  const [branchs, setBranch] = React.useState([])
-  const [seletedTimeSlots, setSeletedTimeSlots] = React.useState<any[]>([])
+  // const [selectedBranch, setSelectedBranch] = React.useState("")
+  // const [selectedCourt, setSelectedCourt] = React.useState("cluster1|")
+  // const [courts, setCourts] = React.useState([])
+  // const [branchs, setBranch] = React.useState([])
+  // const [seletedTimeSlots, setSeletedTimeSlots] = React.useState<any[]>([])
 
-  React.useEffect(() => {
-    axios.get('/api/facilities').then(res => {
-      setBranch(res.data.data)
-    })
+  // React.useEffect(() => {
+  //   axios.get('/api/facilities').then(res => {
+  //     setBranch(res.data.data)
+  //   })
 
-  }, [])
+  // }, [])
 
-  React.useEffect(() => {
-    if (selectedBranch !== "") {
-      axios.get(`/api/courts?facilitiyId=${selectedBranch}`).then(res => {
-        setCourts(res.data.data)
-      })
-    }
-  }, [selectedBranch])
+  // React.useEffect(() => {
+  //   if (selectedBranch !== "") {
+  //     axios.get(`/api/courts?facilitiyId=${selectedBranch}`).then(res => {
+  //       setCourts(res.data.data)
+  //     })
+  //   }
+  // }, [selectedBranch])
 
-  React.useEffect(() => {
-    if (timeSlots && selectedCourt !== undefined) {
+  // React.useEffect(() => {
+  //   if (timeSlots && selectedCourt !== undefined) {
 
-      setSeletedTimeSlots(timeSlots[selectedCourt.split("|")[0] as keyof typeof timeSlots]);
-    } else {
-      setSeletedTimeSlots([]);
-    }
-  }, [selectedCourt]);
+  //     setSeletedTimeSlots(timeSlots[selectedCourt.split("|")[0] as keyof typeof timeSlots]);
+  //   } else {
+  //     setSeletedTimeSlots([]);
+  //   }
+  // }, [selectedCourt]);
 
   if (isLoading) {
     return <Loader />;
@@ -167,6 +168,17 @@ export default function Page() {
           </Form.Item>
           <Form.Item
             className="w-full"
+            name="status"
+            label="Trạng thái (*)"
+            rules={[{ required: false }]}
+          >
+            <Radio.Group options={[
+              { label: <p className="text-white">Đã đặt</p>, value: 'booked', id: "booked" },
+              { label: <p className="text-white">Giữ sân CĐ</p>, value: 'fixed', id: "fixed" }
+            ]} />
+          </Form.Item>
+          <Form.Item
+            className="w-full"
             name="password"
             label="Mật khẩu (*)"
             rules={[{ required: false }]}
@@ -189,7 +201,7 @@ export default function Page() {
 
       </Modal>}
 
-      {isShowSetFixedModel && <Modal
+      {/* {isShowSetFixedModel && <Modal
         className="update-info-modal px-12"
         title={<p className="bg-black/40 p-2 text-center rounded-t-xl">Đặt cố định</p>}
         // loading={true}
@@ -280,7 +292,7 @@ export default function Page() {
           </Form.Item>
         </Form>
 
-      </Modal>}
+      </Modal>} */}
 
       {contextHolder}
       <header className="p-6 lg:sticky bg-primary top-0 flex flex-col justify-center gap-4 justify-between z-30">
@@ -289,11 +301,11 @@ export default function Page() {
           Ways Station Badminton
         </h1>
         <div className="flex absolute right-5 gap-2">
-          <button onClick={() => setShowSetFixedModel(true)}
+          {/* <button onClick={() => setShowSetFixedModel(true)}
             disabled={isProcessing}
             className="border border-white p-2 rounded-md disabled:bg-gray-300 hover:bg-gray-200 hover:text-primary">
             <p>CĐ</p>
-          </button>
+          </button> */}
           <button onClick={onChangeInfo}
             disabled={selected.totalHours === 0 || isProcessing}
             className="border border-white p-2 rounded-md disabled:bg-gray-300 hover:bg-gray-200 hover:text-primary">

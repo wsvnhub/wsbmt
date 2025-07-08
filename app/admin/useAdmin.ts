@@ -243,7 +243,7 @@ export default function useAdmin() {
 
     const onFormFinishUpdateInfo = async (values: any) => {
         setProcessing(true);
-        const { name, phone, password } = values;
+        const { name, phone, password, status } = values;
         if (!name || !phone || !password) {
             setProcessing(false);
             return api.open({
@@ -266,7 +266,7 @@ export default function useAdmin() {
         const timeSlotData = _.flatMap(Object.values(selectedTimeSlots)).map((timeSlots: any) => {
             return {
                 ...timeSlots,
-                status: "booked",
+                status,
                 isFixed,
                 bookedBy: { name, phone },
             };
@@ -282,8 +282,8 @@ export default function useAdmin() {
                     totalPrice,
                     address
                 },
-                timeSlotData
-            })
+                timeSlotData,
+            }, status === "booked" ? "add" : "fixed")
 
             setSelectedTimeSlots({});
             setSelected(defaultSelected);

@@ -42,10 +42,6 @@ export interface FacilitiesInfo {
 
 const minWidth = 60;
 
-
-
-
-
 export default function Home() {
 
   const {
