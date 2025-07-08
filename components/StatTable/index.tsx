@@ -11,6 +11,7 @@ interface StatItem {
         emptySlotsCount: number;
         bookedSlotsCount: number;
         totalSlotsCount: number;
+        fixedSlotsCount: number;
     };
     createdAt: string;
 }
@@ -43,6 +44,11 @@ export default function StatsTable({ data, branchs }: StatsTableProps) {
                 dataIndex: [`${b.id}`, 'emptySlotsCount'],
                 key: `${b.id}_empty`,
             },
+            {
+                title: 'Ô giữ CĐ',
+                dataIndex: [`${b.id}`, 'fixedSlotsCount'],
+                key: `${b.id}_fixed`,
+            },
         ],
     }));
 
@@ -60,6 +66,11 @@ export default function StatsTable({ data, branchs }: StatsTableProps) {
                 title: 'Ô tương lai',
                 dataIndex: ['total', 'emptySlotsCount'],
                 key: 'total_empty',
+            },
+            {
+                title: 'Ô giữ CĐ',
+                dataIndex: ['total', 'fixedSlotsCount'],
+                key: 'total_fixed',
             },
         ],
     });
@@ -90,17 +101,20 @@ export default function StatsTable({ data, branchs }: StatsTableProps) {
             total: {
                 bookedSlotsCount: 0,
                 emptySlotsCount: 0,
+                fixedSlotsCount: 0,
             },
         };
 
         items.forEach((item: any) => {
             row[item.branchId] = {
-                bookedSlotsCount: item.stats.bookedSlotsCount,
-                emptySlotsCount: item.stats.emptySlotsCount,
+                bookedSlotsCount: item.stats.bookedSlotsCount || 0,
+                emptySlotsCount: item.stats.emptySlotsCount || 0,
+                fixedSlotsCount: item.stats.fixedSlotsCount || 0
             };
 
-            row.total.bookedSlotsCount += item.stats.bookedSlotsCount;
-            row.total.emptySlotsCount += item.stats.emptySlotsCount;
+            row.total.bookedSlotsCount += item.stats.bookedSlotsCount || 0;
+            row.total.emptySlotsCount += item.stats.emptySlotsCount || 0;
+            row.total.fixedSlotsCount += item.stats.fixedSlotsCount || 0;
         });
 
         return row;

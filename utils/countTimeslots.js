@@ -29,6 +29,7 @@ async function run() {
                 branchName: branch.name,
                 emptySlotsCount: 0,
                 bookedSlotsCount: 0,
+                fixedSlotsCount: 0,
                 totalSlotsCount: 0
             };
         }
@@ -49,6 +50,9 @@ async function run() {
                     if (value.status === "booked") {
                         statsByBranch[branchIdStr].bookedSlotsCount++;
                     }
+                    if (value.status === "fixed") {
+                        statsByBranch[branchIdStr].fixedSlotsCount++;
+                    }
                 }
             }
         }
@@ -62,6 +66,7 @@ async function run() {
             stats: {
                 emptySlotsCount: branchData.emptySlotsCount,
                 bookedSlotsCount: branchData.bookedSlotsCount,
+                fixedSlotsCount: branchData.fixedSlotsCount,
                 totalSlotsCount: branchData.totalSlotsCount
             },
             createdAt: new Date()

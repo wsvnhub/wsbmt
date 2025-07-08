@@ -419,7 +419,7 @@ export default function Page() {
               </div>
               <div className="flex items-center justify-center gap-2">
                 <div className="bg-blue-600 w-6 h-6 text-xs rounded-md"></div>
-                <span>Cố định</span>
+                <span>Giữ chờ CĐ</span>
               </div>
               <div className="flex items-center justify-center gap-2">
                 <div className="bg-yellow-500 w-6 h-6 text-xs rounded-md"></div>
