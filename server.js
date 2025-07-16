@@ -133,6 +133,8 @@ app.prepare().then(async () => {
 
     socket.on("schedules:create", async ({ timeSlotsData, schedulesData }, callback) => {
       logger.info(`Creating schedule: ${JSON.stringify({ schedulesData })}`);
+      
+      logger.info(`debug schedule: ${JSON.stringify(timeSlotsData)}`);
 
       const schedules = mongoPool.collection("schedules");
       const timeSlots = mongoPool.collection("timeslots");
@@ -317,8 +319,9 @@ app.prepare().then(async () => {
     // });
 
     socket.on("schedules:manual", async ({ timeSlots, data, action }, callback) => {
-      logger.info(`Updated: schedules:manual`);
-      logger.info(`Updated: manual ${JSON.stringify(timeSlots)}`);
+      logger.info(`Updated: schedules:manual ${JSON.stringify(data)}`);
+      logger.info(`Updated: manual action ${action} ${JSON.stringify(timeSlots)}`);
+
       const collection = mongoPool.collection("timeslots");
 
       const [schedule] = timeSlots;
