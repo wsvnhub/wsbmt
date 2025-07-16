@@ -418,7 +418,7 @@ export default function Page() {
                 <span>Pass</span>
               </div>
               <div className="flex items-center justify-center gap-2">
-                <div className="bg-blue-600 w-6 h-6 text-xs rounded-md"></div>
+                <div className="bg-blue-300 w-6 h-6 text-xs rounded-md"></div>
                 <span>Giữ chờ CĐ</span>
               </div>
               <div className="flex items-center justify-center gap-2">

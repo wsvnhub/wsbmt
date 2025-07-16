@@ -2,16 +2,23 @@ import { logger, errorLogger, larkLogger } from "./logger.js";
 import { createLarkRecord } from "./lark.js";
 
 const actionsStatus = {
-    add: "empty",
-    update: "booked",
-    delete: "wait",
+    add: ["empty"],
+    update: ["booked", "pass", "fixed"],
+    delete: ["wait"],
 }
 export const updateTimeSlot = async ({ timeSlotsData, collection, action = "add" }) => {
     logger.info(`Updating time slots status: ${JSON.stringify(timeSlotsData)}`);
     const updatePromises = timeSlotsData.map(({ facility, id, index, ...rest }) => {
-        const availability = action === "add" ? true : false
+        const availability = action !== "add"
         return collection.updateOne(
-            { facility, courtId: id, createdAt: index.createdAt, [index.columnIndex + ".status"]: actionsStatus[action] },
+            {
+                facility,
+                courtId: id,
+                createdAt: index.createdAt,
+                [index.columnIndex + ".status"]: {
+                    $in: actionsStatus[action]
+                }
+            },
             { $set: { [index.columnIndex]: { facility, id, index, availability, ...rest } } }
         )
     }

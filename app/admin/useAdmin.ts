@@ -218,6 +218,7 @@ export default function useAdmin() {
                 ...timeSlots,
                 bookedBy: { name, phone },
                 isChange: false,
+                status: "booked"
             };
         });
 
@@ -413,7 +414,7 @@ export default function useAdmin() {
         currentDate: Date,
         cluster: string
     ) => {
-        if (cell.status === "booked" || cell.status === "pass") {
+        if (cell.status === "booked" || cell.status === "pass" || cell.status === "fixed") {
 
             if (cell.isChange) {
                 return setSelectedBookedTimeSlots((prevSlots: any) => ({
