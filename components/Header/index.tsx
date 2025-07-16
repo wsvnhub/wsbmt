@@ -47,7 +47,7 @@ export const Header = ({ isSchedule, selectedDate, setSelectedDate, children, he
                     >
                         Khách đặt lịch cố định: <br /> Gọi 0389145575
                     </a>
-                    <div className="w-7/12 lg:w-full flex items-center gap-2 lg:gap-6 text-sm">
+                    <div className="w-7/12 lg:w-full flex items-center gap-2 lg:gap-4 text-[6px] lg:text-sm">
                         <div className="flex items-center justify-center gap-2">
                             <div className="bg-white w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md" />
                             <span>Trống</span>
@@ -59,6 +59,10 @@ export const Header = ({ isSchedule, selectedDate, setSelectedDate, children, he
                         <div className="flex items-center justify-center gap-2">
                             <div className="bg-yellow-500 w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md" />
                             <span>Đang chọn</span>
+                        </div>
+                        <div className="flex items-center justify-center gap-2">
+                            <div className="bg-purple-400 w-4 h-4 lg:w-6 lg:h-6 rounded-sm lg:rounded-md" />
+                            <span>Cần Pass</span>
                         </div>
                     </div>
                 </div>
