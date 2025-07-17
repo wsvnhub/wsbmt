@@ -131,9 +131,26 @@ app.prepare().then(async () => {
       return callback({ data });
     });
 
-    socket.on("schedules:create", async ({ timeSlotsData, schedulesData }, callback) => {
+    socket.on("schedules:create", async (payload, callback) => {
+
+
+      // Bước 1: Log payload gốc ngay lập tức, không qua JSON.stringify
+      console.log("--- RAW PAYLOAD RECEIVED ---");
+      console.dir(payload, { depth: null });
+
+      const { timeSlotsData, schedulesData } = payload;
+
+      // Bước 2: Log từng phần tử của mảng
+      console.log("--- CHECKING timeSlotsData array ---");
+      if (Array.isArray(timeSlotsData)) {
+        timeSlotsData.forEach((slot, i) => {
+          console.log(`Slot ${i} createdAt:`, slot.index.createdAt);
+          console.log(`Type of createdAt:`, typeof slot.index.createdAt);
+        });
+      }
+
+      // Bước 3: Bây giờ mới log bằng logger của bạn
       logger.info(`Creating schedule: ${JSON.stringify({ schedulesData })}`);
-      
       logger.info(`debug schedule: ${JSON.stringify(timeSlotsData)}`);
 
       const schedules = mongoPool.collection("schedules");

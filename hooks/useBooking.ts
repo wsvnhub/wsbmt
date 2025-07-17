@@ -179,7 +179,7 @@ export default function useBooking() {
         const row = facilities[cluster][rowIndex];
 
         let isCanDelete = false
-
+        console.log(" row.createdAt", row.createdAt)
         const detail: string = `${row.court} - ${cell.from} đến ${cell.to}`;
         const formateddetail: string = `${row.court} - ${cell.from} đến ${cell.to} (${new Intl.DateTimeFormat('en-GB').format(new Date(date))} - ${row.facility})`;
         let cloneSelected: any = { ...selected };
@@ -238,7 +238,7 @@ export default function useBooking() {
         }
         setFacilities((preState: any) => {
             preState[cluster][rowIndex][columnIndex] = cell;
-            return { ...preState };
+            return { ...preState, key: `${rowIndex}-${columnIndex}` };
         });
 
         return setSelected((preState: any) => {
@@ -298,12 +298,15 @@ export default function useBooking() {
                     ? newState.formateddetails
                     : newState.formateddetails.join(";");
 
-            const timeSlotData = _.flatMap(Object.values(selectedTimeSlots)).map((timeSlots: any) => {
-                timeSlots.bookedBy = { name: newState.userName, phone: newState.phone };
-                timeSlots.status = "wait";
-                timeSlots.isFixed = newState.isFixed;
-                return timeSlots;
+            const timeSlotData = _.flatMap(Object.values(selectedTimeSlots)).map((timeSlot: any) => {
+                // DÙNG CLONE ĐỂ TRÁNH MUTATION
+                const newTimeSlot = { ...timeSlot };
+                newTimeSlot.bookedBy = { name: newState.userName, phone: newState.phone };
+                newTimeSlot.status = "wait";
+                newTimeSlot.isFixed = newState.isFixed;
+                return newTimeSlot;
             });
+            console.log("Data to be sent to backend:", JSON.stringify(timeSlotData, null, 2));
             try {
                 api.open({
                     type: "info",
