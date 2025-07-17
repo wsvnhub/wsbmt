@@ -279,6 +279,9 @@ export default function useBooking() {
     };
     const handleChangePage = async (newState: any) => {
         if (isSchedule) {
+            console.log("selected", selected)
+            console.log("Object.values(selectedTimeSlots)", Object.values(selectedTimeSlots))
+            console.log("_.flatMap(Object.values(selectedTimeSlots))", _.flatMap(Object.values(selectedTimeSlots)))
 
             setSelected((pre: any) => ({
                 ...pre,
@@ -286,6 +289,7 @@ export default function useBooking() {
                 timeSlots: _.flatMap(Object.values(selectedTimeSlots)),
                 totalPrice: selected.totalHours * Number(pricePerHour),
             }));
+
         }
         if (isConfirm) {
             newState.transactionCode = generateTransactionCode();
@@ -298,15 +302,18 @@ export default function useBooking() {
                     ? newState.formateddetails
                     : newState.formateddetails.join(";");
 
-            const timeSlotData = _.flatMap(Object.values(selectedTimeSlots)).map((timeSlot: any) => {
-                // DÙNG CLONE ĐỂ TRÁNH MUTATION
-                const newTimeSlot = { ...timeSlot };
-                newTimeSlot.bookedBy = { name: newState.userName, phone: newState.phone };
-                newTimeSlot.status = "wait";
-                newTimeSlot.isFixed = newState.isFixed;
-                return newTimeSlot;
+            const timeSlotData = _.flatMap(Object.values(selectedTimeSlots)).map((timeSlots: any) => {
+                timeSlots.bookedBy = { name: newState.userName, phone: newState.phone };
+
+                timeSlots.status = "wait";
+
+                timeSlots.isFixed = newState.isFixed;
+
+                return timeSlots;
             });
-            console.log("Data to be sent to backend:", JSON.stringify(timeSlotData, null, 2));
+            console.log("isConfirm selected", selected)
+            console.log("Data to be sent to backend", timeSlotData)
+
             try {
                 api.open({
                     type: "info",
