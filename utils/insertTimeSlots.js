@@ -49,10 +49,7 @@ export const insertCustomDateTimeslots = async ({ db, courtIds = [], fromDate, t
     console.log(i, lastDate, month);
     do {
         while (i <= lastDate) {
-            const date = new Date();
-            date.setFullYear(fromDate.getFullYear())
-            date.setMonth(month)
-            date.setDate(i);
+            const date = new Date(fromDate.getFullYear(), month, i);
             console.log(date.toDateString());
             const insertData = courts.map((court) => {
                 const timeslots = generateTimeArray(court.timeClusterId);
