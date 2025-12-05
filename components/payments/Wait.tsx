@@ -156,13 +156,13 @@ export default function WaitPayments({
               Thời gian chờ giữ sân 15 phút.
               Vui lòng <span className="text-[#fa9654]">ghi đúng nội dung theo mã giao dịch ở trên </span>hoặc quét mã QR bên dưới để hệ thống xác nhận tự động thành công và <span className="text-[#fa9654]">không tắt trang này.</span>
               Ways <span className="text-[#fa9654]">không chịu trách nhiệm giữ sân nếu bạn chuyển khoản không có mã.</span>
-              Nếu trong trường hợp tiền chuyển đã chuyển khoản thành công nhưng hệ thống ngân hàng chưa báo nhận được và hết thời gian chờ 15 phút,<span className="text-[#fa9654]"> bạn hãy gọi 0389145575 (7-23h) </span> để Ways xác nhận giữ sân.
+              Nếu trong trường hợp tiền chuyển đã chuyển khoản thành công nhưng hệ thống ngân hàng chưa báo nhận được và hết thời gian chờ 15 phút,<span className="text-[#fa9654]"> bạn hãy gọi 0889555559 (7-23h) </span> để Ways xác nhận giữ sân.
               <span className="text-[#fa9654]"> Nếu ngoài giờ làm</span>, bạn hãy đặt lại sân 1 lần nữa và nhắn lại Zalo để Ways báo kế toán hoàn tiền chuyển 2 lần nhé.
             </p>
           </div>
         </hgroup>
         <p className="font-semibold text-center">
-          Giữ chỗ chờ thanh toán trong 15 phút. <br /> Hotline: 0389145575 (7-23h).
+          Giữ chỗ chờ thanh toán trong 15 phút. <br /> Hotline: 0889555559 (7-23h).
         </p>
         {alertMessage && <p className="text-secondary">{alertMessage}</p>}
         <p className="font-semibold my-2">

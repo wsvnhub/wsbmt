@@ -323,8 +323,8 @@ export default function useBooking() {
                 const res = await createSchedules(newState, timeSlotData);
                 if (!res.success) {
                     return api.open({
-                        message: "Ô giờ lỗi, để đặt ô giờ này, hãy gọi 0389145575 để được hỗ trợ",
-                        description: "Gọi 0389145575 để được hỗ trợ",
+                        message: "Ô giờ lỗi, để đặt ô giờ này, hãy gọi 0889555559 để được hỗ trợ",
+                        description: "Gọi 0889555559 để được hỗ trợ",
                         duration: 3000,
                         type: "error",
                     });

@@ -130,7 +130,7 @@ function generateTimeArray(
               className={`cursor-pointer ${bgClass} absolute inset-0 w-full h-full flex flex-col items-center justify-center text-white text-xs`}
             >
               {!isAdmin && value.status === "pass" && (
-                <a className="text-[5px] hover:text-white hover:underline" href="tel:0389145575">Hotline: 0389145575</a>
+                <a className="text-[5px] hover:text-white hover:underline" href="tel:0889555559">Hotline: 0889555559</a>
               )}
               {(value.status === "booked" || value.status === "pass" || value.status === "fixed") && isAdmin && (
                 <>
