@@ -118,11 +118,11 @@ export default function WaitPayments({
   const { transactionCode } = data;
   const {
     //  bankName, bankCode, bankUserName,
-    qrCode 
+    // qrCode 
   } = paymentInfo;
 
-  const QRCODE = qrCode !== undefined && qrCode !== "" ? qrCode.replace('{AMOUNT}', totalPrice.toString()).replace('{CODE}', transactionCode) : `https://qr.sepay.vn/img?acc=688112688&bank=MBBank&amount=${totalPrice}&des=${transactionCode}`;
-  // const QRCODE = `https://qr.sepay.vn/img?acc=0703970249&bank=MBBank&amount=${totalPrice}&des=${transactionCode}`;
+  // const QRCODE = qrCode !== undefined && qrCode !== "" ? qrCode.replace('{AMOUNT}', totalPrice.toString()).replace('{CODE}', transactionCode) : `https://qr.sepay.vn/img?acc=688112688&bank=MBBank&amount=${totalPrice}&des=${transactionCode}`;
+  const QRCODE = `https://qr.sepay.vn/img?acc=0703970249&bank=MBBank&amount=${totalPrice}&des=${transactionCode}`;
 
   return (
     <div className="h-screen px-4 pt-4 pb-2 flex items-center flex-col">
