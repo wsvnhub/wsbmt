@@ -3,7 +3,7 @@ import {
   // Button,
   CountdownProps, Image, Statistic, Typography
 } from "antd";
-import { VND } from "@/utils";
+// import { VND } from "@/utils";
 import { io } from "socket.io-client";
 
 const Text = ({ title, content, isCopyable = false }: any) => {
@@ -116,9 +116,13 @@ export default function WaitPayments({
 
 
   const { transactionCode } = data;
-  const { bankName, bankCode, bankUserName, qrCode } = paymentInfo;
+  const {
+    //  bankName, bankCode, bankUserName,
+    // qrCode 
+  } = paymentInfo;
 
-  const QRCODE = qrCode !== undefined && qrCode !== "" ? qrCode.replace('{AMOUNT}', totalPrice.toString()).replace('{CODE}', transactionCode) : `https://qr.sepay.vn/img?acc=688112688&bank=MBBank&amount=${totalPrice}&des=${transactionCode}`;
+  // const QRCODE = qrCode !== undefined && qrCode !== "" ? qrCode.replace('{AMOUNT}', totalPrice.toString()).replace('{CODE}', transactionCode) : `https://qr.sepay.vn/img?acc=688112688&bank=MBBank&amount=${totalPrice}&des=${transactionCode}`;
+  const QRCODE = `https://qr.sepay.vn/img?acc=0703970249&bank=MBBank&amount=${totalPrice}&des=${transactionCode}`;
 
   return (
     <div className="h-screen px-4 pt-4 pb-2 flex items-center flex-col">
@@ -147,14 +151,14 @@ export default function WaitPayments({
             </div>
           </div>
           <div className="p-2 flex flex-col gap-2">
-            <Text title="Ngân hàng" content={bankName} />
+            {/* <Text title="Ngân hàng" content={bankName} />
             <Text title="Số tài khoản" content={bankCode} isCopyable />
             <Text title="Tên tài khoản" content={bankUserName} />
             <Text title="Nội dung" content={transactionCode} isCopyable />
-            <Text title="Số tiền" content={VND.format(totalPrice)} isCopyable />
+            <Text title="Số tiền" content={VND.format(totalPrice)} isCopyable /> */}
             <p className="font-semibold">
               Thời gian chờ giữ sân 15 phút.
-              Vui lòng <span className="text-[#fa9654]">ghi đúng nội dung theo mã giao dịch ở trên </span>hoặc quét mã QR bên dưới để hệ thống xác nhận tự động thành công và <span className="text-[#fa9654]">không tắt trang này.</span>
+              Vui lòng quét mã QR bên dưới để hệ thống xác nhận tự động thành công và <span className="text-[#fa9654]">không tắt trang này.</span>
               Ways <span className="text-[#fa9654]">không chịu trách nhiệm giữ sân nếu bạn chuyển khoản không có mã.</span>
               Nếu trong trường hợp tiền chuyển đã chuyển khoản thành công nhưng hệ thống ngân hàng chưa báo nhận được và hết thời gian chờ 15 phút,<span className="text-[#fa9654]"> bạn hãy gọi 0889555559 (7-23h) </span> để Ways xác nhận giữ sân.
               <span className="text-[#fa9654]"> Nếu ngoài giờ làm</span>, bạn hãy đặt lại sân 1 lần nữa và nhắn lại Zalo để Ways báo kế toán hoàn tiền chuyển 2 lần nhé.
