@@ -84,32 +84,32 @@ export default function ConfirmPayments({
   const onVerifyCode = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("api/verify-code", {
-        method: "POST",
-        body: JSON.stringify({
-          code: discountCode,
-          timesSlots: data.timeSlots,
-          selectedDates: dates,
-          facility: Object.values(facility)
-        }),
-      });
-      const res = await response.json();
-      if (!res.data && res.status !== 200) {
-        setDiscountMessage(res.error ? res.error : "Mã không tồn tại hoặc hết hạn!")
-        return setIsLoading(false);
-      }
+      // const response = await fetch("api/verify-code", {
+      //   method: "POST",
+      //   body: JSON.stringify({
+      //     code: discountCode,
+      //     timesSlots: data.timeSlots,
+      //     selectedDates: dates,
+      //     facility: Object.values(facility)
+      //   }),
+      // });
+      // const res = await response.json();
+      // if (!res.data && res.status !== 200) {
+      //   setDiscountMessage(res.error ? res.error : "Mã không tồn tại hoặc hết hạn!")
+      //   return setIsLoading(false);
+      // }
 
-      const percent = res.data.value;
-      const discountAmount = pricePerHour - (pricePerHour * percent) / 100;
-      setIsLoading(false);
-      setDiscountMessage("Mã thành công. Giá đã được áp dụng");
+      // const percent = res.data.value;
+      // const discountAmount = pricePerHour - (pricePerHour * percent) / 100;
+      // setIsLoading(false);
+      // setDiscountMessage("Mã thành công. Giá đã được áp dụng");
 
-      return setDiscountInfo({
-        value: percent,
-        discountAmount,
-        newPrice: data.totalHours * discountAmount,
-        isApplyDiscount: true,
-      });
+      // return setDiscountInfo({
+      //   value: percent,
+      //   discountAmount,
+      //   newPrice: data.totalHours * discountAmount,
+      //   isApplyDiscount: true,
+      // });
     } catch (error) {
       console.log(error);
       setDiscountMessage("Mã không thành công, hết hạn sử dụng");
