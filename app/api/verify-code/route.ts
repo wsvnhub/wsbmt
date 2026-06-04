@@ -14,6 +14,16 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const enabled = process.env.VERIFY_CODE_API_ENABLED === "true";
+  if (!enabled) {
+    logger.warn(`POST /api/verify-code - API is disabled`);
+    return Response.json(
+      {
+        error: "API is disabled",
+      },
+      { status: 503, statusText: "Service Unavailable" }
+    );
+  }
   try {
     const client = await clientPromise;
     const db = client.db(process.env.DB);
