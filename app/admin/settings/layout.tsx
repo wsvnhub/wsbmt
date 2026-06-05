@@ -11,7 +11,7 @@ const SettingLayout = (props: SettingLayoutProps) => {
 
     return (
         <AntdApp>
-            <AuthenticationLayout title="Nhập mật khẩu vào settings" correctPassword="TeamMate&2069">
+            <AuthenticationLayout title="Nhập mật khẩu vào settings">
                 <SettingsLayout>
                     {children}
                 </SettingsLayout>

@@ -19,7 +19,7 @@ const CalendarPage: React.FC = () => {
   const [listData, setListData] = React.useState<any[]>([])
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [isLoading, setLoading] = React.useState(false);
-  const [selectedDate, setSelectedDate] = React.useState<Date[]>([]);
+  const [selectedDate, setSelectedDate] = React.useState<string[]>([]);
 
   React.useEffect(() => {
     fetch("/api/calendar").then(res => res.json()).then(res => {
@@ -67,11 +67,13 @@ const CalendarPage: React.FC = () => {
   }
 
   const onChangeDates = (dates: any) => {
-    if (dates) {
+    if (dates && dates[0] && dates[1]) {
       const [from, to] = dates
-      setSelectedDate([from.toDate().toLocaleDateString(), to.toDate().toLocaleDateString()])
+      // Gửi ISO YYYY-MM-DD để server parse không phụ thuộc locale (tránh dd/mm bị hiểu nhầm mm/dd).
+      setSelectedDate([from.format("YYYY-MM-DD"), to.format("YYYY-MM-DD")])
+    } else {
+      setSelectedDate([])
     }
-
   }
 
 
@@ -81,24 +83,30 @@ const CalendarPage: React.FC = () => {
   };
 
   const handleOk = async () => {
+    if (selectedDate.length < 2) {
+      message.error('Vui lòng chọn khoảng ngày (từ - đến)');
+      return;
+    }
     setLoading(true)
     try {
       const res = await fetch('/api/calendar',
         {
           method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ selectedDate })
         })
-        .then(res => res.json())
-      console.log(res)
+      const data = await res.json()
+      if (!res.ok) {
+        message.error(data?.message || 'Tạo lịch thất bại');
+        return;
+      }
       message.success('Thêm thành công');
+      setIsModalOpen(false);
     } catch (error) {
-
+      message.error('Lỗi kết nối, thử lại');
     } finally {
       setLoading(false)
-      setIsModalOpen(false);
     }
-
-
   };
 
   const handleCancel = () => {
