@@ -31,26 +31,37 @@ function isProtected(pathname: string, method: string): boolean {
   return false;
 }
 
+function matchesAdmin(pathname: string): boolean {
+  return pathname === "/admin" || pathname.startsWith("/admin/");
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const token = request.cookies.get(SESSION_COOKIE)?.value;
 
+  // Bảo vệ TRANG admin ở tầng server: chưa đăng nhập -> chuyển sang /login.
+  // Đây là cổng thật (không thể bypass bằng cách tắt JS như modal client cũ).
+  if (matchesAdmin(pathname)) {
+    if (await verifySessionToken(token)) return NextResponse.next();
+    const loginUrl = new URL("/login", request.url);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Bảo vệ các API admin.
   if (!isProtected(pathname, request.method)) {
     return NextResponse.next();
   }
-
-  const token = request.cookies.get(SESSION_COOKIE)?.value;
   if (await verifySessionToken(token)) {
     return NextResponse.next();
   }
-
   return NextResponse.json(
     { error: "Unauthorized - cần đăng nhập admin" },
     { status: 401 }
   );
 }
 
-// Chạy middleware cho mọi route /api; logic isProtected quyết định chặn hay không.
-// (Không ảnh hưởng Socket.io vì socket nằm ngoài pipeline của Next.)
+// Chạy middleware cho mọi route /api (logic isProtected quyết định chặn hay không)
+// và toàn bộ trang /admin. Không ảnh hưởng Socket.io vì socket nằm ngoài pipeline Next.
 export const config = {
-  matcher: ["/api/:path*"],
+  matcher: ["/api/:path*", "/admin", "/admin/:path*"],
 };

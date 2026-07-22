@@ -1,5 +1,15 @@
 import { createServer } from "node:http";
 
+// Node >= 24/25 expose một global `localStorage` mặc định, nhưng nếu không có
+// `--localstorage-file=<path>` hợp lệ thì các method (getItem/setItem...) bị hỏng.
+// Một số thư viện (vd socket.io-client/engine.io) kiểm tra `typeof localStorage !== "undefined"`
+// rồi gọi getItem -> "localStorage.getItem is not a function" -> render 500 khi SSR.
+// Xoá global hỏng để các thư viện rơi về nhánh "không có localStorage".
+if (typeof localStorage !== "undefined" && typeof localStorage.getItem !== "function") {
+  delete globalThis.localStorage;
+  delete globalThis.sessionStorage;
+}
+
 import { config } from "dotenv";
 import { MongoClient, ObjectId } from "mongodb";
 import next from "next";

@@ -1,17 +1,13 @@
-import AuthenticationLayout from "@/components/AuthenticationLayout";
 import { ReactNode } from "react"
 
 type AdminLayoutProps = {
   children: ReactNode,
 }
+// Quyền truy cập /admin được gác ở middleware (server). Chưa đăng nhập sẽ bị
+// redirect sang /login trước khi tới đây.
 const AdminLayout = (props: AdminLayoutProps) => {
   const { children } = props;
-
-  return (
-    <AuthenticationLayout title="Nhập mật khẩu vào admin">
-      {children}
-    </AuthenticationLayout>
-  )
+  return <>{children}</>
 }
 
 export default AdminLayout

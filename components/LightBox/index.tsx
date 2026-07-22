@@ -16,6 +16,9 @@ export default function LightBox({ listFac, handleSelectedDate, handleChangeFaci
 
   useEffect(() => {
     // Kiểm tra nếu đã có sẵn giá trị trong localStorage thì không cần hiện modal
+    if (typeof window !== "undefined") {
+      return;
+    }
     const savedDate = localStorage.getItem('selectedDate');
     const savedBranch = localStorage.getItem('selectedBranch');
     if (savedDate && savedBranch) {
