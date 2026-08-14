@@ -1,4 +1,5 @@
 import clientPromise from "@/lib/mongo";
+import { COURT_DAYS } from "@/utils/courtDays";
 
 export async function GET(request: Request) {
   let client;
@@ -82,6 +83,12 @@ export async function DELETE(request: Request) {
     if (result.deletedCount === 0) {
       return Response.json({ error: "Court not found" }, { status: 404 });
     }
+
+    // Bản cũ KHÔNG cascade gì cả: xoá sân xong, các ô của sân đó vẫn nằm lại
+    // trong DB, không hiện trên lưới (vì lưới dựng từ danh sách sân) nhưng vẫn
+    // chiếm chỗ và sẽ hiện lại nếu ai đó tạo lại sân cùng id.
+    const slotsDeleted = await db.collection(COURT_DAYS).deleteMany({ courtId: id });
+    console.log(`Đã xoá ${slotsDeleted.deletedCount} court_days của sân ${id}`);
 
     return Response.json({ message: "Court deleted successfully" }, { status: 200 });
   } catch (error) {

@@ -14,7 +14,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
       {
@@ -35,7 +35,15 @@
     ".next/types/**/*.ts",
     "utils/genTimeSlots.js",
     "utils/insertTimeSlots.js",
-    "utils/lark.js"
+    "utils/lark.js",
+    "utils/bookingConstants.js",
+    "utils/buildGrid.js",
+    "utils/courtDays.js",
+    "utils/confirmOrder.js",
+    "utils/adminAuth.js",
+    "utils/webhookAuth.js",
+    "engine/bookingEngine.js",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

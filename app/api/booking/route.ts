@@ -1,8 +1,7 @@
 import clientPromise from "@/lib/mongo";
-// import { formatDate } from "@/utils";
 import { logger } from "@/utils/logger";
-import { updatedTimeSlotStatus } from "@/utils/updateTimeSlotsStatus";
-
+import { confirmPaidOrder } from "@/utils/confirmOrder";
+import { verifyPaymentRequest } from "@/utils/webhookAuth";
 
 export async function GET(request: Request) {
     let client;
@@ -30,48 +29,77 @@ export async function GET(request: Request) {
     }
 }
 
+/**
+ * Webhook ngân hàng: tiền đã về -> xác nhận đơn.
+ *
+ * Bản cũ KHÔNG auth, KHÔNG so `amount` với `totalPrice` (chỉ log ra), rồi gọi
+ * `void updatedTimeSlotStatus(...)` fire-and-forget vốn ghi đè cả subdocument ô
+ * bằng dữ liệu từ đơn và nuốt mọi lỗi vào một catch chỉ ghi log. Vì mã giao dịch
+ * cũ chỉ phân giải tới 10 giây nên nó đoán được: đoán đúng mã là đặt được sân mà
+ * không trả đồng nào.
+ */
 export async function POST(request: Request) {
     let client;
     try {
-        const { code, amount } = await request.json();
+        // Đọc raw body trước để verify được HMAC (chữ ký tính trên đúng bytes gửi lên).
+        const rawBody = await request.text();
 
+        const auth = verifyPaymentRequest(request, rawBody);
+        if (!auth.ok) {
+            logger.error(`Booking webhook rejected: ${auth.reason}`);
+            return Response.json({ error: "Unauthorized", data: null }, { status: 401 });
+        }
+
+        const { code, amount } = JSON.parse(rawBody);
+
+        if (!code) {
+            return Response.json({ error: "Thiếu mã giao dịch", data: null }, { status: 400 });
+        }
 
         client = await clientPromise;
         const db = client.db();
-        const schedules = db.collection("schedules");
-        const isExist = await schedules.findOne({ transactionCode: code, status: "wait" })
+        const order = await db.collection("schedules").findOne({ transactionCode: code });
 
-        if (!isExist) {
+        if (!order) {
             throw new Error("Đơn hàng của bạn đã bị xoá!!!!!!");
         }
-        const timslots = isExist.timeSlots
 
-        // const timeSlots = db.collection("timeslots");
+        if (Number(amount) < Number(order.totalPrice)) {
+            logger.error(
+                `Booking underpaid: code=${code} received=${amount} expected=${order.totalPrice}`
+            );
+            return Response.json(
+                { error: "Số tiền chuyển khoản không khớp với đơn hàng", data: null },
+                { status: 402 }
+            );
+        }
 
-        await schedules.updateOne(
-            { transactionCode: code, status: "wait" },
-            { $set: { status: "booked" } }
+        // Điểm vào DUY NHẤT cho việc xác nhận, dùng chung với socket server.
+        // Atomic, idempotent (webhook gửi lại vẫn trả success), và khi hold đã
+        // hết hạn thì tự thử giành lại ô — đây chính là kịch bản đã sinh ra 139
+        // dòng "Đơn hàng của bạn đã bị xoá" trong app.log.
+        const result = await confirmPaidOrder(db, code, { amount, source: "bank_webhook" });
+
+        if (!result.success) {
+            if (result.needsManualReview) {
+                // Tiền đã về nhưng thiếu sân. Trả 200 để ngân hàng không gửi lại
+                // vô hạn, nhưng đánh dấu rõ là cần người xử lý — trường hợp này
+                // đã được ghi vào `payment_exceptions`.
+                logger.error(`PAYMENT EXCEPTION cần xử lý tay: ${code}`);
+                return Response.json(
+                    { error: result.error, needsManualReview: true, data: null },
+                    { status: 200, statusText: "manual-review" }
+                );
+            }
+            throw new Error(result.error);
+        }
+
+        logger.info(
+            `Booking confirmed: code=${code} amount=${amount}${result.replay ? " (replay)" : ""}`
         );
-        logger.info(`updateLarkRecord: booking ${code} - ${JSON.stringify(isExist)}`);
 
-        // const updatedData = timslots.map((timeSlot: any) => ({ ...timeSlot, status: "booked" }));
-
-        // const updateOperations = updatedData.map((timeSlot: any) => ({
-        //     updateOne: {
-        //         filter: { facility: timeSlot.facility, courtId: timeSlot.id, createdAt: timeSlot.index.createdAt },
-        //         update: { $set: { [timeSlot.index.columnIndex]: timeSlot } }
-        //     }
-        // }));
-        // logger.info(`Updating time slots: ${JSON.stringify(updatedData)}`);
-
-        // await timeSlots.bulkWrite(updateOperations);
-
-        logger.info(`Verification successful: code=${code}, amount=${amount}`);
-
-        void updatedTimeSlotStatus({ db, code })
-        
         return Response.json(
-            { data: timslots },
+            { data: result.schedule?.timeSlots ?? [], replay: Boolean(result.replay) },
             { status: 200, statusText: "success" }
         );
     } catch (error: any) {

@@ -20,6 +20,9 @@
 .DS_Store
 *.pem
 
+# keyfile xác thực nội bộ của replica set mongo — là bí mật, không được commit
+mongo-keyfile
+
 *.md
 
 # debug

@@ -1,4 +1,5 @@
 import clientPromise from "@/lib/mongo";
+import { COURT_DAYS } from "@/utils/courtDays";
 
 export async function GET(request: Request) {
   let client;
@@ -80,8 +81,10 @@ export async function DELETE(request: Request) {
       return Response.json({ error: "Facility not found" }, { status: 404 });
     }
     
-    const timeslotsDeleted = await db.collection("timeslots").deleteMany({ facility: id });
-    console.log("√",timeslotsDeleted)
+    // Cascade sang collection ô sân mới. Nếu bỏ sót, các ô mồ côi vẫn tiếp tục
+    // chặn lịch và sẽ "sống lại" nếu ai đó tạo lại chi nhánh cùng id.
+    const slotsDeleted = await db.collection(COURT_DAYS).deleteMany({ facility: id });
+    console.log(`Đã xoá ${slotsDeleted.deletedCount} court_days của ${id}`);
     return Response.json({ message: "Facility deleted successfully" }, { status: 200 });
   } catch (error) {
     console.error("Error deleting facility:", error);

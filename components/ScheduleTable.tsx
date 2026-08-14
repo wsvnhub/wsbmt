@@ -4,6 +4,7 @@ import type { TableProps } from "antd";
 import HeaderCell from "./Table/HeaderCell";
 import timeSlots from "@/data/timeSlots.json";
 import { timeToMinutes } from "@/utils";
+import { safeCell } from "@/utils/buildGrid";
 
 const bgColors: any = {
   booked: "bg-red-400",
@@ -80,7 +81,13 @@ function generateTimeArray(
         title: `${time.trim()} ${nextDate} ${subtitle || ""}`,
         dataIndex,
         width: slotWidth,
-        render: (value: any, _record: DataType, rowIndex: number) => {
+        render: (raw: any, record: DataType, rowIndex: number) => {
+          // Ô có thể vắng mặt: dữ liệu giờ là sparse (chỉ ô đã đặt mới tồn tại),
+          // và một delta "vừa trống lại" cũng có thể tới trước khi lưới dựng
+          // xong. Bản cũ đọc thẳng value.from nên một ô thiếu sẽ ném lỗi ngay
+          // trong render của antd và làm TRẮNG CẢ BẢNG.
+          const value = raw ?? safeCell(record as any, dataIndex, cluster);
+          if (!value) return <div className="absolute inset-0 bg-gray-100" />;
 
           const fromTime = timeToMinutes(value.from)
           const toTime = timeToMinutes(value.to)
@@ -139,16 +146,18 @@ function generateTimeArray(
                       Cố định
                     </p>
                   )}
+                  {/* bookedBy chỉ được server gửi cho admin đã xác thực; khách
+                      vô danh không còn nhận tên/SĐT của khách khác nữa. */}
                   <div className="relative group w-full max-w-full">
                     <p className="text-[6px] text-center truncate w-full overflow-hidden whitespace-nowrap">
-                      {value.bookedBy.name}
+                      {value.bookedBy?.name}
                     </p>
                     <span className="absolute z-10 hidden group-hover:flex bg-black text-white text-[10px] px-2 py-1 rounded shadow-lg -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-                      {value.bookedBy.name}
+                      {value.bookedBy?.name}
                     </span>
                   </div>
 
-                  <p className="text-[8px]">{value.bookedBy.phone}</p>
+                  <p className="text-[8px]">{value.bookedBy?.phone}</p>
                 </>
               )}
             </div>
@@ -197,7 +206,9 @@ const columns: TableProps<DataType>["columns"] = [
   },
 ];
 
-export default function ScheduleTable({
+const components = { header: { cell: HeaderCell } };
+
+function ScheduleTable({
   data,
   isAdmin = false,
   tableInex,
@@ -208,24 +219,32 @@ export default function ScheduleTable({
   handleCellClick,
   handleScrollChange,
 }: TableIProps) {
-  const timeSlots =
-    generateTimeArray(
-      selectedDate.toDateString(),
-      60,
-      slotWidth,
-      tableInex,
-      handleCellClick,
-      bgCell,
-      isAdmin,
-      cluster
-    ) || [];
-  const combinedColumns = columns?.concat(timeSlots);
-  const components = { header: { cell: HeaderCell } };
+  const dateKey = selectedDate.toDateString();
 
-  const handleScroll = (event: any) => {
-    const currentScrollLeft = event.currentTarget.scrollLeft;
-    handleScrollChange(currentScrollLeft);
-  };
+  // Bản cũ dựng lại toàn bộ 22 định nghĩa cột (kèm 22 closure render) ở MỖI lần
+  // render — tức mỗi lần kéo thanh trượt độ rộng ô và mỗi delta socket. Trang
+  // admin mở range 30 ngày là 120 bảng, nên chi phí này là thật.
+  const combinedColumns = React.useMemo(
+    () =>
+      (columns || []).concat(
+        generateTimeArray(
+          dateKey,
+          60,
+          slotWidth,
+          tableInex,
+          handleCellClick,
+          bgCell,
+          isAdmin,
+          cluster
+        ) || []
+      ),
+    [dateKey, slotWidth, tableInex, handleCellClick, bgCell, isAdmin, cluster]
+  );
+
+  const handleScroll = React.useCallback(
+    (event: any) => handleScrollChange(event.currentTarget.scrollLeft),
+    [handleScrollChange]
+  );
 
   return (
     <Table
@@ -241,3 +260,7 @@ export default function ScheduleTable({
     />
   );
 }
+
+// Bảng chỉ render lại khi props của chính nó đổi. Có tác dụng khi
+// handleCellClick/handleScrollChange được giữ ổn định ở hook cha.
+export default React.memo(ScheduleTable);

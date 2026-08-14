@@ -9,6 +9,7 @@ import _ from "lodash";
 import { notification } from "antd";
 import { FacilitiesInfo } from "@/app/page";
 import { generateTransactionCode } from "@/utils";
+import { buildGridByCluster } from "@/utils/buildGrid";
 
 interface PageState {
     state: "schedule" | "confirm" | "info" | "result";
@@ -91,64 +92,81 @@ export default function useBooking() {
                     startDate: "",
                     endDate: "",
                 },
-                [selectedDate.toDateString()]
-            ).then((data) => {
-
-                const grouped = groupBy(data, "timeClusterId")
-                if (grouped) {
-                    let i = 0
-                    const timeSlots = selectedTimeSlots[selectedDate.toLocaleDateString()] || []
-                    while (i < timeSlots.length) {
-                        const item = timeSlots[i];
-                        const { index: { cluster, rowIndex, columnIndex } } = item
-                        if (grouped[cluster]) {
-                            grouped[cluster].forEach((row, index) => {
-                                const status = row[columnIndex].status
-                                const facility = row.facility
-                                const court = row.court
-                                if (status === "empty" && item.facility === facility && court === item.court) {
-                                    grouped[cluster][index][columnIndex] = item
-                                }
-                            })
-                        }
-                        i++
-                    }
-                    setFacilities(grouped);
+                [selectedDate.toISOString()]
+            ).then((res) => {
+                // Server chỉ gửi bộ khung sân + những ô ĐÃ BỊ CHIẾM. 22 ô mỗi sân
+                // được dựng ở client từ data/timeSlots.json — ô trống không tồn
+                // tại trong DB và cũng không đi qua mạng.
+                const date = res.dates?.[0];
+                if (!date) {
                     setIsLoading(false);
+                    return;
                 }
 
+                const grouped = buildGridByCluster(res.courts || [], res.occupied || [], date);
+
+                // Giữ lại các ô người dùng đang chọn (trạng thái "pending" chỉ
+                // tồn tại ở client) khi lưới được dựng lại.
+                const pending = selectedTimeSlots[selectedDate.toLocaleDateString()] || [];
+                for (const item of pending) {
+                    const { cluster, columnIndex } = item.index || {};
+                    const rows = grouped[cluster];
+                    if (!rows) continue;
+
+                    for (const row of rows) {
+                        if (row.facility !== item.facility || row.court !== item.court) continue;
+                        // Chỉ khôi phục lựa chọn nếu ô vẫn còn trống; nếu trong
+                        // lúc đó có người khác đặt mất thì phải để nguyên trạng
+                        // thái thật, không được vẽ đè lên.
+                        if (row[columnIndex]?.status === "empty") {
+                            row[columnIndex] = item;
+                        }
+                    }
+                }
+
+                setFacilities(grouped);
+                setIsLoading(false);
             });
         }
     }, [selectedFacInfo, getCourts, selectedDate]);
+
     React.useEffect(() => {
-        socket.on("schedules:updated", (arg) => {
-            return setFacilities((preState: any) => {
-                const data = clusters.reduce((memo: any, cluster) => {
-                    const items = preState[cluster.id] || [];
-                    const newState = items.map((item: any) => {
-                        if (item) {
-                            arg.forEach((cell: any) => {
-                                const { index, facility, id } = cell;
-                                const row = item;
-                                if (
-                                    row.facility === facility &&
-                                    row.courtId === id &&
-                                    row.createdAt === index.createdAt
-                                ) {
-                                    item[index.columnIndex] = cell;
-                                }
-                            });
-                        }
-                        return item;
+        /**
+         * Bản cũ đăng ký handler này mà KHÔNG có socket.off, trong khi `socket`
+         * là singleton ở module scope nên dep [socket] không bao giờ đổi và
+         * handler tích luỹ mãi qua mỗi lần StrictMode double-mount hay điều
+         * hướng. Reducer cũ cũng mutate state cũ tại chỗ.
+         */
+        const onUpdated = (arg: any[]) => {
+            setFacilities((preState: any) => {
+                const next: any = {};
+
+                for (const cluster of clusters) {
+                    const rows = preState[cluster.id] || [];
+                    next[cluster.id] = rows.map((row: any) => {
+                        const patches = arg.filter(
+                            (cell) =>
+                                row.facility === cell.facility &&
+                                row.courtId === cell.id &&
+                                row.createdAt === cell.index?.createdAt
+                        );
+                        if (patches.length === 0) return row;
+
+                        // Clone thay vì mutate: handler cũ sửa thẳng object của
+                        // state trước đó nên thứ tự merge trở nên bất định.
+                        const clone = { ...row };
+                        for (const cell of patches) clone[cell.index.columnIndex] = cell;
+                        return clone;
                     });
-
-                    memo[cluster.id] = newState;
-                    return memo;
-                }, {});
-
-                return data;
+                }
+                return next;
             });
-        });
+        };
+
+        socket.on("schedules:updated", onUpdated);
+        return () => {
+            socket.off("schedules:updated", onUpdated);
+        };
     }, [socket]);
 
 
@@ -323,7 +341,11 @@ export default function useBooking() {
                 const res = await createSchedules(newState, timeSlotData);
                 if (!res.success) {
                     return api.open({
-                        message: "Ô giờ lỗi, để đặt ô giờ này, hãy gọi 0889555559 để được hỗ trợ",
+                        // Server trả về danh sách ô bị chiếm (res.conflicts) để
+                        // báo đúng ô nào lỗi thay vì một thông báo chung.
+                        message: res.conflicts?.length
+                            ? `Ô giờ đã có người đặt: ${res.conflicts.join(", ")}. Vui lòng chọn ô khác.`
+                            : "Ô giờ lỗi, để đặt ô giờ này, hãy gọi 0889555559 để được hỗ trợ",
                         description: "Gọi 0889555559 để được hỗ trợ",
                         duration: 3000,
                         type: "error",
@@ -335,6 +357,9 @@ export default function useBooking() {
                     message: "Tạo đơn thành công!",
                 });
                 newState.schedulesId = res.schedulesId
+                // lockId là thứ duy nhất định danh quyền sở hữu hold; Wait.tsx
+                // cần nó để huỷ đơn khi hết đồng hồ đếm ngược.
+                newState.lockId = res.lockId
                 setSelected(newState);
 
             } catch (error) {

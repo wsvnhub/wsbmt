@@ -1,6 +1,7 @@
 import React from 'react'
 import { useRouter } from "next/navigation";
 import useSocket from "@/socket/useSocket";
+import { buildGridByDate } from "@/utils/buildGrid";
 import dayjs, { Dayjs } from "dayjs";
 import { FacilitiesInfo } from "../page";
 import clusters from "@/data/clusters.json";
@@ -40,7 +41,31 @@ const defaultSelected = {
 }
 
 export default function useAdmin() {
-    const { socket, getCourts, getInfo, createSchedules, sendUpdateSchedulesManual, sendUpdateFixedSchedulesManual } = useSocket();
+    const { socket, getCourts, getInfo, createSchedules, sendUpdateSchedulesManual, sendUpdateFixedSchedulesManual, authenticateAdmin } = useSocket();
+
+    /**
+     * Xác thực mật khẩu admin ở phía server.
+     *
+     * Bản cũ so sánh mật khẩu với một literal hardcode ngay tại đây, tức mật
+     * khẩu nằm trong JS bundle gửi cho mọi khách truy cập, còn server thì nhận
+     * `schedules:manual` từ bất kỳ ai mà không kiểm tra gì. Giờ mật khẩu chỉ
+     * được so sánh ở server và quyền được đánh dấu trên chính socket đó.
+     *
+     * @returns true nếu hợp lệ; nếu không, đã hiện thông báo lỗi và trả false.
+     */
+    const requireAdmin = async (password: string) => {
+        const res = await authenticateAdmin(password);
+        if (!res?.success) {
+            api.open({
+                message: "Mật khẩu không hợp lệ",
+                description: res?.error || "Vui lòng điền mật khẩu được cấp.",
+                duration: 3,
+                type: "error"
+            });
+            return false;
+        }
+        return true;
+    };
 
     const router = useRouter();
 
@@ -129,14 +154,9 @@ export default function useAdmin() {
 
     const onFormUnlockSubmit = async (values: any) => {
         const { password } = values;
-        if (password !== "#%&teAm*832Z") {
+        if (!(await requireAdmin(password))) {
             setProcessing(false);
-            return api.open({
-                message: "Mật khẩu không hợp lệ",
-                description: "Vui lòng điền mật khẩu được cấp.",
-                duration: 3,
-                type: "error"
-            });
+            return;
         }
         const timeSlotData = _.flatMap(Object.values(selectedBookedTimeSlots)).map((timeSlots: any) => {
             return {
@@ -165,14 +185,9 @@ export default function useAdmin() {
 
     const onFormPassSubmit = async (values: any) => {
         const { password } = values;
-        if (password !== "#%&teAm*832Z") {
+        if (!(await requireAdmin(password))) {
             setProcessing(false);
-            return api.open({
-                message: "Mật khẩu không hợp lệ",
-                description: "Vui lòng điền mật khẩu được cấp.",
-                duration: 3,
-                type: "error"
-            });
+            return;
         }
         const timeSlotData = _.flatMap(Object.values(selectedBookedTimeSlots)).map((timeSlots: any) => {
             return {
@@ -204,14 +219,8 @@ export default function useAdmin() {
                 type: "error"
             });
         }
-        if (password !== "#%&teAm*832Z") {
-
-            return api.open({
-                message: "Mật khẩu không hợp lệ",
-                description: "Vui lòng điền mật khẩu được cấp.",
-                duration: 3,
-                type: "error"
-            });
+        if (!(await requireAdmin(password))) {
+            return;
         }
         const timeSlotData = _.flatMap(Object.values(selectedBookedTimeSlots)).map((timeSlots: any) => {
             return {
@@ -255,14 +264,9 @@ export default function useAdmin() {
             });
         }
 
-        if (password !== "#%&teAm*832Z") {
+        if (!(await requireAdmin(password))) {
             setProcessing(false);
-            return api.open({
-                message: "Mật khẩu không hợp lệ",
-                description: "Vui lòng điền mật khẩu được cấp.",
-                duration: 3,
-                type: "error"
-            });
+            return;
         }
         const timeSlotData = _.flatMap(Object.values(selectedTimeSlots)).map((timeSlots: any) => {
             return {
@@ -502,33 +506,31 @@ export default function useAdmin() {
                 selectedFacInfo.map((item) => item.id),
                 rangefilter,
                 specificsDate
-            ).then((data) => {
-                const groupByDate = groupBy(data, "createdAt");
-                const mapped = Object.keys(groupByDate).reduce((memo: any, date) => {
-                    const timeSlots = selectedTimeSlots[new Date(date).toLocaleDateString()] || []
-                    // console.log("timeSlots", timeSlots)
-                    memo[date] = splitArr({
-                        data: groupByDate[date],
-                    });
-                    const grouped = memo[date]
-                    let i = 0
-                    while (i < timeSlots.length) {
-                        const item = timeSlots[i];
-                        const { index: { cluster, columnIndex } } = item
-                        if (grouped[cluster]) {
-                            grouped[cluster].forEach((row: any, index: number) => {
-                                const status = row[columnIndex].status
-                                const facility = row.facility
-                                const court = row.court
-                                if (status === "empty" && item.facility === facility && court === item.court) {
-                                    memo[date][cluster][index][columnIndex] = item
-                                }
-                            })
+            ).then((res) => {
+                // Server chỉ gửi bộ khung sân + ô đã bị chiếm; 22 ô mỗi sân được
+                // dựng ở client từ data/timeSlots.json. Nhờ vậy một range 30
+                // ngày không còn kéo về ~2MB document nữa.
+                const mapped = buildGridByDate(res.courts || [], res.occupied || [], res.dates || []);
+
+                // Khôi phục các ô admin đang chọn (trạng thái chỉ có ở client).
+                for (const date of Object.keys(mapped)) {
+                    const pending = selectedTimeSlots[new Date(date).toLocaleDateString()] || [];
+                    for (const item of pending) {
+                        const { cluster, columnIndex } = item.index || {};
+                        const rows = mapped[date]?.[cluster];
+                        if (!rows) continue;
+
+                        for (const row of rows) {
+                            if (row.facility !== item.facility || row.court !== item.court) continue;
+                            // Chỉ khôi phục nếu ô vẫn trống — nếu có người khác
+                            // đã đặt thì phải hiện trạng thái thật.
+                            if (row[columnIndex]?.status === "empty") {
+                                row[columnIndex] = item;
+                            }
                         }
-                        i++
                     }
-                    return memo;
-                }, {});
+                }
+
                 setFacilities(mapped);
                 setIsLoading(false);
             });
@@ -536,40 +538,42 @@ export default function useAdmin() {
     }, [selectedFacInfo, getCourts, specificsDate, rangeDate]);
 
     React.useEffect(() => {
-        socket.on("schedules:updated", (arg) => {
-            return setFacilities((preState: any) => {
-                const data = Object.keys(preState).reduce((memo: any, value) => {
-                    const stateItems = preState[value] || [];
-                    const data = clusters.reduce((memo: any, cluster) => {
+        // Có cleanup: bản cũ không gọi socket.off nên handler tích luỹ vô hạn
+        // qua mỗi lần điều hướng (socket là singleton, dep không bao giờ đổi).
+        const onUpdated = (arg: any[]) => {
+            setFacilities((preState: any) => {
+                const next: any = {};
 
-                        const items = stateItems[cluster.id] || [];
-                        const newState = items.map((item: any) => {
-                            if (item) {
-                                arg.forEach((cell: any) => {
-                                    const { index, facility, id } = cell;
-                                    const row = item;
-                                    if (
-                                        row.facility === facility &&
-                                        row.courtId === id &&
-                                        row.createdAt === index.createdAt
-                                    ) {
-                                        item[index.columnIndex] = cell;
-                                    }
-                                });
-                            }
-                            return item;
+                for (const date of Object.keys(preState)) {
+                    const byCluster = preState[date] || {};
+                    next[date] = {};
+
+                    for (const cluster of clusters) {
+                        const rows = byCluster[cluster.id] || [];
+                        next[date][cluster.id] = rows.map((row: any) => {
+                            const patches = arg.filter(
+                                (cell) =>
+                                    row.facility === cell.facility &&
+                                    row.courtId === cell.id &&
+                                    row.createdAt === cell.index?.createdAt
+                            );
+                            if (patches.length === 0) return row;
+
+                            // Clone thay vì mutate state cũ tại chỗ.
+                            const clone = { ...row };
+                            for (const cell of patches) clone[cell.index.columnIndex] = cell;
+                            return clone;
                         });
-
-                        memo[cluster.id] = newState;
-                        return memo;
-                    }, {});
-
-                    memo[value] = data;
-                    return memo;
-                }, {});
-                return data;
+                    }
+                }
+                return next;
             });
-        });
+        };
+
+        socket.on("schedules:updated", onUpdated);
+        return () => {
+            socket.off("schedules:updated", onUpdated);
+        };
     }, [socket]);
     return {
         isLoading,

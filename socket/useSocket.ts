@@ -41,6 +41,14 @@ export default function useSocket() {
     return res;
   }, []);
 
+  /**
+   * Lấy lưới sân.
+   *
+   * Trả về `{ courts, occupied, dates }` chứ KHÔNG còn là mảng document đầy đủ:
+   * server chỉ gửi bộ khung sân và những ô đã bị chiếm, còn 22 ô mỗi sân được
+   * dựng ở client từ data/timeSlots.json (xem utils/buildGrid.js). `dates` là
+   * danh sách ngày đã được SERVER chuẩn hoá về YYYY-MM-DD.
+   */
   const getCourts = React.useCallback(
     async (
       facilitiyIds: string[],
@@ -52,7 +60,12 @@ export default function useSocket() {
         range,
         dates,
       });
-      return res.data;
+      return res as {
+        courts: any[];
+        occupied: any[];
+        dates: string[];
+        error?: string;
+      };
     },
     []
   );
@@ -84,6 +97,17 @@ export default function useSocket() {
     });
     return res;
   }, []);
+  /**
+   * Xác thực admin ở phía SERVER. Bản cũ so sánh mật khẩu với một literal
+   * hardcode ngay trong browser, nên mật khẩu nằm sẵn trong JS bundle và server
+   * chẳng kiểm tra gì cả. Giờ mật khẩu chỉ tồn tại trong ADMIN_PASSWORD của
+   * server và quyền được đánh dấu trên socket.
+   */
+  const authenticateAdmin = React.useCallback(async (password: string) => {
+    const res = await socket.emitWithAck("admin:auth", { password });
+    return res as { success: boolean; error?: string };
+  }, []);
+
   const sendUpdateSchedulesManual = React.useCallback(async ({ timeSlotData, data }: any, action = "add") => {
     const res = await socket.emitWithAck("schedules:manual", {
       timeSlots: timeSlotData,
@@ -104,6 +128,7 @@ export default function useSocket() {
     getCourts,
     updateSchedules,
     createSchedules,
+    authenticateAdmin,
     deleteSchedules,
     sendUpdateSchedules,
     sendUpdateSchedulesManual,
