@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Redirecting...</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Inter, Arial, sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0f172a, #1e293b, #334155);
+      overflow: hidden;
+      color: white;
+    }
+
+    .background-glow {
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: rgba(59, 130, 246, 0.25);
+      border-radius: 50%;
+      filter: blur(120px);
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+
+    .card {
+      position: relative;
+      z-index: 2;
+      width: 90%;
+      max-width: 450px;
+      padding: 40px 30px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 20px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: bold;
+      box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: rgba(255, 255, 255, 0.75);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .progress-container {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #3b82f6, #06b6d4);
+      border-radius: 999px;
+      animation: loading 2s linear forwards;
+    }
+
+    @keyframes loading {
+      from {
+        width: 0%;
+      }
+      to {
+        width: 100%;
+      }
+    }
+
+    .countdown {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 24px;
+      border-radius: 14px;
+      text-decoration: none;
+      color: white;
+      background: linear-gradient(135deg, #2563eb, #0891b2);
+      transition: transform 0.2s ease, opacity 0.2s ease;
+      font-weight: 600;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      opacity: 0.95;
+    }
+
+    .footer {
+      margin-top: 20px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="background-glow"></div>
+
+  <div class="card">
+    <div class="logo">WS</div>
+
+    <h1>Đang chuyển hướng...</h1>
+
+    <p>
+      Bạn sẽ được chuyển tới trang đặt sân cầu trong vài giây.
+      Nếu không tự động chuyển hướng, hãy nhấn nút bên dưới.
+    </p>
+
+    <div class="progress-container">
+      <div class="progress-bar"></div>
+    </div>
+
+    <div class="countdown">
+      Redirect sau <span id="timer">2</span> giây
+    </div>
+
+    <a href="https://san.ways.io.vn/" class="btn" id="redirectBtn">
+      Đi tới trang đích
+    </a>
+
+    <div class="footer">
+      Secure Redirect Page
+    </div>
+  </div>
+
+  <script>
+    const redirectUrl = "https://san.ways.io.vn/";
+    const redirectDelay = 2;
+
+    document.getElementById("redirectBtn").href = redirectUrl;
+
+    let timeLeft = redirectDelay;
+    const timerElement = document.getElementById("timer");
+
+    const interval = setInterval(() => {
+      timeLeft--;
+      timerElement.textContent = timeLeft;
+
+      if (timeLeft <= 0) {
+        clearInterval(interval);
+        window.location.href = redirectUrl;
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

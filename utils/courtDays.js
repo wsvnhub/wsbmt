@@ -228,15 +228,28 @@ export async function ensureIndexes(db) {
  * cùng một ô sân cho nhiều người mà không báo lỗi gì.
  */
 export async function assertIndexes(db) {
-  const indexes = await db.collection(COURT_DAYS).listIndexes().toArray();
+  let indexes;
+  try {
+    indexes = await db.collection(COURT_DAYS).listIndexes().toArray();
+  } catch (err) {
+    // NamespaceNotFound: collection chưa tồn tại (DB mới, hoặc chưa migrate).
+    // Không có collection thì đương nhiên không có index — rơi xuống cùng một
+    // lỗi fail-closed có hướng dẫn, thay vì ném "ns does not exist" trần trụi
+    // ra ngoài khiến không ai biết phải chạy gì.
+    if (err?.code !== 26) throw err;
+    indexes = [];
+  }
+
   const unique = indexes.find(
     (ix) => ix.name === UNIQUE_INDEX_NAME && ix.unique === true
   );
   if (!unique) {
     throw new Error(
-      `Thiếu unique index "${UNIQUE_INDEX_NAME}" trên ${COURT_DAYS}. ` +
+      `Thiếu unique index "${UNIQUE_INDEX_NAME}" trên ${COURT_DAYS}` +
+      (indexes.length === 0 ? ` (collection chưa tồn tại)` : ``) + `. ` +
       `Không có nó thì KHÔNG có gì chặn đặt trùng sân. ` +
-      `Chạy: node utils/migrateToSparseRows.js`
+      `Chạy "npm run migrate:sparse" để xem báo cáo, rồi ` +
+      `"npm run migrate:sparse:apply" để tạo index + validator.`
     );
   }
 }

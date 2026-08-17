@@ -8,15 +8,18 @@ services:
     ports:
       - '8888:8888'
     environment:
-      - NODE_ENV=production 
-      - MONGODB_URI=mongodb://root:example@mongo:27017/ways?authSource=admin
+      - NODE_ENV=production
+      # Mongo chạy standalone (không --replSet) và KHÔNG bật auth
+      # (MONGO_INITDB_ROOT_* bên dưới đang bị comment), nên URI không được mang
+      # credentials — kèm root:example vào sẽ bị authentication failed.
+      - MONGODB_URI=mongodb://mongo:27017/ways
     command: sh -c "npm install --include=dev && npm run build && npm start"
     depends_on:
       - mongo
     mem_limit: 2g
     memswap_limit: 4g
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8888"]
+      test: ["CMD", "wget", "--spider", "http://localhost:8888"]
       interval: 120s
       timeout: 12s
       retries: 3
@@ -24,13 +27,22 @@ services:
   mongo:
     image: mongo:5.0
     container_name: mongodb
+    # Standalone. Engine hiện tại chống đặt trùng bằng unique index, không dùng
+    # transaction/change stream, nên không cần replica set. Nếu sau này cần
+    # withTransaction thì phải thêm lại --replSet rs0 VÀ chạy rs.initiate().
+    command: ["mongod", "--bind_ip_all"]
     volumes:
       - mongodb_data:/data/db
     ports:
       - '27017:27017'
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
-      
+    # environment:
+    #   MONGO_INITDB_ROOT_USERNAME: root
+    #   MONGO_INITDB_ROOT_PASSWORD: example
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   mongodb_data:

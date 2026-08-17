@@ -109,7 +109,7 @@ const attachHelpers = (io) => {
   return { broadcastSlotDeltas };
 };
 
-app.prepare().then(async () => {
+const bootstrap = app.prepare().then(async () => {
   const httpServer = createServer(handler);
   const { mongoPool } = await initDB();
   const io = new Server(httpServer, {
@@ -585,6 +585,16 @@ app.prepare().then(async () => {
       // replica set. Xem utils/courtDays.js.
       logger.info("Booking engine sẵn sàng (sparse row, unique index, không transaction)");
     });
+});
+
+// Không có catch ở đây thì mọi lỗi khởi động (Mongo không kết nối được, thiếu
+// unique index) nổi lên thành `unhandledRejection`: in stack trace hai lần, kèm
+// nguyên object lỗi của driver, và tiến trình vẫn lửng lơ chưa chắc đã chết.
+// Fail nhanh với một dòng đọc được.
+bootstrap.catch((err) => {
+  console.error(`\n✖ Không khởi động được server: ${err.message}\n`);
+  errorLogger.error(`Startup failed: ${err.stack || err}`);
+  process.exit(1);
 });
 
 const shutdown = async (signal) => {
