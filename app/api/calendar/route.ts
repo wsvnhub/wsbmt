@@ -17,17 +17,25 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     try {
-        const { selectedDate, notes, facilities } = await request.json();
+        const { selectedDate, notes } = await request.json();
+
+        if (!Array.isArray(selectedDate) || selectedDate.length < 2) {
+            return Response.json({ message: "Vui lòng chọn khoảng ngày (từ - đến)" }, { status: 400 });
+        }
+
+        const [from, to] = selectedDate;
+        const fromDate = new Date(from);
+        const toDate = new Date(to);
+
+        if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
+            return Response.json({ message: `Ngày không hợp lệ: ${from} - ${to}` }, { status: 400 });
+        }
+
         const client = await clientPromise;
         const db = client.db();
 
         const collection = db.collection("calendar");
 
-        const [from, to] = selectedDate
-
-        const fromDate = new Date(from)
-        const toDate = new Date(to)
-       
         const result = await collection.insertOne({
             id: new ObjectId().toString(),
             fromDate,
