@@ -51,14 +51,36 @@ const initDB = async () => {
 //   const results = collection.find({})
 // }
 
+// Bọc handler async của socket.io. Socket.io không bắt lỗi trong listener async,
+// nên một payload sai từ client sẽ thành unhandledRejection và giết cả tiến trình.
+const safe = (event, listener) => async (...args) => {
+  const callback = typeof args[args.length - 1] === "function" ? args[args.length - 1] : null;
+
+  try {
+    await listener(...args);
+  } catch (error) {
+    errorLogger.error(`Socket handler "${event}" failed: ${error?.stack || error}`);
+    if (callback) {
+      callback({ success: false, error: error?.message || "Internal server error" });
+    }
+  }
+};
+
 app.prepare().then(async () => {
   const httpServer = createServer(handler);
-  const { mongoPool } = await initDB();
+  const db = await initDB();
+
+  if (!db?.mongoPool) {
+    logger.error("Không kết nối được MongoDB, dừng khởi động server");
+    process.exit(1);
+  }
+
+  const { mongoPool } = db;
   const io = new Server(httpServer);
 
   io.on("connection", async (socket) => {
 
-    socket.on("app:info", async (args, callback) => {
+    socket.on("app:info", safe("app:info", async (args, callback) => {
       const { selectedDate, isAdmin } = args
 
       console.log("Connected", socket.id);
@@ -82,21 +104,21 @@ app.prepare().then(async () => {
       const paymentInfoData = await mongoPool.collection("paymentInfo").find().toArray();
 
       return callback({ facilities: facilitiesData, paymentInfo: paymentInfoData });
-    });
+    }));
 
-    socket.on("schedules:list", async ({ facilitiyIds, range, dates }, callback) => {
+    socket.on("schedules:list", safe("schedules:list", async ({ facilitiyIds, range, dates } = {}, callback) => {
 
-      if ((!range.startDate || !range.endDate) && dates.length === 0) {
+      if ((!range?.startDate || !range?.endDate) && !(dates?.length > 0)) {
 
         return callback({ data: [] })
       }
       const filter = { facility: { $in: facilitiyIds } };
 
-      if (dates.length > 0) {
+      if (dates?.length > 0) {
         filter.createdAt = { $in: dates };
       }
 
-      if (range.startDate && range.endDate) {
+      if (range?.startDate && range?.endDate) {
         filter.createdAt = {
           $gte: new Date(range.startDate),
           $lte: new Date(range.endDate),
@@ -129,9 +151,9 @@ app.prepare().then(async () => {
         .find(filter)
         .toArray();
       return callback({ data });
-    });
+    }));
 
-    socket.on("schedules:create", async (payload, callback) => {
+    socket.on("schedules:create", safe("schedules:create", async (payload = {}, callback) => {
 
 
       // Bước 1: Log payload gốc ngay lập tức, không qua JSON.stringify
@@ -222,14 +244,14 @@ app.prepare().then(async () => {
         errorLogger.error(`Error creating schedulesData: ${JSON.stringify(schedulesData)}`)
         return callback({ success: false, data: error });
       }
-    });
+    }));
 
-    socket.on("schedules:send-info", async ({ timeSlots }, callback) => {
+    socket.on("schedules:send-info", safe("schedules:send-info", async ({ timeSlots } = {}, callback) => {
       socket.broadcast.emit("schedules:updated", timeSlots);
       callback({ success: true });
-    });
+    }));
 
-    socket.on("schedules:update", async ({ code }, callback) => {
+    socket.on("schedules:update", safe("schedules:update", async ({ code } = {}, callback) => {
       // const schedules = mongoPool.collection("schedules");
       try {
         // const schedule = await schedules.findOne({ transactionCode: code, status: "booked" });
@@ -275,9 +297,14 @@ app.prepare().then(async () => {
         errorLogger.error(`Error updating schedule: ${error}`);
         callback({ error });
       }
-    });
+    }));
 
-    socket.on("schedules:delete", async ({ timeSlotsData, id }) => {
+    socket.on("schedules:delete", safe("schedules:delete", async ({ timeSlotsData, id } = {}) => {
+      if (!Array.isArray(timeSlotsData)) {
+        errorLogger.error(`schedules:delete: timeSlotsData không hợp lệ - ${JSON.stringify(timeSlotsData)}`);
+        return;
+      }
+
       const schedules = mongoPool.collection("schedules");
       const timeSlots = mongoPool.collection("timeslots");
 
@@ -291,7 +318,7 @@ app.prepare().then(async () => {
         socket.broadcast.emit("schedules:updated", updatedData);
         await updateTimeSlot({ timeSlotsData: updatedData, collection: timeSlots, action: "delete" });
       }
-    });
+    }));
 
     // socket.on("schedules:manual:fixed", async ({ data }, callback) => {
     //   console.log("data", data);
@@ -335,14 +362,21 @@ app.prepare().then(async () => {
     //   return callback({ success: true, data });
     // });
 
-    socket.on("schedules:manual", async ({ timeSlots, data, action }, callback) => {
+    socket.on("schedules:manual", safe("schedules:manual", async ({ timeSlots, data, action } = {}, callback) => {
       logger.info(`Updated: schedules:manual ${JSON.stringify(data)}`);
       logger.info(`Updated: manual action ${action} ${JSON.stringify(timeSlots)}`);
+
+      // Client cũ (bundle của bản deploy trước) hoặc client lạ có thể gửi timeSlots
+      // không phải mảng — từ chối sớm thay vì để destructuring ném lỗi.
+      if (!Array.isArray(timeSlots) || timeSlots.length === 0) {
+        errorLogger.error(`schedules:manual: timeSlots không hợp lệ - ${JSON.stringify(timeSlots)}`);
+        return callback?.({ success: false, error: "timeSlots không hợp lệ" });
+      }
 
       const collection = mongoPool.collection("timeslots");
 
       const [schedule] = timeSlots;
-      const facilities = [...new Set(timeSlots.map(item => item.facility))].join(", ");
+      const facilities = [...new Set(timeSlots.map(item => item?.facility))].join(", ");
 
       const quantity = timeSlots.length;
 
@@ -355,12 +389,12 @@ app.prepare().then(async () => {
             name: schedule?.bookedBy?.name || "",
             phone: schedule?.bookedBy?.phone || "",
             email: "",
-            san: data.formateddetails.join(", "),
-            address: Object.values(data.address).join(", "),
-            date: data.dates.map(date => new Date(date).toLocaleDateString("vi-VN")).join(", "),
-            time: data.totalHours || 0,
+            san: Array.isArray(data?.formateddetails) ? data.formateddetails.join(", ") : (data?.formateddetails || ""),
+            address: data?.address ? Object.values(data.address).join(", ") : "",
+            date: Array.isArray(data?.dates) ? data.dates.map(date => new Date(date).toLocaleDateString("vi-VN")).join(", ") : "",
+            time: data?.totalHours || 0,
             quantity: quantity,
-            total_money: data.totalPrice || 0,
+            total_money: data?.totalPrice || 0,
             voucher_code: "",
             trang_thai: "booked",
             dat_co_dinh: "false",
@@ -372,8 +406,8 @@ app.prepare().then(async () => {
 
       await updateTimeSlot({ timeSlotsData: timeSlots, collection, action: action === "fixed" ? "add" : action });
       io.emit("schedules:updated", timeSlots);
-      return callback({ success: true, timeSlots });
-    })
+      return callback?.({ success: true, timeSlots });
+    }))
 
     socket.on("disconnect", () => {
       console.log("User disconnected:", socket.id);
@@ -390,9 +424,27 @@ app.prepare().then(async () => {
     .listen(port, () => {
       console.log(`> Ready on http://${hostname}:${port}`);
     });
+}).catch((error) => {
+  errorLogger.error(`Startup failed: ${error?.stack || error}`);
+  process.exit(1);
+});
+
+// Lưới an toàn cuối cùng: Node 18 mặc định giết tiến trình khi có unhandled
+// rejection. Log lại và chạy tiếp thay vì để cả server sập vì một request lỗi.
+process.on('unhandledRejection', (reason) => {
+  errorLogger.error(`unhandledRejection: ${reason?.stack || reason}`);
+});
+
+process.on('uncaughtException', (error) => {
+  errorLogger.error(`uncaughtException: ${error?.stack || error}`);
 });
 
 process.on('SIGINT', async () => {
+  console.log('Shutting down gracefully...');
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
   console.log('Shutting down gracefully...');
   process.exit(0);
 });
