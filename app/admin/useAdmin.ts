@@ -129,7 +129,7 @@ export default function useAdmin() {
 
     const onFormUnlockSubmit = async (values: any) => {
         const { password } = values;
-        if (password !== "#%&teAm*832Z") {
+        if (password !== "@@9sjvK$") {
             setProcessing(false);
             return api.open({
                 message: "Mật khẩu không hợp lệ",
@@ -165,7 +165,7 @@ export default function useAdmin() {
 
     const onFormPassSubmit = async (values: any) => {
         const { password } = values;
-        if (password !== "#%&teAm*832Z") {
+        if (password !== "@@9sjvK$") {
             setProcessing(false);
             return api.open({
                 message: "Mật khẩu không hợp lệ",
@@ -204,7 +204,7 @@ export default function useAdmin() {
                 type: "error"
             });
         }
-        if (password !== "#%&teAm*832Z") {
+        if (password !== "@@9sjvK$") {
 
             return api.open({
                 message: "Mật khẩu không hợp lệ",
@@ -255,7 +255,7 @@ export default function useAdmin() {
             });
         }
 
-        if (password !== "#%&teAm*832Z") {
+        if (password !== "@@9sjvK$") {
             setProcessing(false);
             return api.open({
                 message: "Mật khẩu không hợp lệ",
